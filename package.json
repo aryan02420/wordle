@@ -1,0 +1,31 @@
+{
+  "name": "@aryan02420/wordle",
+  "version": "0.0.0",
+  "description": "stateless Wordle clone",
+  "main": "dist/index.js",
+  "type": "module",
+  "files": [
+    "dist/**"
+  ],
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "wordle"
+  ],
+  "author": "aryan02420",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aryan02420/wordle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aryan02420/wordle/issues"
+  },
+  "homepage": "https://github.com/aryan02420/wordle#readme"
+}
