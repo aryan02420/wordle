@@ -10,7 +10,7 @@ export function isValidWord(word: string): boolean {
     return index > -1
 }
 
-export function getRandomSolution(): string {
+export function getRandomSolution(seed: any): string {
     let index = (Math.random() * SolutionWords.length) >> 0
     return SolutionWords[index]
 }
