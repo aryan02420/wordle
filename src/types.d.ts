@@ -7,7 +7,7 @@ type Tuple5<T> = [T, T, T, T, T]
 type Tuple6<T> = [T, T, T, T, T, T]
 type TWord = Tuple5<TAlphabet | null>
 type TGuesses = Tuple6<TWord>
-enum EFeedback {
+const enum EFeedback {
     empty = 0,
     absent,
     present,
