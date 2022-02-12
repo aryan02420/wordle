@@ -99,14 +99,12 @@ export function submitGuess(state: IState): IState {
 
     })
 
-    state.row++
-    state.col = 0
-
     if (state.wrd[state.row].join('') === state.sol.join('')) {
         state.msg = 'Great!!!'
         state.fin = true
-        return state
     }
 
+    state.row++
+    state.col = 0
     return state
 }
