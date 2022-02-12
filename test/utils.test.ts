@@ -1,4 +1,5 @@
-import { removeAlphabet, addAplhabet } from '../src/utils'
+import { removeAlphabet, addAplhabet, submitGuess } from '../src/utils'
+
 
 test('backspace deletes last character', () => {
     const state = {
@@ -90,3 +91,24 @@ test('alphabet clears message', () => {
     expect(addAplhabet(state, 'd').msg).toBe('')
 })
 
+test('show error when <5 chars' ,() => {
+    const state = {
+        row: 0,
+        col: 3,
+        wrd: [['a', 'b', 'c', null, null]],
+        msg: '',
+    }
+    // @ts-ignore
+    expect(submitGuess(state).msg).toBeTruthy
+})
+
+test('show error when not a word' ,() => {
+    const state = {
+        row: 0,
+        col: 5,
+        wrd: [['a', 'b', 'c', 'd', 'e']],
+        msg: '',
+    }
+    // @ts-ignore
+    expect(submitGuess(state).msg).toBeTruthy
+})

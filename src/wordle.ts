@@ -1,4 +1,4 @@
-import { getNewState, addAplhabet, removeAlphabet, checkAndUpdateState } from './utils'
+import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './utils'
 
 export function start(seed: string): IState {
   return getNewState(seed)
@@ -17,7 +17,7 @@ export function action(state: IState, move: TAlphabet | 'bksp' | 'enter'): IStat
   if (move === 'bksp') {
     state = removeAlphabet(state)
   } else if (move === 'enter') {
-    state = checkAndUpdateState(state)
+    state = submitGuess(state)
   } else {
     state = addAplhabet(state, move)
   }

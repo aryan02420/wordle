@@ -70,16 +70,14 @@ export function removeAlphabet(state: IState) {
     return state
 }
 
-export function checkAndUpdateState(state: IState): IState {
+export function submitGuess(state: IState): IState {
 
-    const input_word = state.wrd[state.row].join('')
-
-    if (input_word.length !== 5) {
+    if (state.col !== 5) {
         state.msg = 'Not enough letters'
         return state
     }
 
-    if (isValidWord(input_word)) {
+    if (!isValidWord(state.wrd[state.row].join(''))) {
         state.msg = 'Not a word'
         return state
     }
@@ -104,7 +102,7 @@ export function checkAndUpdateState(state: IState): IState {
     state.row++
     state.col = 0
 
-    if (input_word === state.sol.join('')) {
+    if (state.wrd[state.row].join('') === state.sol.join('')) {
         state.msg = 'Great!!!'
         state.fin = true
         return state
