@@ -1,4 +1,4 @@
-import { getRandomSolution, isValidWord } from './words.js'
+import { getRandomSolution, isValidWord } from './words'
 
 export function getNewState(seed: any): IState {
     return {
@@ -54,6 +54,22 @@ export function getNewState(seed: any): IState {
     }
 }
 
+export function addAplhabet(state: IState, alpha: TAlphabet) {
+    state.msg = ""
+    if (state.col === 5) return state
+    state.wrd[state.row][state.col] = alpha
+    state.col++
+    return state
+}
+
+export function removeAlphabet(state: IState) {
+    state.msg = ""
+    if (state.col === 0) return state
+    state.col--
+    state.wrd[state.row][state.col] = null
+    return state
+}
+
 export function checkAndUpdateState(state: IState): IState {
 
     const input_word = state.wrd[state.row].join('')
@@ -62,7 +78,7 @@ export function checkAndUpdateState(state: IState): IState {
         state.msg = 'Not enough letters'
         return state
     }
-    
+
     if (isValidWord(input_word)) {
         state.msg = 'Not a word'
         return state
@@ -82,8 +98,11 @@ export function checkAndUpdateState(state: IState): IState {
             state.fbk[state.row][i] = EFeedback.correct
             state.kbd[alpha!] = Math.max(EFeedback.correct, state.kbd[alpha!])
         }
-        
+
     })
+
+    state.row++
+    state.col = 0
 
     if (input_word === state.sol.join('')) {
         state.msg = 'Great!!!'

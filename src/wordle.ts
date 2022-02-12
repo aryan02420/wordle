@@ -1,4 +1,4 @@
-import { getNewState, checkAndUpdateState } from './utils.js'
+import { getNewState, addAplhabet, removeAlphabet, checkAndUpdateState } from './utils'
 
 export function start(seed: string): IState {
   return getNewState(seed)
@@ -13,24 +13,13 @@ export function decode(str: string): IState {
 }
 
 export function action(state: IState, move: TAlphabet | 'bksp' | 'enter'): IState {
-  if (move.length === 1 && move >= 'a' && move <= 'z') {
 
-    if (state.col < 5) {
-      state.wrd[state.row][state.col] = move as TAlphabet
-      state.col++
-      state.msg = ""
-    }
-
-  } else if (move === 'bksp') {
-
-    state.wrd[state.row][state.col] = null
-    state.col = Math.min(0, state.col - 1)
-    state.msg = ""
-
+  if (move === 'bksp') {
+    state = removeAlphabet(state)
   } else if (move === 'enter') {
-
     state = checkAndUpdateState(state)
-
+  } else {
+    state = addAplhabet(state, move)
   }
 
   if (!state.fin && state.row === 6) {
