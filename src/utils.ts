@@ -49,13 +49,13 @@ export function getNewState(seed: any): IState {
         row: 0,
         col: 0,
         sol: getRandomSolution(seed).split('') as Tuple5<TAlphabet>,
-        msg: '',
+        msg: EMessages.none,
         fin: false,
     }
 }
 
 export function addAplhabet(state: IState, alpha: TAlphabet) {
-    state.msg = ""
+    state.msg = EMessages.none
     if (state.col === 5) return state
     state.wrd[state.row][state.col] = alpha
     state.col++
@@ -63,7 +63,7 @@ export function addAplhabet(state: IState, alpha: TAlphabet) {
 }
 
 export function removeAlphabet(state: IState) {
-    state.msg = ""
+    state.msg = EMessages.none
     if (state.col === 0) return state
     state.col--
     state.wrd[state.row][state.col] = null
@@ -73,12 +73,12 @@ export function removeAlphabet(state: IState) {
 export function submitGuess(state: IState): IState {
 
     if (state.col !== 5) {
-        state.msg = 'Not enough letters'
+        state.msg = EMessages.less
         return state
     }
 
     if (!isValidWord(state.wrd[state.row].join(''))) {
-        state.msg = 'Not a word'
+        state.msg = EMessages.invalid
         return state
     }
 
@@ -100,7 +100,7 @@ export function submitGuess(state: IState): IState {
     })
 
     if (state.wrd[state.row].join('') === state.sol.join('')) {
-        state.msg = 'Great!!!'
+        state.msg = EMessages.win
         state.fin = true
         return state
     }

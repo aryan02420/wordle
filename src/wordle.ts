@@ -24,7 +24,7 @@ export function action(state: IState, move: TAlphabet | 'bksp' | 'enter'): IStat
 
   if (!state.fin && state.row === 6) {
     state.fin = true
-    state.msg = state.sol.join('').toUpperCase()
+    state.msg = EMessages.lose
   }
 
   return state

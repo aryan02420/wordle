@@ -16,6 +16,13 @@ const enum EFeedback {
 type TFeedback = Tuple5<EFeedback>
 type TFeedbacks = Tuple6<TFeedback>
 type TKeyboard = Record<TAlphabet, EFeedback>
+const enum EMessages {
+    none = 0,
+    less,
+    invalid,
+    win,
+    lose
+}
 interface IState {
     wrd: TGuesses
     fbk: TFeedbacks
@@ -23,6 +30,6 @@ interface IState {
     row: number
     col: number
     sol: Tuple5<TAlphabet>
-    msg: string
+    msg: EMessages
     fin: boolean
 }

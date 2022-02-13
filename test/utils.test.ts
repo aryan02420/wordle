@@ -1,3 +1,5 @@
+/// <reference types='../src/types' />
+
 import { removeAlphabet, addAplhabet, submitGuess } from '../src/utils'
 
 
@@ -6,13 +8,13 @@ test('backspace deletes last character', () => {
         row: 0,
         col: 3,
         wrd: [['a', 'b', 'c', null, null]],
-        msg: '',
+        msg: EMessages.none,
     }
     const stateNew = {
         row: 0,
         col: 2,
         wrd: [['a', 'b', null, null, null]],
-        msg: '',
+        msg: EMessages.none,
     }
     // @ts-ignore
     expect(removeAlphabet(state)).toEqual(stateNew)
@@ -23,13 +25,13 @@ test('backspace does nothing when no alphabet in current guess', () => {
         row: 1,
         col: 0,
         wrd: [['a', 'b', 'c', 'd', 'e'], [null, null, null, null, null]],
-        msg: '',
+        msg: EMessages.none,
     }
     const stateNew = {
         row: 1,
         col: 0,
         wrd: [['a', 'b', 'c', 'd', 'e'], [null, null, null, null, null]],
-        msg: '',
+        msg: EMessages.none,
     }
     // @ts-ignore
     expect(removeAlphabet(state)).toEqual(stateNew)
@@ -40,10 +42,10 @@ test('backspace clears message', () => {
         row: 0,
         col: 5,
         wrd: [['a', 'b', 'c', 'd', 'e']],
-        msg: 'some error msg',
+        msg: EMessages.invalid,
     }
     // @ts-ignore
-    expect(removeAlphabet(state).msg).toBe('')
+    expect(removeAlphabet(state).msg).toBe(0)
 })
 
 test('alphabet adds a new character', () => {
@@ -51,13 +53,13 @@ test('alphabet adds a new character', () => {
         row: 0,
         col: 3,
         wrd: [['a', 'b', 'c', null, null]],
-        msg: '',
+        msg: EMessages.none,
     }
     const stateNew = {
         row: 0,
         col: 4,
         wrd: [['a', 'b', 'c', 'd', null]],
-        msg: '',
+        msg: EMessages.none,
     }
     // @ts-ignore
     expect(addAplhabet(state, 'd')).toEqual(stateNew)
@@ -68,13 +70,13 @@ test('alphabet does nothing when current guess is full', () => {
         row: 0,
         col: 5,
         wrd: [['a', 'b', 'c', 'd', 'e']],
-        msg: '',
+        msg: EMessages.none,
     }
     const stateNew = {
         row: 0,
         col: 5,
         wrd: [['a', 'b', 'c', 'd', 'e']],
-        msg: '',
+        msg: EMessages.none,
     }
     // @ts-ignore
     expect(addAplhabet(state, 'd')).toEqual(stateNew)
@@ -85,10 +87,10 @@ test('alphabet clears message', () => {
         row: 0,
         col: 3,
         wrd: [['a', 'b', 'c', null, null]],
-        msg: 'some error message',
+        msg: EMessages.less,
     }
     // @ts-ignore
-    expect(addAplhabet(state, 'd').msg).toBe('')
+    expect(addAplhabet(state, 'd').msg).toBe(0)
 })
 
 test('show error when <5 chars', () => {
@@ -96,10 +98,10 @@ test('show error when <5 chars', () => {
         row: 0,
         col: 3,
         wrd: [['a', 'b', 'c', null, null]],
-        msg: '',
+        msg: EMessages.none,
     }
     // @ts-ignore
-    expect(submitGuess(state).msg).toBeTruthy
+    expect(submitGuess(state).msg).toBe(1)
 })
 
 test('show error when not a word', () => {
@@ -107,10 +109,10 @@ test('show error when not a word', () => {
         row: 0,
         col: 5,
         wrd: [['a', 'b', 'c', 'd', 'e']],
-        msg: '',
+        msg: EMessages.none,
     }
     // @ts-ignore
-    expect(submitGuess(state).msg).toBeTruthy
+    expect(submitGuess(state).msg).toBe(2)
 })
 
 test('show correct feedback #1', () => {
@@ -125,7 +127,7 @@ test('show correct feedback #1', () => {
             m: 0,
             y: 0,
         },
-        msg: '',
+        msg: EMessages.none,
         sol: ['m', 'o', 'u', 's', 'e'],
         fin: false,
     }
@@ -157,7 +159,7 @@ test('show correct feedback #2', () => {
             o: 0,
             n: 0,
         },
-        msg: '',
+        msg: EMessages.none,
         sol: ['m', 'o', 't', 'o', 'r'],
         fin: false,
     }
@@ -192,7 +194,7 @@ test('win game', () => {
             s: 0,
             e: 0,
         },
-        msg: '',
+        msg: EMessages.none,
         sol: ['m', 'o', 'u', 's', 'e'],
         fin: false,
     }
@@ -216,5 +218,6 @@ test('win game', () => {
     const stateRet = submitGuess(state)
     expect(stateRet).toEqual(expect.objectContaining(stateNew))
     expect(stateRet.fin).toBe(true)
+    expect(stateRet.msg).toBe(EMessages.win)
 })
 
