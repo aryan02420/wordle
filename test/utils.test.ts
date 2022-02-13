@@ -113,7 +113,7 @@ test('show error when not a word', () => {
     expect(submitGuess(state).msg).toBeTruthy
 })
 
-test('show correct feedback', () => {
+test('show correct feedback #1', () => {
     const state = {
         row: 0,
         col: 5,
@@ -144,6 +144,39 @@ test('show correct feedback', () => {
     expect(submitGuess(state)).toEqual(expect.objectContaining(stateNew))
 })
 
+test('show correct feedback #2', () => {
+    const state = {
+        row: 0,
+        col: 5,
+        wrd: [['l', 'e', 'm', 'o', 'n']],
+        fbk: [[0, 0, 0, 0, 0]],
+        kbd: {
+            l: 0,
+            e: 0,
+            m: 0,
+            o: 0,
+            n: 0,
+        },
+        msg: '',
+        sol: ['m', 'o', 't', 'o', 'r'],
+        fin: false,
+    }
+    const stateNew = {
+        row: 1,
+        col: 0,
+        fbk: [[1, 1, 2, 3, 1]],
+        kbd: {
+            l: 1,
+            e: 1,
+            m: 2,
+            o: 3,
+            n: 1,
+        },
+    }
+    // @ts-ignore
+    expect(submitGuess(state)).toEqual(expect.objectContaining(stateNew))
+})
+
 test('win game', () => {
     const state = {
         row: 1,
@@ -164,8 +197,8 @@ test('win game', () => {
         fin: false,
     }
     const stateNew = {
-        row: 2,
-        col: 0,
+        row: 1,
+        col: 5,
         fbk: [[1, 3, 2, 2, 1], [3, 3, 3, 3, 3]],
         kbd: {
             t: 1,

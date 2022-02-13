@@ -102,6 +102,7 @@ export function submitGuess(state: IState): IState {
     if (state.wrd[state.row].join('') === state.sol.join('')) {
         state.msg = 'Great!!!'
         state.fin = true
+        return state
     }
 
     state.row++
