@@ -1,12 +1,13 @@
 export function serialize(state: IState): string {
     let str = ''
+
     str += state.row
     str += state.col
     str += Number(state.fin)
     str += state.msg
     str += state.sol.join('')
 
-    str += Object.values(state.kbd).join('')
+    str += Object.entries(state.kbd).sort((a, b) => a[0].localeCompare(b[0])).map(x => x[1]).join('')
 
     str += state.wrd.map(chars => chars.join('')).join('')
 
