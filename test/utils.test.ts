@@ -1,6 +1,6 @@
 /// <reference types='../src/types' />
 
-import { removeAlphabet, addAplhabet, submitGuess } from '../src/utils'
+import { removeAlphabet, addAplhabet, submitGuess, evaluateGuess } from '../src/utils'
 
 
 test('backspace deletes last character', () => {
@@ -113,6 +113,19 @@ test('show error when not a word', () => {
     }
     // @ts-ignore
     expect(submitGuess(state).msg).toBe(2)
+})
+
+test('correct evaluation #1', () => {
+    expect(evaluateGuess(['s', 'p', 'e', 'e', 'd'], ['a', 'b', 'i', 'd', 'e'])).toEqual([1, 1, 2, 1, 2])
+})
+test('correct evaluation #2', () => {
+    expect(evaluateGuess(['s', 'p', 'e', 'e', 'd'], ['e', 'r', 'a', 's', 'e'])).toEqual([2, 1, 2, 2, 1])
+})
+test('correct evaluation #3', () => {
+    expect(evaluateGuess(['s', 'p', 'e', 'e', 'd'], ['s', 't', 'e', 'a', 'l'])).toEqual([3, 1, 3, 1, 1])
+})
+test('correct evaluation #4', () => {
+    expect(evaluateGuess(['s', 'p', 'e', 'e', 'd'], ['c', 'r', 'e', 'p', 'e'])).toEqual([1, 2, 3, 2, 1])
 })
 
 test('show correct feedback #1', () => {

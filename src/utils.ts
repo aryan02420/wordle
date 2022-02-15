@@ -70,6 +70,29 @@ export function removeAlphabet(state: IState) {
     return state
 }
 
+export function evaluateGuess(guess: Tuple5<TAlphabet>, solution: Tuple5<TAlphabet>): TFeedback {
+    const feedback = new Array(5).fill(EFeedback.absent) as TFeedback
+    const markedGuess = new Array(5).fill(false)
+    const markedSolution = new Array(5).fill(false)
+    guess.forEach((char, i) => {
+        if (char !== solution[i]) return
+        feedback[i] = EFeedback.correct
+        markedGuess[i] = true
+        markedSolution[i] = true
+    })
+    guess.forEach((char, ci) => {
+        if (markedGuess[ci]) return
+        for (let si = 0; si < 5; si++) {
+            if (markedSolution[si]) continue
+            if (char !== solution[si]) continue
+            feedback[ci] = EFeedback.present
+            markedSolution[si] = true
+            break
+        }
+    })
+    return feedback
+}
+
 export function submitGuess(state: IState): IState {
 
     if (state.col !== 5) {
