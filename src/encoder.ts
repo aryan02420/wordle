@@ -13,12 +13,12 @@ export function serialize(state: IState): string {
 
     str += state.fbk.slice(0, state.row).map(chars => chars.join('')).join('')
 
-    return encode(str)
+    return ascToHex(str)
 }
 
 export function deserialize(str: string): IState {
     const state = {} as IState
-    str = decode(str)
+    str = hexToAsc(str)
 
     state.row = +str[0]
     state.col = +str[1]
@@ -119,10 +119,10 @@ export function hexToBin5(str: string): string {
     return str.slice(0, str.length - str.length % 5)
 }
 
-export function encode(str: string): string {
+export function ascToHex(str: string): string {
     return bin5ToHex(ascToBin5(str))
 }
 
-export function decode(str: string): string {
+export function hexToAsc(str: string): string {
     return bin5ToAsc(hexToBin5(str))
 }

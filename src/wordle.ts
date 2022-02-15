@@ -1,15 +1,16 @@
 import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './utils'
+import { serialize, deserialize } from './encoder'
 
 export function start(seed: string): IState {
   return getNewState(seed)
 }
 
 export function encode(state: IState): string {
-  return Buffer.from(JSON.stringify(state), 'binary').toString('base64')
+  return serialize(state)
 }
 
 export function decode(str: string): IState {
-  return JSON.parse(Buffer.from(str, 'base64').toString('binary')) as IState
+  return deserialize(str)
 }
 
 export function action(state: IState, move: TAlphabet | 'bksp' | 'enter'): IState {

@@ -1,5 +1,5 @@
 import { getNewState } from '../src/utils'
-import {serialize, deserialize, ascToBin5, bin5ToAsc, bin5ToHex, hexToBin5, encode, decode} from '../src/encoder'
+import {serialize, deserialize, ascToBin5, bin5ToAsc, bin5ToHex, hexToBin5, ascToHex, hexToAsc} from '../src/encoder'
 
 test('ASCII to bin', () => {
     expect(ascToBin5('05az')).toBe('00000001010011011111')
@@ -17,7 +17,7 @@ test('hex to bin', () => {
 })
 
 test('correctly encode/decode string', () => {
-    expect(decode(encode('1234lmno'))).toBe('1234lmno')
+    expect(hexToAsc(ascToHex('1234lmno'))).toBe('1234lmno')
 })
 
 test('correctly serialize/deserialize state', () => {
