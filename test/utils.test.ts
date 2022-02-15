@@ -147,7 +147,7 @@ test('show correct feedback #1', () => {
     const stateNew = {
         row: 1,
         col: 0,
-        fbk: [[1, 3, 2, 2, 1]],
+        fbk: [[1, 3, 2, 1, 1]],
         kbd: {
             t: 1,
             o: 3,
@@ -234,3 +234,4 @@ test('win game', () => {
     expect(stateRet.msg).toBe(EMessages.win)
 })
 
+// TODO: https://jestjs.io/docs/expect#tomatchobjectobject

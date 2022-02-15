@@ -93,6 +93,13 @@ export function evaluateGuess(guess: Tuple5<TAlphabet>, solution: Tuple5<TAlphab
     return feedback
 }
 
+export function updateKeyboard(keyboard: TKeyboard, guess: Tuple5<TAlphabet>, feedback: TFeedback) {
+    guess.forEach((char, i) => {
+        keyboard[char] = Math.max(keyboard[char], feedback[i])
+    })
+    return keyboard
+}
+
 export function submitGuess(state: IState): IState {
 
     if (state.col !== 5) {
@@ -105,22 +112,8 @@ export function submitGuess(state: IState): IState {
         return state
     }
 
-    state.wrd[state.row].forEach((alpha, i) => {
-
-        if (state.sol.findIndex(val => val === alpha) === -1) {
-            state.fbk[state.row][i] = EFeedback.absent
-            state.kbd[alpha!] = Math.max(EFeedback.absent, state.kbd[alpha!])
-        } else {
-            state.fbk[state.row][i] = EFeedback.present
-            state.kbd[alpha!] = Math.max(EFeedback.present, state.kbd[alpha!])
-        }
-
-        if (alpha === state.sol[i]) {
-            state.fbk[state.row][i] = EFeedback.correct
-            state.kbd[alpha!] = Math.max(EFeedback.correct, state.kbd[alpha!])
-        }
-
-    })
+    state.fbk[state.row] = evaluateGuess(state.wrd[state.row] as Tuple5<TAlphabet>, state.sol)
+    state.kbd = updateKeyboard(state.kbd, state.wrd[state.row] as Tuple5<TAlphabet>, state.fbk[state.row])
 
     if (state.wrd[state.row].join('') === state.sol.join('')) {
         state.msg = EMessages.win
@@ -131,4 +124,5 @@ export function submitGuess(state: IState): IState {
     state.row++
     state.col = 0
     return state
+
 }
