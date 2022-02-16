@@ -1,6 +1,6 @@
 import { getRandomSolution, isValidWord } from './words'
 
-export function getNewState(seed: any): IState {
+export function getNewState(seed?: any): IState {
     return {
         wrd: [
             [null, null, null, null, null],

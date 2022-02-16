@@ -21,6 +21,6 @@ test('correctly encode/decode string', () => {
 })
 
 test('correctly serialize/deserialize state', () => {
-    const state = getNewState(undefined)
+    const state = getNewState()
     expect(deserialize(serialize(state))).toEqual(state)
 })

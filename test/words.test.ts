@@ -1,7 +1,7 @@
 import { SolutionWords, ValidWords, getRandomSolution, isValidWord } from '../src/words'
 
 test('return random word', () => {
-    expect(getRandomSolution(undefined)).not.toBe(getRandomSolution(undefined))
+    expect(getRandomSolution()).not.toBe(getRandomSolution())
 })
 
 test('solution word is valid word', () => {
