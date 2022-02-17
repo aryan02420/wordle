@@ -1,26 +1,17 @@
 import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './utils'
-import { serialize, deserialize } from './encoder'
 
-export function start(seed: string): IState {
-  return getNewState(seed)
-}
+export function play(state?: IState, action: TAlphabet | 'bksp' | 'enter' | 'new' = 'new'): IState {
 
-export function encode(state: IState): string {
-  return serialize(state)
-}
+  if (!state || state.fin || action === 'new') {
+    return getNewState()
+  }
 
-export function decode(str: string): IState {
-  return deserialize(str)
-}
-
-export function action(state: IState, move: TAlphabet | 'bksp' | 'enter'): IState {
-
-  if (move === 'bksp') {
+  if (action === 'bksp') {
     state = removeAlphabet(state)
-  } else if (move === 'enter') {
+  } else if (action === 'enter') {
     state = submitGuess(state)
-  } else {
-    state = addAplhabet(state, move)
+  } else if (action.length === 1 && action >= 'a' && action <= 'z') {
+    state = addAplhabet(state, action)
   }
 
   if (!state.fin && state.row === 6) {
