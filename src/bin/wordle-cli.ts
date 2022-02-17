@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import process from 'process'
+import { escape } from 'querystring'
 import * as wordle from '../index.js'
 import chalk, { Chalk } from 'chalk'
 
@@ -17,12 +18,35 @@ const keys = [
   ['z', 'x', 'c', 'v', 'b', 'n', 'm']
 ]
 
+const enum inputMap {
+  'CtrlC' = '%03',
+  'CtrlD' = '%04',
+  'CtrlL' = '%0c',
+  'Enter' = '%0d',
+  'Backspace' = '%7f',
+}
+
+process.stdin.setRawMode(true);
+
 let state = wordle.play()
 display()
 
 process.stdin.on('data', (data) => {
-  play(data.toString().trim())
+
+  const inputCode = escape(data.toString()).toLowerCase()
+
+  // SIGINT
+  if (inputCode === inputMap.CtrlC) {
+    process.exit(0)
+  }
+
+  if (inputCode === inputMap.Enter) play('enter')
+  else if (inputCode === inputMap.Backspace) play('bksp')
+  else if (inputCode === inputMap.CtrlL) play('new')
+  else play(inputCode)
+
   display()
+
 })
 
 function play(move: string) {
@@ -30,10 +54,7 @@ function play(move: string) {
   state = wordle.play(state, move || 'enter')
 }
 
-function display() {
-  console.clear()
-  console.log('WORDLE')
-
+function getGrid() {
   let grid = ''
   state.wrd.forEach((guess, j) => {
     guess.forEach((char, i) => {
@@ -42,10 +63,10 @@ function display() {
     grid += colors[0]('\n')
   })
   grid += colors[0]('               ')
-  console.log(grid)
+  return grid
+}
 
-  console.log('')
-
+function getKeyboard() {
   let keyboard = ''
   keys.forEach((row, i) => {
     keyboard += chalk.reset(Array(2 * i).fill(' ').join(''))
@@ -55,10 +76,21 @@ function display() {
     })
     keyboard += colors[0]('\n')
   })
-  console.log(keyboard)
+  return keyboard
+}
 
-  if (state.msg !== EMessages.lose)
-    console.log(wordle.getMessageString(state.msg))
-  else
-    console.log(chalk.bgWhite.red(state.sol.join('')))
+function getMessage() {
+  if (state.msg === EMessages.lose)
+    return chalk.bgWhite.red(state.sol.join(''))
+  return wordle.getMessageString(state.msg)
+}
+
+function display() {
+  console.clear()
+  console.log('WORDLE')
+  console.log('')
+  console.log(getGrid())
+  console.log('')
+  console.log(getKeyboard())
+  console.log(getMessage())
 }
