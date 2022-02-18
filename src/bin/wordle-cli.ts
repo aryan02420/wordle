@@ -1,8 +1,6 @@
-#!/usr/bin/env node
-
 import process from 'process'
 import { escape } from 'querystring'
-import * as wordle from '../index.js'
+import * as wordle from '../'
 import chalk, { Chalk } from 'chalk'
 
 const colors: Record<EFeedback, Chalk> = {
