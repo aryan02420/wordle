@@ -1,7 +1,9 @@
 import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './utils'
 
-export function play(state?: IState, action: TAlphabet | 'bksp' | 'enter' | 'new' = 'new'): IState {
-
+export function play(
+  state?: IState,
+  action: TAlphabet | 'bksp' | 'enter' | 'new' = 'new'
+): IState {
   if (!state || state.fin || action === 'new') {
     return getNewState()
   }

@@ -13,7 +13,7 @@ const colors: Record<EFeedback, Chalk> = {
 const keys = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
   ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-  ['z', 'x', 'c', 'v', 'b', 'n', 'm']
+  ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
 ]
 
 const enum inputMap {
@@ -24,13 +24,12 @@ const enum inputMap {
   'Backspace' = '%7f',
 }
 
-process.stdin.setRawMode(true);
+process.stdin.setRawMode(true)
 
 let state = wordle.play()
 display()
 
 process.stdin.on('data', (data) => {
-
   const inputCode = escape(data.toString()).toLowerCase()
 
   // SIGINT
@@ -44,7 +43,6 @@ process.stdin.on('data', (data) => {
   else play(inputCode)
 
   display()
-
 })
 
 function play(move: string) {
@@ -67,8 +65,12 @@ function getGrid() {
 function getKeyboard() {
   let keyboard = ''
   keys.forEach((row, i) => {
-    keyboard += chalk.reset(Array(2 * i).fill(' ').join(''))
-    row.forEach(key => {
+    keyboard += chalk.reset(
+      Array(2 * i)
+        .fill(' ')
+        .join('')
+    )
+    row.forEach((key) => {
       // @ts-ignore
       keyboard += colors[state.kbd[key]](' ' + key + ' ')
     })
@@ -78,8 +80,7 @@ function getKeyboard() {
 }
 
 function getMessage() {
-  if (state.msg === EMessages.lose)
-    return chalk.bgWhite.red(state.sol.join(''))
+  if (state.msg === EMessages.lose) return chalk.bgWhite.red(state.sol.join(''))
   return wordle.getMessageString(state.msg)
 }
 
