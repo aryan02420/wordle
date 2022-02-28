@@ -34,6 +34,10 @@ process.stdin.on('data', (data) => {
 
   // SIGINT
   if (inputCode === inputMap.CtrlC) {
+    if (!state.fin) {
+      state.msg = EMessages.lose
+      console.log(getMessage())
+    }
     process.exit(0)
   }
 
@@ -80,8 +84,10 @@ function getKeyboard() {
 }
 
 function getMessage() {
-  if (state.msg === EMessages.lose) return chalk.bgWhite.red(state.sol.join(''))
-  return wordle.getMessageString(state.msg)
+  const msg = wordle.getMessageString(state.msg)
+  if (state.msg === EMessages.lose) 
+    return msg + '\nSolution: ' + chalk.bgWhite.red(' ' + state.sol.join('') + ' ')
+  return msg
 }
 
 function display() {

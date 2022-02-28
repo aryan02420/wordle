@@ -6,7 +6,7 @@ export const messages: Record<EMessages, string[]> = {
   ],
   [EMessages.invalid]: ['not a valid word', 'word not valid'],
   [EMessages.win]: ['Great', 'Awesome', 'You Win'],
-  [EMessages.lose]: [''],
+  [EMessages.lose]: ['Loser', 'You Suck!', 'Better Luck next tym.'],
 }
 
 export function getMessageString(type: EMessages): string {
