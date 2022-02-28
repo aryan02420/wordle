@@ -29,6 +29,15 @@ export default [
     plugins: [typescript()],
   },
   {
+    input: 'src/server/server.ts',
+    output: {
+      file: 'dist/cjs/server/server.js',
+      format: 'cjs',
+    },
+    external: ['../'],
+    plugins: [typescript()],
+  },
+  {
     input: 'src/index.ts',
     output: {
       file: 'dist/esm/wordle.js',
