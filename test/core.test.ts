@@ -1,13 +1,13 @@
 /// <reference types='../src/types' />
 
-import { getNewState } from '../src/utils'
 import {
+  getNewState,
   removeAlphabet,
   addAplhabet,
   evaluateGuess,
   updateKeyboard,
   submitGuess,
-} from '../src/utils'
+} from '../src/core'
 
 describe('removeAlphabet', () => {
   describe('delete last character', () => {

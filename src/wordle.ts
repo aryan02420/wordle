@@ -1,4 +1,4 @@
-import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './utils'
+import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './core'
 
 export function play(
   state?: IState,

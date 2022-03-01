@@ -1,4 +1,4 @@
-import { getNewState } from '../src/utils'
+import { getNewState } from '../src/core'
 import {
   serialize,
   deserialize,
