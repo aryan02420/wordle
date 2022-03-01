@@ -1,5 +1,5 @@
-import process from 'process'
-import { escape } from 'querystring'
+import process from 'node:process'
+import { escape } from 'node:querystring'
 import * as wordle from '../'
 import chalk, { Chalk } from 'chalk'
 
