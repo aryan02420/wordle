@@ -1,0 +1,11 @@
+{
+  "ignore": [
+    ".git",
+    "node_modules/**/node_modules",
+    "src/**"
+  ],
+  "watch": [
+    "dist/cjs/server/**"
+  ],
+  "verbose": true
+}
