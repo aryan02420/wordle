@@ -57,12 +57,13 @@ function play(move: string) {
 function getGrid() {
   let grid = ''
   state.wrd.forEach((guess, j) => {
+    grid += '       '
     guess.forEach((char, i) => {
-      grid += colors[state.fbk[j][i]](' ' + (char || '_') + ' ')
+      grid +=  colors[state.fbk[j][i]](' ' + (char || '_') + ' ')
     })
     grid += colors[0]('\n')
   })
-  grid += colors[0]('               ')
+  grid += '       ' + colors[0]('               ')
   return grid
 }
 
@@ -92,7 +93,7 @@ function getMessage() {
 
 function display() {
   console.clear()
-  console.log('WORDLE')
+  console.log('           WORDLE')
   console.log('')
   console.log(getGrid())
   console.log('')
