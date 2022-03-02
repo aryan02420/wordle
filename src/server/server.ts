@@ -1,5 +1,5 @@
 import express from 'express'
-import renderer from './render'
+import { renderer } from '../shared'
 import playRouter from './routes/play'
 import dispatchRouter from './routes/dispatch'
 
