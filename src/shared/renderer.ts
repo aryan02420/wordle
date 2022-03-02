@@ -2,7 +2,7 @@ import nunjucks from 'nunjucks'
 import markdownit from 'markdown-it'
 
 type renderFn = (
-  filePath: string,
+  source: string,
   options: {
     renderMarkdown?: boolean
     context: any
