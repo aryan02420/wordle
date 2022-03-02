@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import express from 'express'
 import { renderer } from '../shared'
 import playRouter from './routes/play'
@@ -8,8 +9,9 @@ const PORT = process.env.port ?? 3000
 const app = express()
 
 app.engine('tmpl', (filePath, options, callback) => {
+  const content = fs.readFileSync(filePath).toString()
   // @ts-ignore
-  const rendered = renderer(filePath, options)
+  const rendered = renderer(content, options)
   callback(null, rendered)
 })
 
