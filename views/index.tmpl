@@ -1,0 +1,19 @@
+# wordle
+
+|      |      |      |      |      |
+| ---- | ---- | ---- | ---- | ---- |
+{% for row in state.wrd -%}
+  |
+  {%- for char in row -%}
+    {%- if char -%}
+      {{ char }}
+    {%- else -%}
+      _
+    {%- endif -%}
+    |
+  {%- endfor %}
+{% endfor %}
+
+```json
+{{ state | dump(2) | safe }}
+```

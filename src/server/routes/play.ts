@@ -9,7 +9,11 @@ router.get('/', (req, res) => {
 })
 
 router.get('/:state/', (req, res) => {
-  res.json(wordle.deserialize(req.params.state))
+  const state = wordle.deserialize(req.params.state)
+  res.render('index', {
+    renderMarkdown: true,
+    context: { state },
+  })
 })
 
 router.get('/:state/:move', (req, res) => {
