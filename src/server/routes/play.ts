@@ -12,7 +12,11 @@ router.get('/:state/', (req, res) => {
   const state = wordle.deserialize(req.params.state)
   res.render('index', {
     renderMarkdown: true,
-    context: { state },
+    context: { 
+      state,
+      message: wordle.getMessageString(state.msg),
+      url: `/play/${req.params.state}/`
+    },
   })
 })
 

@@ -9,7 +9,9 @@ type renderFn = (
   },
 ) => string
 
-const markdown = new markdownit()
+const markdown = new markdownit({
+  html: true
+})
 
 const renderer: renderFn = (source, options) => {
   let rendered = nunjucks.renderString(source, options.context)

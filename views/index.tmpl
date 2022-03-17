@@ -1,19 +1,62 @@
 # wordle
 
+{% macro key(name) %}
+  {{- state.kbd[name] -}}
+{% endmacro %}
+
+{% set color = ['#383555', '#962D43', '#8A6F30', '#4B692F' ] %}
+
+{% macro getColor(num = 0) %}
+  {{- color[num] -}}
+{% endmacro %}
+
+{% macro block(row, col) %}
+  {%- if state.wrd[row][col] -%}
+    <span style="color:{{ getColor(state.fbk[row][col]) }};">{{ state.wrd[row][col] }}</span>
+  {%- else -%}
+    _
+  {%- endif -%}
+{% endmacro %}
+
+
+
 |      |      |      |      |      |
 | ---- | ---- | ---- | ---- | ---- |
-{% for row in state.wrd -%}
+{% for row in range(0, 6) -%}
   |
-  {%- for char in row -%}
-    {%- if char -%}
-      {{ char }}
-    {%- else -%}
-      _
-    {%- endif -%}
+  {%- for col in range(0, 5) -%}
+    {{- block(row, col) -}}
     |
   {%- endfor %}
 {% endfor %}
 
+
+
+{% set row1 = ['q','w','e','r','t','y','u','i','o','p'] %}
+{% set row2 = ['a','s','d','f','g','h','j','k','l',''] %}
+{% set row3 = ['bksp','z','x','c','v','b','n','m','','enter'] %}
+
+
+|      |      |      |      |      |      |      |      |      |      |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+|
+{%- for k in row1 -%}
+  <a href="{{ url }}{{ k }}" style="color:{{ getColor(key(k)) }};">{{ k }}</a> |
+{%- endfor %}
+|
+{%- for k in row2 -%}
+  <a href="{{ url }}{{ k }}" style="color:{{ getColor(key(k)) }};">{{ k }}</a> |
+{%- endfor %}
+|
+{%- for k in row3 -%}
+  <a href="{{ url }}{{ k }}" style="color:{{ getColor(key(k)) }};">{{ k }}</a> |
+{%- endfor %}
+
+
+{{ message }}
+
+
 ```json
 {{ state | dump(2) | safe }}
 ```
+
