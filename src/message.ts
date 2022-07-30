@@ -5,7 +5,7 @@ export const messages: Record<EMessages, string[]> = {
     'guess must be a five letter word',
   ],
   [EMessages.invalid]: ['not a valid word', 'word not valid'],
-  [EMessages.win]: ['Great', 'Awesome', 'You Win'],
+  [EMessages.win]: ['Great', 'Awesome', 'You Win', 'Genius'],
   [EMessages.lose]: ['Loser', 'You Suck!', 'Better Luck next tym.'],
 }
 
