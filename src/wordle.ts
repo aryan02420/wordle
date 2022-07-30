@@ -2,7 +2,7 @@ import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './core'
 
 export function play(
   state?: IState,
-  action: TAlphabet | 'bksp' | 'enter' | 'new' = 'new'
+  action: TAlphabet | 'bksp' | 'enter' | 'new' | string = 'new'
 ): IState {
   if (!state || state.fin || action === 'new') {
     return getNewState()
@@ -13,7 +13,7 @@ export function play(
   } else if (action === 'enter') {
     state = submitGuess(state)
   } else if (action.length === 1 && action >= 'a' && action <= 'z') {
-    state = addAplhabet(state, action)
+    state = addAplhabet(state, action as TAlphabet)
   }
 
   if (!state.fin && state.row === 6) {

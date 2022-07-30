@@ -4,13 +4,13 @@ import * as wordle from '../'
 import chalk, { Chalk } from 'chalk'
 
 const colors: Record<EFeedback, Chalk> = {
-  0: chalk.bgGray.whiteBright,
-  1: chalk.bgWhite.black,
-  2: chalk.bgYellow.black,
-  3: chalk.bgGreen.black,
+  [EFeedback.empty]: chalk.bgGray.whiteBright,
+  [EFeedback.absent]: chalk.bgWhite.black,
+  [EFeedback.present]: chalk.bgYellow.black,
+  [EFeedback.correct]: chalk.bgGreen.black,
 }
 
-const keys = [
+const keys: TAlphabet[][] = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
   ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
   ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
@@ -50,7 +50,6 @@ process.stdin.on('data', (data) => {
 })
 
 function play(move: string) {
-  // @ts-ignore
   state = wordle.play(state, move || 'enter')
 }
 
@@ -59,11 +58,10 @@ function getGrid() {
   state.wrd.forEach((guess, j) => {
     grid += '       '
     guess.forEach((char, i) => {
-      grid +=  colors[state.fbk[j][i]](' ' + (char || '_') + ' ')
+      grid +=  colors[state.fbk[j][i]](' ' + (char || '-') + ' ')
     })
     grid += colors[0]('\n')
   })
-  grid += '       ' + colors[0]('               ')
   return grid
 }
 
@@ -76,7 +74,6 @@ function getKeyboard() {
         .join('')
     )
     row.forEach((key) => {
-      // @ts-ignore
       keyboard += colors[state.kbd[key]](' ' + key + ' ')
     })
     keyboard += colors[0]('\n')
@@ -93,7 +90,7 @@ function getMessage() {
 
 function display() {
   console.clear()
-  console.log('           WORDLE')
+  console.log('            WORDLE')
   console.log('')
   console.log(getGrid())
   console.log('')
