@@ -266,12 +266,12 @@ describe('submitGuess #2', () => {
       expect(result.msg).toBe(EMessages.win)
     })
 
-    test('do not change row', () => {
-      expect(result.row).toBe(2)
+    test('change row', () => {
+      expect(result.row).toBe(3)
     })
 
-    test('do not change col', () => {
-      expect(result.col).toBe(5)
+    test('change col', () => {
+      expect(result.col).toBe(0)
     })
   })
 })
