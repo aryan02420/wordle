@@ -1,21 +1,20 @@
 import nunjucks from 'nunjucks'
 import markdownit from 'markdown-it'
 
-type renderFn = (
-  source: string,
-  options: {
-    renderMarkdown?: boolean
-    context: any
-  },
-) => string
+export interface renderOptions {
+  renderAsHTML?: boolean
+  context: Record<string, any>
+}
+
+type renderFn = (source: string, options: renderOptions) => string
 
 const markdown = new markdownit({
-  html: true
+  html: true,
 })
 
 const renderer: renderFn = (source, options) => {
   let rendered = nunjucks.renderString(source, options.context)
-  if (options.renderMarkdown) rendered = markdown.render(rendered)
+  if (options.renderAsHTML) rendered = markdown.render(rendered)
   return rendered
 }
 

@@ -3,15 +3,19 @@ import express from 'express'
 import { renderer } from '../shared'
 import playRouter from './routes/play'
 import dispatchRouter from './routes/dispatch'
+import type { renderOptions } from '../shared'
 
 const PORT = process.env.port ?? 3000
 
 const app = express()
 
+app.use(express.static('public', {
+  maxAge: 1000*60*60*24,
+}))
+
 app.engine('tmpl', (filePath, options, callback) => {
   const content = fs.readFileSync(filePath).toString()
-  // @ts-ignore
-  const rendered = renderer(content, options)
+  const rendered = renderer(content, options as renderOptions)
   callback(null, rendered)
 })
 

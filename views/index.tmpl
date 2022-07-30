@@ -1,24 +1,34 @@
-# wordle
+<!--WORDLE:{{ id }}-->
 
-{% macro key(name) %}
+{% macro keyState(name) %}
   {{- state.kbd[name] -}}
-{% endmacro %}
-
-{% set color = ['#383555', '#962D43', '#8A6F30', '#4B692F' ] %}
-
-{% macro getColor(num = 0) %}
-  {{- color[num] -}}
 {% endmacro %}
 
 {% macro block(row, col) %}
   {%- if state.wrd[row][col] -%}
-    <span style="color:{{ getColor(state.fbk[row][col]) }};">{{ state.wrd[row][col] }}</span>
+    <img height="40px" src="{{ imgBaseUrl }}{{ state.wrd[row][col] }}{{ state.fbk[row][col] }}.png" />
   {%- else -%}
-    _
+    <img height="40px" src="{{ imgBaseUrl }}blank.png" />
   {%- endif -%}
 {% endmacro %}
 
+{% set row1 = ['q','w','e','r','t','y','u','i','o','p'] %}
+{% set row2 = ['a','s','d','f','g','h','j','k','l'] %}
+{% set row3 = ['bksp','z','x','c','v','b','n','m','enter'] %}
 
+
+<table>
+<tr><th><p align="center">
+
+WORDLE
+
+</p></th></tr>
+<tr><td><p align="center">
+
+<br/>
+
+</p></td></tr>
+<tr><td><p align="center">
 
 |      |      |      |      |      |
 | ---- | ---- | ---- | ---- | ---- |
@@ -30,33 +40,44 @@
   {%- endfor %}
 {% endfor %}
 
+</p></td></tr>
+<tr><td><p align="center">
 
+{{- message -}}
 
-{% set row1 = ['q','w','e','r','t','y','u','i','o','p'] %}
-{% set row2 = ['a','s','d','f','g','h','j','k','l',''] %}
-{% set row3 = ['bksp','z','x','c','v','b','n','m','','enter'] %}
+</p></td></tr>
+<tr><td><p align="center">
 
+<br/>
 
-|      |      |      |      |      |      |      |      |      |      |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-|
+</p></td></tr>
+<tr><td><p align="center">
+
 {%- for k in row1 -%}
-  <a href="{{ url }}{{ k }}" style="color:{{ getColor(key(k)) }};">{{ k }}</a> |
+  <a href="{{ url }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor %}
-|
+
+</p></td></tr>
+<tr><td><p align="center">
+
 {%- for k in row2 -%}
-  <a href="{{ url }}{{ k }}" style="color:{{ getColor(key(k)) }};">{{ k }}</a> |
+  <a href="{{ url }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor %}
-|
+
+</p></td></tr>
+<tr><td><p align="center">
+
 {%- for k in row3 -%}
-  <a href="{{ url }}{{ k }}" style="color:{{ getColor(key(k)) }};">{{ k }}</a> |
+  <a href="{{ url }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor %}
 
+</p></td></tr>
+</table>
 
-{{ message }}
 
-
+{% if isDev %}
 ```json
 {{ state | dump(2) | safe }}
 ```
+{% endif %}
 

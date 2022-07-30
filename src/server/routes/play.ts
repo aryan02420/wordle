@@ -1,5 +1,6 @@
 import express from 'express'
 import * as wordle from '../../'
+import type { renderOptions } from '../../shared'
 
 const router = express.Router()
 
@@ -10,19 +11,22 @@ router.get('/', (req, res) => {
 
 router.get('/:state/', (req, res) => {
   const state = wordle.deserialize(req.params.state)
-  res.render('index', {
-    renderMarkdown: true,
-    context: { 
-      state,
+  const options: renderOptions = {
+    renderAsHTML: true,
+    context: {
+      id: req.params.state,
+      imgBaseUrl: '/images/',
+      isDev: process.env.NODE_ENV === 'development',
       message: wordle.getMessageString(state.msg),
-      url: `/play/${req.params.state}/`
+      state,
+      url: `/play/${req.params.state}/`,
     },
-  })
+  }
+  res.render('index', options)
 })
 
 router.get('/:state/:move', (req, res) => {
   const state = wordle.deserialize(req.params.state)
-  // @ts-ignore
   const nextState = wordle.serialize(wordle.play(state, req.params.move))
   res.redirect(`/play/${nextState}`)
 })
