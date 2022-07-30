@@ -3,7 +3,7 @@ import {
   ValidWords,
   getRandomSolution,
   isValidWord,
-} from '../src/words'
+} from '../src/core/words'
 
 test('return random word', () => {
   expect(getRandomSolution()).not.toBe(getRandomSolution())

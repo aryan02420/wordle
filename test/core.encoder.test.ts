@@ -1,4 +1,4 @@
-import { getNewState } from '../src/core'
+import { getNewState } from '../src/core/actions'
 import {
   serialize,
   deserialize,
@@ -8,7 +8,7 @@ import {
   hexToBin5,
   ascToHex,
   hexToAsc,
-} from '../src/encoder'
+} from '../src/core/encoder'
 
 test('ASCII to bin', () => {
   expect(ascToBin5('05az')).toBe('00000001010011011111')

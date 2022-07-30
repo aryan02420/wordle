@@ -1,3 +1,3 @@
-export { play } from './wordle'
-export { serialize, deserialize } from './encoder'
-export { getMessageString } from './message'
+export { play } from './core/wordle'
+export { serialize, deserialize } from './core/encoder'
+export { getMessageString } from './core/message'

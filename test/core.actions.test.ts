@@ -7,7 +7,7 @@ import {
   evaluateGuess,
   updateKeyboard,
   submitGuess,
-} from '../src/core'
+} from '../src/core/actions'
 
 describe('removeAlphabet', () => {
   describe('delete last character', () => {
