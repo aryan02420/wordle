@@ -110,6 +110,6 @@ convert assets/sheet.png -crop 8x8+120+40 -filter box -resize 400% public/images
 
 
 convert assets/sheet.png -crop 8x8+8+40 -filter box -resize 400% public/images/blank.png
-convert assets/sheet.png -crop 9x8+16+40 -filter box -resize 400% public/images/bksp.png
-convert assets/sheet.png -crop 9x8+24+40 -filter box -resize 400% public/images/enter.png
-convert assets/sheet.png -crop 8x8+32+40 -filter box -resize 400% public/images/cursor.png
+convert assets/sheet.png -crop 8x8+16+40 -filter box -resize 400% public/images/cursor.png
+convert assets/sheet.png -crop 12x8+0+48 -filter box -resize 400% public/images/bksp.png
+convert assets/sheet.png -crop 12x8+12+48 -filter box -resize 400% public/images/enter.png
