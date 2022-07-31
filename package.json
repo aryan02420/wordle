@@ -1,6 +1,6 @@
 {
   "name": "@aryan02420/wordle",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "stateless Wordle clone",
   "main": "dist/cjs/wordle.js",
   "bin": "dist/cjs/bin/wordle-cli.js",
