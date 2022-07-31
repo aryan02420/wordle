@@ -275,3 +275,48 @@ describe('submitGuess #2', () => {
     })
   })
 })
+
+describe('immutable states', () => {
+  test('immutable keyboard', () => {
+    const initKbd = {
+      a: EFeedback.absent,
+      b: EFeedback.correct,
+      c: EFeedback.present,
+      d: EFeedback.correct,
+      e: EFeedback.present,
+    } as TKeyboard
+    const nextKbd = updateKeyboard(
+      initKbd,
+      ['a', 'b', 'c', 'd', 'e'],
+      [
+        EFeedback.present,
+        EFeedback.absent,
+        EFeedback.correct,
+        EFeedback.correct,
+        EFeedback.present,
+      ]
+    )
+    expect(initKbd).not.toBe(nextKbd)
+  })
+
+  test('immutable add alphabet', () => {
+    const initState = getNewState()
+    const nextState = addAplhabet(initState, 'a')
+    expect(initState).not.toBe(nextState)
+  })
+  
+  test('immutable remove alphabet', () => {
+    const initState = getNewState()
+    initState.col = 5
+    const nextState = removeAlphabet(initState)
+    expect(initState).not.toBe(nextState)
+  })
+  
+  test('immutable submit guess', () => {
+    const initState = getNewState()
+    initState.col = 5
+    initState.wrd[0] = ['h', 'e', 'l', 'l', 'o']
+    const nextState = submitGuess(initState)
+    expect(initState).not.toBe(nextState)
+  })
+})
