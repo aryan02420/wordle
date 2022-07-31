@@ -1,3 +1,4 @@
+import { produce } from "immer"
 import { getRandomSolution, isValidWord } from './words'
 
 export function getNewState(seed?: any): IState {
@@ -91,19 +92,23 @@ export function getNewState(seed?: any): IState {
 }
 
 export function addAplhabet(state: IState, alpha: TAlphabet) {
-  state.msg = EMessages.none
-  if (state.col === 5) return state
-  state.wrd[state.row][state.col] = alpha
-  state.col++
-  return state
+  const nextState = produce(state, draft => {
+    draft.msg = EMessages.none
+    if (draft.col === 5) return
+    draft.wrd[draft.row][draft.col] = alpha
+    draft.col++
+  })
+  return nextState
 }
 
 export function removeAlphabet(state: IState) {
-  state.msg = EMessages.none
-  if (state.col === 0) return state
-  state.col--
-  state.wrd[state.row][state.col] = null
-  return state
+  const nextState = produce(state, draft => {
+    draft.msg = EMessages.none
+    if (draft.col === 0) return
+    draft.col--
+    draft.wrd[draft.row][draft.col] = null
+  })
+  return nextState
 }
 
 export function evaluateGuess(
@@ -135,41 +140,45 @@ export function evaluateGuess(
 export function updateKeyboard(
   keyboard: TKeyboard,
   guess: Tuple5<TAlphabet>,
-  feedback: TFeedback
-) {
-  guess.forEach((char, i) => {
-    keyboard[char] = Math.max(keyboard[char], feedback[i])
+  feedback: TFeedback,
+): TKeyboard {
+  const newKbd = produce(keyboard, draft => {
+    guess.forEach((char, i) => {
+      draft[char] = Math.max(draft[char], feedback[i])
+    })
   })
-  return keyboard
+  return newKbd
 }
 
 export function submitGuess(state: IState): IState {
-  if (state.col !== 5) {
-    state.msg = EMessages.less
-    return state
-  }
-
-  if (!isValidWord(state.wrd[state.row].join(''))) {
-    state.msg = EMessages.invalid
-    return state
-  }
-
-  state.fbk[state.row] = evaluateGuess(
-    state.wrd[state.row] as Tuple5<TAlphabet>,
-    state.sol
-  )
-  state.kbd = updateKeyboard(
-    state.kbd,
-    state.wrd[state.row] as Tuple5<TAlphabet>,
-    state.fbk[state.row]
-  )
-
-  if (state.wrd[state.row].join('') === state.sol.join('')) {
-    state.msg = EMessages.win
-    state.fin = true
-  }
-
-  state.row++
-  state.col = 0
-  return state
+  const nextState = produce(state, draft => {
+    if (draft.col !== 5) {
+      draft.msg = EMessages.less
+      return
+    }
+  
+    if (!isValidWord(draft.wrd[draft.row].join(''))) {
+      draft.msg = EMessages.invalid
+      return
+    }
+  
+    draft.fbk[draft.row] = evaluateGuess(
+      draft.wrd[draft.row] as Tuple5<TAlphabet>,
+      draft.sol
+    )
+    draft.kbd = updateKeyboard(
+      draft.kbd,
+      draft.wrd[draft.row] as Tuple5<TAlphabet>,
+      draft.fbk[draft.row]
+    )
+  
+    if (draft.wrd[draft.row].join('') === draft.sol.join('')) {
+      draft.msg = EMessages.win
+      draft.fin = true
+    }
+  
+    draft.row++
+    draft.col = 0
+  })
+  return nextState
 }
