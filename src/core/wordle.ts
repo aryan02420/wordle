@@ -1,9 +1,7 @@
+import { produce } from 'immer'
 import { getNewState, addAplhabet, removeAlphabet, submitGuess } from './actions'
 
-export function play(
-  state?: IState,
-  action: TAlphabet | 'bksp' | 'enter' | 'new' | string = 'new'
-): IState {
+export function play(state?: IState, action: TAlphabet | 'bksp' | 'enter' | 'new' | string = 'new'): IState {
   if (!state || state.fin || action === 'new') {
     return getNewState()
   }
@@ -16,10 +14,12 @@ export function play(
     state = addAplhabet(state, action as TAlphabet)
   }
 
-  if (!state.fin && state.row === 6) {
-    state.fin = true
-    state.msg = EMessages.lose
-  }
+  const nextState = produce(state, (draft) => {
+    if (!draft.fin && draft.row === 6) {
+      draft.fin = true
+      draft.msg = EMessages.lose
+    }
+  })
 
-  return state
+  return nextState
 }
