@@ -23,7 +23,7 @@ app.set('views', './views')
 app.set('view engine', 'tmpl')
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('<a href="https://github.com/aryan02420/wordle">aryan02420/wordle</a>')
 })
 
 app.use('/play/', playRouter)
