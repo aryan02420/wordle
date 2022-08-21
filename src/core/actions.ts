@@ -179,6 +179,11 @@ export function submitGuess(state: IState): IState {
   
     draft.row++
     draft.col = 0
+    
+    if (!draft.fin && draft.row === 6) {
+      draft.fin = true
+      draft.msg = EMessages.lose
+    }
   })
   return nextState
 }

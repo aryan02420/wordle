@@ -274,6 +274,33 @@ describe('submitGuess #2', () => {
       expect(result.col).toBe(0)
     })
   })
+
+  describe('lose game', () => {
+    const state = getNewState()
+    state.row = 5
+    state.col = 5
+    state.msg = EMessages.none
+    state.sol = ['t', 'o', 'm', 'm', 'y']
+    state.wrd[5] = ['t', 'r', 'u', 'c', 'k']
+
+    const result = submitGuess(state)
+
+    test('finish flag', () => {
+      expect(result.fin).toBe(true)
+    })
+
+    test('set message', () => {
+      expect(result.msg).toBe(EMessages.lose)
+    })
+
+    test('change row', () => {
+      expect(result.row).toBe(6)
+    })
+
+    test('change col', () => {
+      expect(result.col).toBe(0)
+    })
+  })
 })
 
 describe('immutable states', () => {
