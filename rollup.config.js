@@ -1,3 +1,6 @@
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 
 /** @type {import('rollup').RollupOptions} */
@@ -20,31 +23,29 @@ export default [
     plugins: [typescript()],
   },
   {
-    input: 'src/bin/wordle-cli.ts',
+    input: 'src/bin/index.ts',
     output: {
-      file: 'dist/cjs/bin/wordle-cli.js',
+      file: 'dist/cjs/cli.js',
       format: 'cjs',
       banner: '#!/usr/bin/env node',
     },
-    external: ['../'],
     plugins: [typescript()],
   },
   {
-    input: 'src/shared/index.ts',
+    input: 'src/server/index.ts',
     output: {
-      file: 'dist/cjs/shared.js',
+      file: 'dist/cjs/server.js',
       format: 'cjs',
     },
-    plugins: [typescript()],
+    plugins: [nodeResolve(), commonjs(), json(), typescript()],
   },
   {
-    input: 'src/server/server.ts',
+    input: 'src/actions/index.ts',
     output: {
-      file: 'dist/cjs/server/server.js',
+      file: 'dist/cjs/actions.js',
       format: 'cjs',
     },
-    external: ['../', '../shared', '../../'],
-    plugins: [typescript()],
+    plugins: [nodeResolve(), commonjs(), json(), typescript()],
   },
   {
     input: 'src/index.ts',

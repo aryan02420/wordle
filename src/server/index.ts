@@ -6,11 +6,12 @@ import dispatchRouter from './routes/dispatch'
 import type { renderOptions } from '../shared'
 
 const PORT = process.env.port ?? 3000
+const MILLISECS_IN_A_DAY = 1000*60*60*24
 
 const app = express()
 
 app.use(express.static('public', {
-  maxAge: 1000*60*60*24,
+  maxAge: MILLISECS_IN_A_DAY,
 }))
 
 app.engine('tmpl', (filePath, options, callback) => {

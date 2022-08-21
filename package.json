@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "description": "stateless Wordle clone",
   "main": "dist/cjs/wordle.js",
-  "bin": "dist/cjs/bin/wordle-cli.js",
+  "bin": "dist/cjs/cli.js",
   "files": [
     "dist/**"
   ],
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "rollup --config rollup.config.js && chmod +x dist/cjs/bin/wordle-cli.js",
     "dev:build": "NODE_ENV=development rollup --config rollup.config.js --watch",
-    "dev:start": "NODE_ENV=development nodemon -r dotenv/config dist/cjs/server/index.js",
+    "dev:start": "NODE_ENV=development nodemon -r dotenv/config dist/cjs/server.js",
     "test": "jest"
   },
   "keywords": [
@@ -23,12 +23,16 @@
     "node": ">=16.0.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-typescript": "^8.3.0",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.4.0",
     "@types/markdown-it": "^12.2.3",
     "@types/node": "^17.0.16",
     "@types/nunjucks": "^3.2.1",
+    "dotenv": "^16.0.1",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
     "rollup": "^2.67.2",
@@ -37,7 +41,6 @@
   },
   "dependencies": {
     "chalk": "^4.1.2",
-    "dotenv": "^16.0.1",
     "immer": "^9.0.15"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
 import process from 'node:process'
 import { escape } from 'node:querystring'
-import * as wordle from '../'
+import * as wordle from '..'
 import chalk, { Chalk } from 'chalk'
 
 const colors: Record<EFeedback, Chalk> = {
@@ -96,4 +96,5 @@ function display() {
   console.log('')
   console.log(getKeyboard())
   console.log(getMessage())
+  console.log(state.sol.join(''))
 }
