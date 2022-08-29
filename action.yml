@@ -1,0 +1,20 @@
+name: 'Wreadle'
+description: 'Play Wordle in GitHub readme'
+inputs:
+  # state -> from readme
+  # move -> from event payload
+  # event type -> from ??
+  # baseurl from -> /dispatch/owner/repo/event -> env var and event type
+  # imageurl base -> hardcode
+  # readme file -> input
+  readme:
+    description: 'path/name of the readme file'
+    required: false
+    default: 'README.md'
+  tag:
+    description: 'tag to identify wordle'
+    required: false
+    default: 'wreadle'
+runs:
+  using: 'node16'
+  main: 'dist/cjs/actions.js'

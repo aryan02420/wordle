@@ -6,11 +6,15 @@ export function play(state?: IState, action: TAlphabet | 'bksp' | 'enter' | 'new
   }
 
   if (action === 'bksp') {
-    state = removeAlphabet(state)
-  } else if (action === 'enter') {
-    state = submitGuess(state)
-  } else if (action.length === 1 && action >= 'a' && action <= 'z') {
-    state = addAplhabet(state, action as TAlphabet)
+    return removeAlphabet(state)
+  }
+
+  if (action === 'enter') {
+    return submitGuess(state)
+  }
+
+  if (action.length === 1 && action >= 'a' && action <= 'z') {
+    return addAplhabet(state, action as TAlphabet)
   }
 
   return state

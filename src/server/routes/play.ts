@@ -14,12 +14,13 @@ router.get('/:state/', (req, res) => {
   const options: renderOptions = {
     renderAsHTML: true,
     context: {
+      baseUrl: `/play/${req.params.state}/`,
       id: req.params.state,
       imgBaseUrl: '/images/',
       isDev: process.env.NODE_ENV === 'development',
       message: wordle.getMessageString(state.msg),
       state,
-      url: `/play/${req.params.state}/`,
+      tag: 'wreadle',
     },
   }
   res.render('index', options)
