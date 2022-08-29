@@ -1,0 +1,17 @@
+name: 'Wreadle'
+
+on:
+  repository_dispatch:
+    types: [wordle]
+
+jobs:
+  wordle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Wreadle action step
+        uses: ./
+        id: wreadle
+        with:
+          readme: ./.github/workflows/wreadle.md
