@@ -1,34 +1,37 @@
 'use strict';
 
-var require$$0 = require('os');
-var require$$0$1 = require('fs');
-var require$$0$2 = require('path');
+var promises = require('node:fs/promises');
+var require$$1$1 = require('os');
+var require$$0$2 = require('fs');
+var require$$0$4 = require('path');
 var http$1 = require('http');
 var require$$3$1 = require('https');
 require('net');
-var require$$1$1 = require('tls');
-var require$$4$1 = require('events');
+var require$$1$2 = require('tls');
+var require$$0$3 = require('events');
 require('assert');
-var require$$6 = require('util');
+var require$$2$1 = require('util');
 var Stream = require('stream');
-var Url = require('url');
-var require$$0$3 = require('punycode');
+var Url$1 = require('url');
+var require$$0$5 = require('punycode');
 var zlib = require('zlib');
+var require$$0$6 = require('domain');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var require$$0__default = /*#__PURE__*/_interopDefaultLegacy(require$$0);
-var require$$0__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$0$1);
-var require$$0__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$0$2);
+var require$$1__default = /*#__PURE__*/_interopDefaultLegacy(require$$1$1);
+var require$$0__default = /*#__PURE__*/_interopDefaultLegacy(require$$0$2);
+var require$$0__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$0$4);
 var http__default = /*#__PURE__*/_interopDefaultLegacy(http$1);
 var require$$3__default = /*#__PURE__*/_interopDefaultLegacy(require$$3$1);
-var require$$1__default = /*#__PURE__*/_interopDefaultLegacy(require$$1$1);
-var require$$4__default = /*#__PURE__*/_interopDefaultLegacy(require$$4$1);
-var require$$6__default = /*#__PURE__*/_interopDefaultLegacy(require$$6);
+var require$$1__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$1$2);
+var require$$0__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$0$3);
+var require$$2__default = /*#__PURE__*/_interopDefaultLegacy(require$$2$1);
 var Stream__default = /*#__PURE__*/_interopDefaultLegacy(Stream);
-var Url__default = /*#__PURE__*/_interopDefaultLegacy(Url);
-var require$$0__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$0$3);
+var Url__default = /*#__PURE__*/_interopDefaultLegacy(Url$1);
+var require$$0__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$0$5);
 var zlib__default = /*#__PURE__*/_interopDefaultLegacy(zlib);
+var require$$0__default$4 = /*#__PURE__*/_interopDefaultLegacy(require$$0$6);
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -57,6 +60,10 @@ function __awaiter$1(thisArg, _arguments, P, generator) {
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
 function getAugmentedNamespace(n) {
   var f = n.default;
 	if (typeof f == "function") {
@@ -82,12 +89,12 @@ var core = {};
 
 var command = {};
 
-var utils$3 = {};
+var utils$7 = {};
 
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
-Object.defineProperty(utils$3, "__esModule", { value: true });
-utils$3.toCommandProperties = utils$3.toCommandValue = void 0;
+Object.defineProperty(utils$7, "__esModule", { value: true });
+utils$7.toCommandProperties = utils$7.toCommandValue = void 0;
 /**
  * Sanitizes an input into a string so it can be passed into issueCommand safely
  * @param input input to sanitize into a string
@@ -101,7 +108,7 @@ function toCommandValue(input) {
     }
     return JSON.stringify(input);
 }
-utils$3.toCommandValue = toCommandValue;
+utils$7.toCommandValue = toCommandValue;
 /**
  *
  * @param annotationProperties
@@ -121,7 +128,7 @@ function toCommandProperties(annotationProperties) {
         endColumn: annotationProperties.endColumn
     };
 }
-utils$3.toCommandProperties = toCommandProperties;
+utils$7.toCommandProperties = toCommandProperties;
 
 var __createBinding$4 = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -144,8 +151,8 @@ var __importStar$4 = (commonjsGlobal && commonjsGlobal.__importStar) || function
 };
 Object.defineProperty(command, "__esModule", { value: true });
 command.issue = command.issueCommand = void 0;
-const os$1 = __importStar$4(require$$0__default["default"]);
-const utils_1$2 = utils$3;
+const os$1 = __importStar$4(require$$1__default["default"]);
+const utils_1$2 = utils$7;
 /**
  * Commands
  *
@@ -240,18 +247,18 @@ Object.defineProperty(fileCommand, "__esModule", { value: true });
 fileCommand.issueCommand = void 0;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar$3(require$$0__default$1["default"]);
-const os = __importStar$3(require$$0__default["default"]);
-const utils_1$1 = utils$3;
+const fs$2 = __importStar$3(require$$0__default["default"]);
+const os = __importStar$3(require$$1__default["default"]);
+const utils_1$1 = utils$7;
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
     }
-    if (!fs.existsSync(filePath)) {
+    if (!fs$2.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
     }
-    fs.appendFileSync(filePath, `${utils_1$1.toCommandValue(message)}${os.EOL}`, {
+    fs$2.appendFileSync(filePath, `${utils_1$1.toCommandValue(message)}${os.EOL}`, {
         encoding: 'utf8'
     });
 }
@@ -290,11 +297,11 @@ function validate(uuid) {
 
 var byteToHex = [];
 
-for (var i = 0; i < 256; ++i) {
-  byteToHex.push((i + 0x100).toString(16).substr(1));
+for (var i$2 = 0; i$2 < 256; ++i$2) {
+  byteToHex.push((i$2 + 0x100).toString(16).substr(1));
 }
 
-function stringify(arr) {
+function stringify$1(arr) {
   var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
   // Note: Be careful editing this code!  It's been tuned for performance
   // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
@@ -400,10 +407,10 @@ function v1(options, buf, offset) {
     b[i + n] = node[n];
   }
 
-  return buf || stringify(b);
+  return buf || stringify$1(b);
 }
 
-function parse$1(uuid) {
+function parse$2(uuid) {
   if (!validate(uuid)) {
     throw TypeError('Invalid UUID');
   }
@@ -456,7 +463,7 @@ function v35 (name, version, hashfunc) {
     }
 
     if (typeof namespace === 'string') {
-      namespace = parse$1(namespace);
+      namespace = parse$2(namespace);
     }
 
     if (namespace.length !== 16) {
@@ -483,7 +490,7 @@ function v35 (name, version, hashfunc) {
       return buf;
     }
 
-    return stringify(bytes);
+    return stringify$1(bytes);
   } // Function#name is not settable on some platforms (#270)
 
 
@@ -731,12 +738,12 @@ function v4(options, buf, offset) {
     return buf;
   }
 
-  return stringify(rnds);
+  return stringify$1(rnds);
 }
 
 // Adapted from Chris Veness' SHA1 code at
 // http://www.movable-type.co.uk/scripts/sha1.html
-function f(s, x, y, z) {
+function f$1(s, x, y, z) {
   switch (s) {
     case 0:
       return x & y ^ ~x & z;
@@ -811,7 +818,7 @@ function sha1(bytes) {
 
     for (var _t2 = 0; _t2 < 80; ++_t2) {
       var s = Math.floor(_t2 / 20);
-      var T = ROTL(a, 5) + f(s, b, c, d) + e + K[s] + W[_t2] >>> 0;
+      var T = ROTL(a, 5) + f$1(s, b, c, d) + e + K[s] + W[_t2] >>> 0;
       e = d;
       d = c;
       c = ROTL(b, 30) >>> 0;
@@ -851,15 +858,15 @@ var esmBrowser = /*#__PURE__*/Object.freeze({
     NIL: nil,
     version: version,
     validate: validate,
-    stringify: stringify,
-    parse: parse$1
+    stringify: stringify$1,
+    parse: parse$2
 });
 
 var require$$5 = /*@__PURE__*/getAugmentedNamespace(esmBrowser);
 
 var oidcUtils = {};
 
-var lib$1 = {};
+var lib$b = {};
 
 var proxy = {};
 
@@ -927,11 +934,11 @@ var tunnel$1 = {exports: {}};
 
 var tunnel = {};
 
-var tls = require$$1__default["default"];
+var tls = require$$1__default$1["default"];
 var http = http__default["default"];
 var https = require$$3__default["default"];
-var events = require$$4__default["default"];
-var util = require$$6__default["default"];
+var events = require$$0__default$1["default"];
+var util = require$$2__default["default"];
 
 
 tunnel.httpOverHttp = httpOverHttp;
@@ -1797,7 +1804,7 @@ tunnel.debug = debug; // for test
 	exports.HttpClient = HttpClient;
 	const lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
 	
-} (lib$1));
+} (lib$b));
 
 var auth$1 = {};
 
@@ -1897,7 +1904,7 @@ function requireOidcUtils () {
 	};
 	Object.defineProperty(oidcUtils, "__esModule", { value: true });
 	oidcUtils.OidcClient = void 0;
-	const http_client_1 = lib$1;
+	const http_client_1 = lib$b;
 	const auth_1 = auth$1;
 	const core_1 = requireCore();
 	class OidcClient {
@@ -1984,8 +1991,8 @@ function requireSummary () {
 		};
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
-		const os_1 = require$$0__default["default"];
-		const fs_1 = require$$0__default$1["default"];
+		const os_1 = require$$1__default["default"];
+		const fs_1 = require$$0__default["default"];
 		const { access, appendFile, writeFile } = fs_1.promises;
 		exports.SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
 		exports.SUMMARY_DOCS_URL = 'https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary';
@@ -2364,8 +2371,8 @@ function requireCore () {
 		exports.getIDToken = exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 		const command_1 = command;
 		const file_command_1 = fileCommand;
-		const utils_1 = utils$3;
-		const os = __importStar(require$$0__default["default"]);
+		const utils_1 = utils$7;
+		const os = __importStar(require$$1__default["default"]);
 		const path = __importStar(require$$0__default$2["default"]);
 		const uuid_1 = require$$5;
 		const oidc_utils_1 = requireOidcUtils();
@@ -2680,9 +2687,9 @@ var context = {};
 
 Object.defineProperty(context, "__esModule", { value: true });
 context.Context = void 0;
-const fs_1 = require$$0__default$1["default"];
-const os_1 = require$$0__default["default"];
-class Context$2 {
+const fs_1 = require$$0__default["default"];
+const os_1 = require$$1__default["default"];
+class Context$3 {
     /**
      * Hydrate the context from the environment
      */
@@ -2729,11 +2736,11 @@ class Context$2 {
         throw new Error("context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'");
     }
 }
-context.Context = Context$2;
+context.Context = Context$3;
 
-var utils$2 = {};
+var utils$6 = {};
 
-var utils$1 = {};
+var utils$5 = {};
 
 var __createBinding$2 = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2754,9 +2761,9 @@ var __importStar$2 = (commonjsGlobal && commonjsGlobal.__importStar) || function
     __setModuleDefault$2(result, mod);
     return result;
 };
-Object.defineProperty(utils$1, "__esModule", { value: true });
-utils$1.getApiBaseUrl = utils$1.getProxyAgent = utils$1.getAuthString = void 0;
-const httpClient = __importStar$2(lib$1);
+Object.defineProperty(utils$5, "__esModule", { value: true });
+utils$5.getApiBaseUrl = utils$5.getProxyAgent = utils$5.getAuthString = void 0;
+const httpClient = __importStar$2(lib$b);
 function getAuthString(token, options) {
     if (!token && !options.auth) {
         throw new Error('Parameter token or opts.auth is required');
@@ -2766,16 +2773,16 @@ function getAuthString(token, options) {
     }
     return typeof options.auth === 'string' ? options.auth : `token ${token}`;
 }
-utils$1.getAuthString = getAuthString;
+utils$5.getAuthString = getAuthString;
 function getProxyAgent(destinationUrl) {
     const hc = new httpClient.HttpClient();
     return hc.getAgent(destinationUrl);
 }
-utils$1.getProxyAgent = getProxyAgent;
+utils$5.getProxyAgent = getProxyAgent;
 function getApiBaseUrl() {
     return process.env['GITHUB_API_URL'] || 'https://api.github.com';
 }
-utils$1.getApiBaseUrl = getApiBaseUrl;
+utils$5.getApiBaseUrl = getApiBaseUrl;
 
 function getUserAgent() {
     if (typeof navigator === "object" && "userAgent" in navigator) {
@@ -2949,14 +2956,14 @@ var Collection = beforeAfterHook.exports.Collection = Hook.Collection;
  * Released under the MIT License.
  */
 
-function isObject(o) {
+function isObject$2(o) {
   return Object.prototype.toString.call(o) === '[object Object]';
 }
 
 function isPlainObject(o) {
   var ctor,prot;
 
-  if (isObject(o) === false) return false;
+  if (isObject$2(o) === false) return false;
 
   // If has modified constructor
   ctor = o.constructor;
@@ -2964,7 +2971,7 @@ function isPlainObject(o) {
 
   // If has modified prototype
   prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
+  if (isObject$2(prot) === false) return false;
 
   // If constructor does not have an Object-specific method
   if (prot.hasOwnProperty('isPrototypeOf') === false) {
@@ -3238,7 +3245,7 @@ function expand(template, context) {
     });
 }
 
-function parse(options) {
+function parse$1(options) {
     // https://fetch.spec.whatwg.org/#methods
     let method = options.method.toUpperCase();
     // replace :varname with {varname} to make it RFC 6570 compatible
@@ -3317,7 +3324,7 @@ function parse(options) {
 }
 
 function endpointWithDefaults(defaults, route, options) {
-    return parse(merge(defaults, route, options));
+    return parse$1(merge(defaults, route, options));
 }
 
 function withDefaults$2(oldDefaults, newDefaults) {
@@ -3327,7 +3334,7 @@ function withDefaults$2(oldDefaults, newDefaults) {
         DEFAULTS,
         defaults: withDefaults$2.bind(null, DEFAULTS),
         merge: merge.bind(null, DEFAULTS),
-        parse,
+        parse: parse$1,
     });
 }
 
@@ -3356,7 +3363,7 @@ var publicApi = {};
 var URL$2 = {exports: {}};
 
 var conversions = {};
-var lib = conversions;
+var lib$a = conversions;
 
 function sign(x) {
     return x < 0 ? -1 : 1;
@@ -3543,7 +3550,7 @@ conversions["RegExp"] = function (V, opts) {
     return V;
 };
 
-var utils = {exports: {}};
+var utils$4 = {exports: {}};
 
 (function (module) {
 
@@ -3564,7 +3571,7 @@ var utils = {exports: {}};
 	module.exports.implForWrapper = function (wrapper) {
 	  return wrapper[module.exports.implSymbol];
 	};
-} (utils));
+} (utils$4));
 
 var URLImpl = {};
 
@@ -81223,7 +81230,7 @@ var require$$1 = [
 	]
 ];
 
-var punycode = require$$0__default$3["default"];
+var punycode$1 = require$$0__default$3["default"];
 var mappingTable = require$$1;
 
 var PROCESSING_OPTIONS = {
@@ -81231,7 +81238,7 @@ var PROCESSING_OPTIONS = {
   NONTRANSITIONAL: 1
 };
 
-function normalize(str) { // fix bug in v8
+function normalize$2(str) { // fix bug in v8
   return str.split('\u0000').map(function (s) { return s.normalize('NFC'); }).join('\u0000');
 }
 
@@ -81322,13 +81329,13 @@ var combiningMarksRegex = /[\u0300-\u036F\u0483-\u0489\u0591-\u05BD\u05BF\u05C1\
 
 function validateLabel(label, processing_option) {
   if (label.substr(0, 4) === "xn--") {
-    label = punycode.toUnicode(label);
+    label = punycode$1.toUnicode(label);
     PROCESSING_OPTIONS.NONTRANSITIONAL;
   }
 
   var error = false;
 
-  if (normalize(label) !== label ||
+  if (normalize$2(label) !== label ||
       (label[3] === "-" && label[4] === "-") ||
       label[0] === "-" || label[label.length - 1] === "-" ||
       label.indexOf(".") !== -1 ||
@@ -81339,8 +81346,8 @@ function validateLabel(label, processing_option) {
   var len = countSymbols(label);
   for (var i = 0; i < len; ++i) {
     var status = findStatus(label.codePointAt(i));
-    if ((processing === PROCESSING_OPTIONS.TRANSITIONAL && status[1] !== "valid") ||
-        (processing === PROCESSING_OPTIONS.NONTRANSITIONAL &&
+    if ((processing$1 === PROCESSING_OPTIONS.TRANSITIONAL && status[1] !== "valid") ||
+        (processing$1 === PROCESSING_OPTIONS.NONTRANSITIONAL &&
          status[1] !== "valid" && status[1] !== "deviation")) {
       error = true;
       break;
@@ -81353,9 +81360,9 @@ function validateLabel(label, processing_option) {
   };
 }
 
-function processing(domain_name, useSTD3, processing_option) {
+function processing$1(domain_name, useSTD3, processing_option) {
   var result = mapChars(domain_name, useSTD3, processing_option);
-  result.string = normalize(result.string);
+  result.string = normalize$2(result.string);
 
   var labels = result.string.split(".");
   for (var i = 0; i < labels.length; ++i) {
@@ -81375,11 +81382,11 @@ function processing(domain_name, useSTD3, processing_option) {
 }
 
 tr46.toASCII = function(domain_name, useSTD3, processing_option, verifyDnsLength) {
-  var result = processing(domain_name, useSTD3, processing_option);
+  var result = processing$1(domain_name, useSTD3, processing_option);
   var labels = result.string.split(".");
   labels = labels.map(function(l) {
     try {
-      return punycode.toASCII(l);
+      return punycode$1.toASCII(l);
     } catch(e) {
       result.error = true;
       return l;
@@ -81405,7 +81412,7 @@ tr46.toASCII = function(domain_name, useSTD3, processing_option, verifyDnsLength
 };
 
 tr46.toUnicode = function(domain_name, useSTD3) {
-  var result = processing(domain_name, useSTD3, PROCESSING_OPTIONS.NONTRANSITIONAL);
+  var result = processing$1(domain_name, useSTD3, PROCESSING_OPTIONS.NONTRANSITIONAL);
 
   return {
     domain: result.string,
@@ -82915,11 +82922,11 @@ URLImpl.implementation = class URLImpl {
 
 (function (module) {
 
-	const conversions = lib;
-	const utils$1 = utils.exports;
+	const conversions = lib$a;
+	const utils = utils$4.exports;
 	const Impl = URLImpl;
 
-	const impl = utils$1.implSymbol;
+	const impl = utils.implSymbol;
 
 	function URL(url) {
 	  if (!this || this[impl] || !(this instanceof URL)) {
@@ -83100,7 +83107,7 @@ URLImpl.implementation = class URLImpl {
 	    privateData.wrapper = obj;
 
 	    obj[impl] = new Impl.implementation(constructorArgs, privateData);
-	    obj[impl][utils$1.wrapperSymbol] = obj;
+	    obj[impl][utils.wrapperSymbol] = obj;
 	  },
 	  interface: URL,
 	  expose: {
@@ -87514,15 +87521,15 @@ var __importStar$1 = (commonjsGlobal && commonjsGlobal.__importStar) || function
     __setModuleDefault$1(result, mod);
     return result;
 };
-Object.defineProperty(utils$2, "__esModule", { value: true });
-utils$2.getOctokitOptions = utils$2.GitHub = utils$2.context = void 0;
-const Context$1 = __importStar$1(context);
-const Utils = __importStar$1(utils$1);
+Object.defineProperty(utils$6, "__esModule", { value: true });
+utils$6.getOctokitOptions = utils$6.GitHub = utils$6.context = void 0;
+const Context$2 = __importStar$1(context);
+const Utils = __importStar$1(utils$5);
 // octokit + plugins
 const core_1 = require$$2;
 const plugin_rest_endpoint_methods_1 = require$$3;
 const plugin_paginate_rest_1 = require$$4;
-utils$2.context = new Context$1.Context();
+utils$6.context = new Context$2.Context();
 const baseUrl = Utils.getApiBaseUrl();
 const defaults = {
     baseUrl,
@@ -87530,7 +87537,7 @@ const defaults = {
         agent: Utils.getProxyAgent(baseUrl)
     }
 };
-utils$2.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(defaults);
+utils$6.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(defaults);
 /**
  * Convience function to correctly format Octokit Options to pass into the constructor.
  *
@@ -87546,7 +87553,7 @@ function getOctokitOptions(token, options) {
     }
     return opts;
 }
-utils$2.getOctokitOptions = getOctokitOptions;
+utils$6.getOctokitOptions = getOctokitOptions;
 
 var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -87569,9 +87576,9 @@ var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (
 };
 Object.defineProperty(github, "__esModule", { value: true });
 github.getOctokit = github.context = void 0;
-const Context = __importStar(context);
-const utils_1 = utils$2;
-github.context = new Context.Context();
+const Context$1 = __importStar(context);
+const utils_1 = utils$6;
+github.context = new Context$1.Context();
 /**
  * Returns a hydrated octokit ready to use for GitHub Actions
  *
@@ -87583,28 +87590,26547 @@ function getOctokit(token, options) {
 }
 github.getOctokit = getOctokit;
 
+function n(n){for(var r=arguments.length,t=Array(r>1?r-1:0),e=1;e<r;e++)t[e-1]=arguments[e];if("production"!==process.env.NODE_ENV){var i=Y[n],o=i?"function"==typeof i?i.apply(null,t):i:"unknown error nr: "+n;throw Error("[Immer] "+o)}throw Error("[Immer] minified error nr: "+n+(t.length?" "+t.map((function(n){return "'"+n+"'"})).join(","):"")+". Find the full error at: https://bit.ly/3cXEKWf")}function r$1(n){return !!n&&!!n[Q]}function t(n){return !!n&&(function(n){if(!n||"object"!=typeof n)return !1;var r=Object.getPrototypeOf(n);if(null===r)return !0;var t=Object.hasOwnProperty.call(r,"constructor")&&r.constructor;return t===Object||"function"==typeof t&&Function.toString.call(t)===Z}(n)||Array.isArray(n)||!!n[L]||!!n.constructor[L]||s(n)||v(n))}function i$1(n,r,t){void 0===t&&(t=!1),0===o(n)?(t?Object.keys:nn)(n).forEach((function(e){t&&"symbol"==typeof e||r(e,n[e],n);})):n.forEach((function(t,e){return r(e,t,n)}));}function o(n){var r=n[Q];return r?r.i>3?r.i-4:r.i:Array.isArray(n)?1:s(n)?2:v(n)?3:0}function u(n,r){return 2===o(n)?n.has(r):Object.prototype.hasOwnProperty.call(n,r)}function a(n,r){return 2===o(n)?n.get(r):n[r]}function f(n,r,t){var e=o(n);2===e?n.set(r,t):3===e?(n.delete(r),n.add(t)):n[r]=t;}function c(n,r){return n===r?0!==n||1/n==1/r:n!=n&&r!=r}function s(n){return X&&n instanceof Map}function v(n){return q&&n instanceof Set}function p(n){return n.o||n.t}function l(n){if(Array.isArray(n))return Array.prototype.slice.call(n);var r=rn(n);delete r[Q];for(var t=nn(r),e=0;e<t.length;e++){var i=t[e],o=r[i];!1===o.writable&&(o.writable=!0,o.configurable=!0),(o.get||o.set)&&(r[i]={configurable:!0,writable:!0,enumerable:o.enumerable,value:n[i]});}return Object.create(Object.getPrototypeOf(n),r)}function d(n,e){return void 0===e&&(e=!1),y(n)||r$1(n)||!t(n)?n:(o(n)>1&&(n.set=n.add=n.clear=n.delete=h),Object.freeze(n),e&&i$1(n,(function(n,r){return d(r,!0)}),!0),n)}function h(){n(2);}function y(n){return null==n||"object"!=typeof n||Object.isFrozen(n)}function b(r){var t=tn[r];return t||n(18,r),t}function _(){return "production"===process.env.NODE_ENV||U||n(0),U}function j(n,r){r&&(b("Patches"),n.u=[],n.s=[],n.v=r);}function O(n){g(n),n.p.forEach(S),n.p=null;}function g(n){n===U&&(U=n.l);}function w(n){return U={p:[],l:U,h:n,m:!0,_:0}}function S(n){var r=n[Q];0===r.i||1===r.i?r.j():r.O=!0;}function P(r,e){e._=e.p.length;var i=e.p[0],o=void 0!==r&&r!==i;return e.h.g||b("ES5").S(e,r,o),o?(i[Q].P&&(O(e),n(4)),t(r)&&(r=M(e,r),e.l||x(e,r)),e.u&&b("Patches").M(i[Q].t,r,e.u,e.s)):r=M(e,i,[]),O(e),e.u&&e.v(e.u,e.s),r!==H?r:void 0}function M(n,r,t){if(y(r))return r;var e=r[Q];if(!e)return i$1(r,(function(i,o){return A(n,e,r,i,o,t)}),!0),r;if(e.A!==n)return r;if(!e.P)return x(n,e.t,!0),e.t;if(!e.I){e.I=!0,e.A._--;var o=4===e.i||5===e.i?e.o=l(e.k):e.o;i$1(3===e.i?new Set(o):o,(function(r,i){return A(n,e,o,r,i,t)})),x(n,o,!1),t&&n.u&&b("Patches").R(e,t,n.u,n.s);}return e.o}function A(e,i,o,a,c,s){if("production"!==process.env.NODE_ENV&&c===o&&n(5),r$1(c)){var v=M(e,c,s&&i&&3!==i.i&&!u(i.D,a)?s.concat(a):void 0);if(f(o,a,v),!r$1(v))return;e.m=!1;}if(t(c)&&!y(c)){if(!e.h.F&&e._<1)return;M(e,c),i&&i.A.l||x(e,c);}}function x(n,r,t){void 0===t&&(t=!1),n.h.F&&n.m&&d(r,t);}function z(n,r){var t=n[Q];return (t?p(t):n)[r]}function I(n,r){if(r in n)for(var t=Object.getPrototypeOf(n);t;){var e=Object.getOwnPropertyDescriptor(t,r);if(e)return e;t=Object.getPrototypeOf(t);}}function k(n){n.P||(n.P=!0,n.l&&k(n.l));}function E(n){n.o||(n.o=l(n.t));}function R(n,r,t){var e=s(r)?b("MapSet").N(r,t):v(r)?b("MapSet").T(r,t):n.g?function(n,r){var t=Array.isArray(n),e={i:t?1:0,A:r?r.A:_(),P:!1,I:!1,D:{},l:r,t:n,k:null,o:null,j:null,C:!1},i=e,o=en;t&&(i=[e],o=on);var u=Proxy.revocable(i,o),a=u.revoke,f=u.proxy;return e.k=f,e.j=a,f}(r,t):b("ES5").J(r,t);return (t?t.A:_()).p.push(e),e}function D(e){return r$1(e)||n(22,e),function n(r){if(!t(r))return r;var e,u=r[Q],c=o(r);if(u){if(!u.P&&(u.i<4||!b("ES5").K(u)))return u.t;u.I=!0,e=F(r,c),u.I=!1;}else e=F(r,c);return i$1(e,(function(r,t){u&&a(u.t,r)===t||f(e,r,n(t));})),3===c?new Set(e):e}(e)}function F(n,r){switch(r){case 2:return new Map(n);case 3:return Array.from(n)}return l(n)}var G,U,W="undefined"!=typeof Symbol&&"symbol"==typeof Symbol("x"),X="undefined"!=typeof Map,q="undefined"!=typeof Set,B="undefined"!=typeof Proxy&&void 0!==Proxy.revocable&&"undefined"!=typeof Reflect,H=W?Symbol.for("immer-nothing"):((G={})["immer-nothing"]=!0,G),L=W?Symbol.for("immer-draftable"):"__$immer_draftable",Q=W?Symbol.for("immer-state"):"__$immer_state",Y={0:"Illegal state",1:"Immer drafts cannot have computed properties",2:"This object has been frozen and should not be mutated",3:function(n){return "Cannot use a proxy that has been revoked. Did you pass an object from inside an immer function to an async process? "+n},4:"An immer producer returned a new value *and* modified its draft. Either return a new value *or* modify the draft.",5:"Immer forbids circular references",6:"The first or second argument to `produce` must be a function",7:"The third argument to `produce` must be a function or undefined",8:"First argument to `createDraft` must be a plain object, an array, or an immerable object",9:"First argument to `finishDraft` must be a draft returned by `createDraft`",10:"The given draft is already finalized",11:"Object.defineProperty() cannot be used on an Immer draft",12:"Object.setPrototypeOf() cannot be used on an Immer draft",13:"Immer only supports deleting array indices",14:"Immer only supports setting array indices and the 'length' property",15:function(n){return "Cannot apply patch, path doesn't resolve: "+n},16:'Sets cannot have "replace" patches.',17:function(n){return "Unsupported patch operation: "+n},18:function(n){return "The plugin for '"+n+"' has not been loaded into Immer. To enable the plugin, import and call `enable"+n+"()` when initializing your application."},20:"Cannot use proxies if Proxy, Proxy.revocable or Reflect are not available",21:function(n){return "produce can only be called on things that are draftable: plain objects, arrays, Map, Set or classes that are marked with '[immerable]: true'. Got '"+n+"'"},22:function(n){return "'current' expects a draft, got: "+n},23:function(n){return "'original' expects a draft, got: "+n},24:"Patching reserved attributes like __proto__, prototype and constructor is not allowed"},Z=""+Object.prototype.constructor,nn="undefined"!=typeof Reflect&&Reflect.ownKeys?Reflect.ownKeys:void 0!==Object.getOwnPropertySymbols?function(n){return Object.getOwnPropertyNames(n).concat(Object.getOwnPropertySymbols(n))}:Object.getOwnPropertyNames,rn=Object.getOwnPropertyDescriptors||function(n){var r={};return nn(n).forEach((function(t){r[t]=Object.getOwnPropertyDescriptor(n,t);})),r},tn={},en={get:function(n,r){if(r===Q)return n;var e=p(n);if(!u(e,r))return function(n,r,t){var e,i=I(r,t);return i?"value"in i?i.value:null===(e=i.get)||void 0===e?void 0:e.call(n.k):void 0}(n,e,r);var i=e[r];return n.I||!t(i)?i:i===z(n.t,r)?(E(n),n.o[r]=R(n.A.h,i,n)):i},has:function(n,r){return r in p(n)},ownKeys:function(n){return Reflect.ownKeys(p(n))},set:function(n,r,t){var e=I(p(n),r);if(null==e?void 0:e.set)return e.set.call(n.k,t),!0;if(!n.P){var i=z(p(n),r),o=null==i?void 0:i[Q];if(o&&o.t===t)return n.o[r]=t,n.D[r]=!1,!0;if(c(t,i)&&(void 0!==t||u(n.t,r)))return !0;E(n),k(n);}return n.o[r]===t&&"number"!=typeof t&&(void 0!==t||r in n.o)||(n.o[r]=t,n.D[r]=!0,!0)},deleteProperty:function(n,r){return void 0!==z(n.t,r)||r in n.t?(n.D[r]=!1,E(n),k(n)):delete n.D[r],n.o&&delete n.o[r],!0},getOwnPropertyDescriptor:function(n,r){var t=p(n),e=Reflect.getOwnPropertyDescriptor(t,r);return e?{writable:!0,configurable:1!==n.i||"length"!==r,enumerable:e.enumerable,value:t[r]}:e},defineProperty:function(){n(11);},getPrototypeOf:function(n){return Object.getPrototypeOf(n.t)},setPrototypeOf:function(){n(12);}},on={};i$1(en,(function(n,r){on[n]=function(){return arguments[0]=arguments[0][0],r.apply(this,arguments)};})),on.deleteProperty=function(r,t){return "production"!==process.env.NODE_ENV&&isNaN(parseInt(t))&&n(13),on.set.call(this,r,t,void 0)},on.set=function(r,t,e){return "production"!==process.env.NODE_ENV&&"length"!==t&&isNaN(parseInt(t))&&n(14),en.set.call(this,r[0],t,e,r[0])};var un=function(){function e(r){var e=this;this.g=B,this.F=!0,this.produce=function(r,i,o){if("function"==typeof r&&"function"!=typeof i){var u=i;i=r;var a=e;return function(n){var r=this;void 0===n&&(n=u);for(var t=arguments.length,e=Array(t>1?t-1:0),o=1;o<t;o++)e[o-1]=arguments[o];return a.produce(n,(function(n){var t;return (t=i).call.apply(t,[r,n].concat(e))}))}}var f;if("function"!=typeof i&&n(6),void 0!==o&&"function"!=typeof o&&n(7),t(r)){var c=w(e),s=R(e,r,void 0),v=!0;try{f=i(s),v=!1;}finally{v?O(c):g(c);}return "undefined"!=typeof Promise&&f instanceof Promise?f.then((function(n){return j(c,o),P(n,c)}),(function(n){throw O(c),n})):(j(c,o),P(f,c))}if(!r||"object"!=typeof r){if(void 0===(f=i(r))&&(f=r),f===H&&(f=void 0),e.F&&d(f,!0),o){var p=[],l=[];b("Patches").M(r,f,p,l),o(p,l);}return f}n(21,r);},this.produceWithPatches=function(n,r){if("function"==typeof n)return function(r){for(var t=arguments.length,i=Array(t>1?t-1:0),o=1;o<t;o++)i[o-1]=arguments[o];return e.produceWithPatches(r,(function(r){return n.apply(void 0,[r].concat(i))}))};var t,i,o=e.produce(n,r,(function(n,r){t=n,i=r;}));return "undefined"!=typeof Promise&&o instanceof Promise?o.then((function(n){return [n,t,i]})):[o,t,i]},"boolean"==typeof(null==r?void 0:r.useProxies)&&this.setUseProxies(r.useProxies),"boolean"==typeof(null==r?void 0:r.autoFreeze)&&this.setAutoFreeze(r.autoFreeze);}var i=e.prototype;return i.createDraft=function(e){t(e)||n(8),r$1(e)&&(e=D(e));var i=w(this),o=R(this,e,void 0);return o[Q].C=!0,g(i),o},i.finishDraft=function(r,t){var e=r&&r[Q];"production"!==process.env.NODE_ENV&&(e&&e.C||n(9),e.I&&n(10));var i=e.A;return j(i,t),P(void 0,i)},i.setAutoFreeze=function(n){this.F=n;},i.setUseProxies=function(r){r&&!B&&n(20),this.g=r;},i.applyPatches=function(n,t){var e;for(e=t.length-1;e>=0;e--){var i=t[e];if(0===i.path.length&&"replace"===i.op){n=i.value;break}}e>-1&&(t=t.slice(e+1));var o=b("Patches").$;return r$1(n)?o(n,t):this.produce(n,(function(n){return o(n,t)}))},e}(),an=new un,fn=an.produce;an.produceWithPatches.bind(an);an.setAutoFreeze.bind(an);an.setUseProxies.bind(an);an.applyPatches.bind(an);an.createDraft.bind(an);an.finishDraft.bind(an);
+
+const SolutionWords = ["cigar", "rebut", "sissy", "humph", "awake", "blush", "focal", "evade", "naval", "serve", "heath", "dwarf", "model", "karma", "stink", "grade", "quiet", "bench", "abate", "feign", "major", "death", "fresh", "crust", "stool", "colon", "abase", "marry", "react", "batty", "pride", "floss", "helix", "croak", "staff", "paper", "unfed", "whelp", "trawl", "outdo", "adobe", "crazy", "sower", "repay", "digit", "crate", "cluck", "spike", "mimic", "pound", "maxim", "linen", "unmet", "flesh", "booby", "forth", "first", "stand", "belly", "ivory", "seedy", "print", "yearn", "drain", "bribe", "stout", "panel", "crass", "flume", "offal", "agree", "error", "swirl", "argue", "bleed", "delta", "flick", "totem", "wooer", "front", "shrub", "parry", "biome", "lapel", "start", "greet", "goner", "golem", "lusty", "loopy", "round", "audit", "lying", "gamma", "labor", "islet", "civic", "forge", "corny", "moult", "basic", "salad", "agate", "spicy", "spray", "essay", "fjord", "spend", "kebab", "guild", "aback", "motor", "alone", "hatch", "hyper", "thumb", "dowry", "ought", "belch", "dutch", "pilot", "tweed", "comet", "jaunt", "enema", "steed", "abyss", "growl", "fling", "dozen", "boozy", "erode", "world", "gouge", "click", "briar", "great", "altar", "pulpy", "blurt", "coast", "duchy", "groin", "fixer", "group", "rogue", "badly", "smart", "pithy", "gaudy", "chill", "heron", "vodka", "finer", "surer", "radio", "rouge", "perch", "retch", "wrote", "clock", "tilde", "store", "prove", "bring", "solve", "cheat", "grime", "exult", "usher", "epoch", "triad", "break", "rhino", "viral", "conic", "masse", "sonic", "vital", "trace", "using", "peach", "champ", "baton", "brake", "pluck", "craze", "gripe", "weary", "picky", "acute", "ferry", "aside", "tapir", "troll", "unify", "rebus", "boost", "truss", "siege", "tiger", "banal", "slump", "crank", "gorge", "query", "drink", "favor", "abbey", "tangy", "panic", "solar", "shire", "proxy", "point", "robot", "prick", "wince", "crimp", "knoll", "sugar", "whack", "mount", "perky", "could", "wrung", "light", "those", "moist", "shard", "pleat", "aloft", "skill", "elder", "frame", "humor", "pause", "ulcer", "ultra", "robin", "cynic", "aroma", "caulk", "shake", "dodge", "swill", "tacit", "other", "thorn", "trove", "bloke", "vivid", "spill", "chant", "choke", "rupee", "nasty", "mourn", "ahead", "brine", "cloth", "hoard", "sweet", "month", "lapse", "watch", "today", "focus", "smelt", "tease", "cater", "movie", "saute", "allow", "renew", "their", "slosh", "purge", "chest", "depot", "epoxy", "nymph", "found", "shall", "stove", "lowly", "snout", "trope", "fewer", "shawl", "natal", "comma", "foray", "scare", "stair", "black", "squad", "royal", "chunk", "mince", "shame", "cheek", "ample", "flair", "foyer", "cargo", "oxide", "plant", "olive", "inert", "askew", "heist", "shown", "zesty", "trash", "larva", "forgo", "story", "hairy", "train", "homer", "badge", "midst", "canny", "shine", "gecko", "farce", "slung", "tipsy", "metal", "yield", "delve", "being", "scour", "glass", "gamer", "scrap", "money", "hinge", "album", "vouch", "asset", "tiara", "crept", "bayou", "atoll", "manor", "creak", "showy", "phase", "froth", "depth", "gloom", "flood", "trait", "girth", "piety", "goose", "float", "donor", "atone", "primo", "apron", "blown", "cacao", "loser", "input", "gloat", "awful", "brink", "smite", "beady", "rusty", "retro", "droll", "gawky", "hutch", "pinto", "egret", "lilac", "sever", "field", "fluff", "agape", "voice", "stead", "berth", "madam", "night", "bland", "liver", "wedge", "roomy", "wacky", "flock", "angry", "trite", "aphid", "tryst", "midge", "power", "elope", "cinch", "motto", "stomp", "upset", "bluff", "cramp", "quart", "coyly", "youth", "rhyme", "buggy", "alien", "smear", "unfit", "patty", "cling", "glean", "label", "hunky", "khaki", "poker", "gruel", "twice", "twang", "shrug", "treat", "waste", "merit", "woven", "needy", "clown", "irony", "ruder", "gauze", "chief", "onset", "prize", "fungi", "charm", "gully", "inter", "whoop", "taunt", "leery", "class", "theme", "lofty", "tibia", "booze", "alpha", "thyme", "doubt", "parer", "chute", "stick", "trice", "alike", "recap", "saint", "glory", "grate", "admit", "brisk", "soggy", "usurp", "scald", "scorn", "leave", "twine", "sting", "bough", "marsh", "sloth", "dandy", "vigor", "howdy", "enjoy", "valid", "ionic", "equal", "floor", "catch", "spade", "stein", "exist", "quirk", "denim", "grove", "spiel", "mummy", "fault", "foggy", "flout", "carry", "sneak", "libel", "waltz", "aptly", "piney", "inept", "aloud", "photo", "dream", "stale", "unite", "snarl", "baker", "there", "glyph", "pooch", "hippy", "spell", "folly", "louse", "gulch", "vault", "godly", "threw", "fleet", "grave", "inane", "shock", "crave", "spite", "valve", "skimp", "claim", "rainy", "musty", "pique", "daddy", "quasi", "arise", "aging", "valet", "opium", "avert", "stuck", "recut", "mulch", "genre", "plume", "rifle", "count", "incur", "total", "wrest", "mocha", "deter", "study", "lover", "safer", "rivet", "funny", "smoke", "mound", "undue", "sedan", "pagan", "swine", "guile", "gusty", "equip", "tough", "canoe", "chaos", "covet", "human", "udder", "lunch", "blast", "stray", "manga", "melee", "lefty", "quick", "paste", "given", "octet", "risen", "groan", "leaky", "grind", "carve", "loose", "sadly", "spilt", "apple", "slack", "honey", "final", "sheen", "eerie", "minty", "slick", "derby", "wharf", "spelt", "coach", "erupt", "singe", "price", "spawn", "fairy", "jiffy", "filmy", "stack", "chose", "sleep", "ardor", "nanny", "niece", "woozy", "handy", "grace", "ditto", "stank", "cream", "usual", "diode", "valor", "angle", "ninja", "muddy", "chase", "reply", "prone", "spoil", "heart", "shade", "diner", "arson", "onion", "sleet", "dowel", "couch", "palsy", "bowel", "smile", "evoke", "creek", "lance", "eagle", "idiot", "siren", "built", "embed", "award", "dross", "annul", "goody", "frown", "patio", "laden", "humid", "elite", "lymph", "edify", "might", "reset", "visit", "gusto", "purse", "vapor", "crock", "write", "sunny", "loath", "chaff", "slide", "queer", "venom", "stamp", "sorry", "still", "acorn", "aping", "pushy", "tamer", "hater", "mania", "awoke", "brawn", "swift", "exile", "birch", "lucky", "freer", "risky", "ghost", "plier", "lunar", "winch", "snare", "nurse", "house", "borax", "nicer", "lurch", "exalt", "about", "savvy", "toxin", "tunic", "pried", "inlay", "chump", "lanky", "cress", "eater", "elude", "cycle", "kitty", "boule", "moron", "tenet", "place", "lobby", "plush", "vigil", "index", "blink", "clung", "qualm", "croup", "clink", "juicy", "stage", "decay", "nerve", "flier", "shaft", "crook", "clean", "china", "ridge", "vowel", "gnome", "snuck", "icing", "spiny", "rigor", "snail", "flown", "rabid", "prose", "thank", "poppy", "budge", "fiber", "moldy", "dowdy", "kneel", "track", "caddy", "quell", "dumpy", "paler", "swore", "rebar", "scuba", "splat", "flyer", "horny", "mason", "doing", "ozone", "amply", "molar", "ovary", "beset", "queue", "cliff", "magic", "truce", "sport", "fritz", "edict", "twirl", "verse", "llama", "eaten", "range", "whisk", "hovel", "rehab", "macaw", "sigma", "spout", "verve", "sushi", "dying", "fetid", "brain", "buddy", "thump", "scion", "candy", "chord", "basin", "march", "crowd", "arbor", "gayly", "musky", "stain", "dally", "bless", "bravo", "stung", "title", "ruler", "kiosk", "blond", "ennui", "layer", "fluid", "tatty", "score", "cutie", "zebra", "barge", "matey", "bluer", "aider", "shook", "river", "privy", "betel", "frisk", "bongo", "begun", "azure", "weave", "genie", "sound", "glove", "braid", "scope", "wryly", "rover", "assay", "ocean", "bloom", "irate", "later", "woken", "silky", "wreck", "dwelt", "slate", "smack", "solid", "amaze", "hazel", "wrist", "jolly", "globe", "flint", "rouse", "civil", "vista", "relax", "cover", "alive", "beech", "jetty", "bliss", "vocal", "often", "dolly", "eight", "joker", "since", "event", "ensue", "shunt", "diver", "poser", "worst", "sweep", "alley", "creed", "anime", "leafy", "bosom", "dunce", "stare", "pudgy", "waive", "choir", "stood", "spoke", "outgo", "delay", "bilge", "ideal", "clasp", "seize", "hotly", "laugh", "sieve", "block", "meant", "grape", "noose", "hardy", "shied", "drawl", "daisy", "putty", "strut", "burnt", "tulip", "crick", "idyll", "vixen", "furor", "geeky", "cough", "naive", "shoal", "stork", "bathe", "aunty", "check", "prime", "brass", "outer", "furry", "razor", "elect", "evict", "imply", "demur", "quota", "haven", "cavil", "swear", "crump", "dough", "gavel", "wagon", "salon", "nudge", "harem", "pitch", "sworn", "pupil", "excel", "stony", "cabin", "unzip", "queen", "trout", "polyp", "earth", "storm", "until", "taper", "enter", "child", "adopt", "minor", "fatty", "husky", "brave", "filet", "slime", "glint", "tread", "steal", "regal", "guest", "every", "murky", "share", "spore", "hoist", "buxom", "inner", "otter", "dimly", "level", "sumac", "donut", "stilt", "arena", "sheet", "scrub", "fancy", "slimy", "pearl", "silly", "porch", "dingo", "sepia", "amble", "shady", "bread", "friar", "reign", "dairy", "quill", "cross", "brood", "tuber", "shear", "posit", "blank", "villa", "shank", "piggy", "freak", "which", "among", "fecal", "shell", "would", "algae", "large", "rabbi", "agony", "amuse", "bushy", "copse", "swoon", "knife", "pouch", "ascot", "plane", "crown", "urban", "snide", "relay", "abide", "viola", "rajah", "straw", "dilly", "crash", "amass", "third", "trick", "tutor", "woody", "blurb", "grief", "disco", "where", "sassy", "beach", "sauna", "comic", "clued", "creep", "caste", "graze", "snuff", "frock", "gonad", "drunk", "prong", "lurid", "steel", "halve", "buyer", "vinyl", "utile", "smell", "adage", "worry", "tasty", "local", "trade", "finch", "ashen", "modal", "gaunt", "clove", "enact", "adorn", "roast", "speck", "sheik", "missy", "grunt", "snoop", "party", "touch", "mafia", "emcee", "array", "south", "vapid", "jelly", "skulk", "angst", "tubal", "lower", "crest", "sweat", "cyber", "adore", "tardy", "swami", "notch", "groom", "roach", "hitch", "young", "align", "ready", "frond", "strap", "puree", "realm", "venue", "swarm", "offer", "seven", "dryer", "diary", "dryly", "drank", "acrid", "heady", "theta", "junto", "pixie", "quoth", "bonus", "shalt", "penne", "amend", "datum", "build", "piano", "shelf", "lodge", "suing", "rearm", "coral", "ramen", "worth", "psalm", "infer", "overt", "mayor", "ovoid", "glide", "usage", "poise", "randy", "chuck", "prank", "fishy", "tooth", "ether", "drove", "idler", "swath", "stint", "while", "begat", "apply", "slang", "tarot", "radar", "credo", "aware", "canon", "shift", "timer", "bylaw", "serum", "three", "steak", "iliac", "shirk", "blunt", "puppy", "penal", "joist", "bunny", "shape", "beget", "wheel", "adept", "stunt", "stole", "topaz", "chore", "fluke", "afoot", "bloat", "bully", "dense", "caper", "sneer", "boxer", "jumbo", "lunge", "space", "avail", "short", "slurp", "loyal", "flirt", "pizza", "conch", "tempo", "droop", "plate", "bible", "plunk", "afoul", "savoy", "steep", "agile", "stake", "dwell", "knave", "beard", "arose", "motif", "smash", "broil", "glare", "shove", "baggy", "mammy", "swamp", "along", "rugby", "wager", "quack", "squat", "snaky", "debit", "mange", "skate", "ninth", "joust", "tramp", "spurn", "medal", "micro", "rebel", "flank", "learn", "nadir", "maple", "comfy", "remit", "gruff", "ester", "least", "mogul", "fetch", "cause", "oaken", "aglow", "meaty", "gaffe", "shyly", "racer", "prowl", "thief", "stern", "poesy", "rocky", "tweet", "waist", "spire", "grope", "havoc", "patsy", "truly", "forty", "deity", "uncle", "swish", "giver", "preen", "bevel", "lemur", "draft", "slope", "annoy", "lingo", "bleak", "ditty", "curly", "cedar", "dirge", "grown", "horde", "drool", "shuck", "crypt", "cumin", "stock", "gravy", "locus", "wider", "breed", "quite", "chafe", "cache", "blimp", "deign", "fiend", "logic", "cheap", "elide", "rigid", "false", "renal", "pence", "rowdy", "shoot", "blaze", "envoy", "posse", "brief", "never", "abort", "mouse", "mucky", "sulky", "fiery", "media", "trunk", "yeast", "clear", "skunk", "scalp", "bitty", "cider", "koala", "duvet", "segue", "creme", "super", "grill", "after", "owner", "ember", "reach", "nobly", "empty", "speed", "gipsy", "recur", "smock", "dread", "merge", "burst", "kappa", "amity", "shaky", "hover", "carol", "snort", "synod", "faint", "haunt", "flour", "chair", "detox", "shrew", "tense", "plied", "quark", "burly", "novel", "waxen", "stoic", "jerky", "blitz", "beefy", "lyric", "hussy", "towel", "quilt", "below", "bingo", "wispy", "brash", "scone", "toast", "easel", "saucy", "value", "spice", "honor", "route", "sharp", "bawdy", "radii", "skull", "phony", "issue", "lager", "swell", "urine", "gassy", "trial", "flora", "upper", "latch", "wight", "brick", "retry", "holly", "decal", "grass", "shack", "dogma", "mover", "defer", "sober", "optic", "crier", "vying", "nomad", "flute", "hippo", "shark", "drier", "obese", "bugle", "tawny", "chalk", "feast", "ruddy", "pedal", "scarf", "cruel", "bleat", "tidal", "slush", "semen", "windy", "dusty", "sally", "igloo", "nerdy", "jewel", "shone", "whale", "hymen", "abuse", "fugue", "elbow", "crumb", "pansy", "welsh", "syrup", "terse", "suave", "gamut", "swung", "drake", "freed", "afire", "shirt", "grout", "oddly", "tithe", "plaid", "dummy", "broom", "blind", "torch", "enemy", "again", "tying", "pesky", "alter", "gazer", "noble", "ethos", "bride", "extol", "decor", "hobby", "beast", "idiom", "utter", "these", "sixth", "alarm", "erase", "elegy", "spunk", "piper", "scaly", "scold", "hefty", "chick", "sooty", "canal", "whiny", "slash", "quake", "joint", "swept", "prude", "heavy", "wield", "femme", "lasso", "maize", "shale", "screw", "spree", "smoky", "whiff", "scent", "glade", "spent", "prism", "stoke", "riper", "orbit", "cocoa", "guilt", "humus", "shush", "table", "smirk", "wrong", "noisy", "alert", "shiny", "elate", "resin", "whole", "hunch", "pixel", "polar", "hotel", "sword", "cleat", "mango", "rumba", "puffy", "filly", "billy", "leash", "clout", "dance", "ovate", "facet", "chili", "paint", "liner", "curio", "salty", "audio", "snake", "fable", "cloak", "navel", "spurt", "pesto", "balmy", "flash", "unwed", "early", "churn", "weedy", "stump", "lease", "witty", "wimpy", "spoof", "saner", "blend", "salsa", "thick", "warty", "manic", "blare", "squib", "spoon", "probe", "crepe", "knack", "force", "debut", "order", "haste", "teeth", "agent", "widen", "icily", "slice", "ingot", "clash", "juror", "blood", "abode", "throw", "unity", "pivot", "slept", "troop", "spare", "sewer", "parse", "morph", "cacti", "tacky", "spool", "demon", "moody", "annex", "begin", "fuzzy", "patch", "water", "lumpy", "admin", "omega", "limit", "tabby", "macho", "aisle", "skiff", "basis", "plank", "verge", "botch", "crawl", "lousy", "slain", "cubic", "raise", "wrack", "guide", "foist", "cameo", "under", "actor", "revue", "fraud", "harpy", "scoop", "climb", "refer", "olden", "clerk", "debar", "tally", "ethic", "cairn", "tulle", "ghoul", "hilly", "crude", "apart", "scale", "older", "plain", "sperm", "briny", "abbot", "rerun", "quest", "crisp", "bound", "befit", "drawn", "suite", "itchy", "cheer", "bagel", "guess", "broad", "axiom", "chard", "caput", "leant", "harsh", "curse", "proud", "swing", "opine", "taste", "lupus", "gumbo", "miner", "green", "chasm", "lipid", "topic", "armor", "brush", "crane", "mural", "abled", "habit", "bossy", "maker", "dusky", "dizzy", "lithe", "brook", "jazzy", "fifty", "sense", "giant", "surly", "legal", "fatal", "flunk", "began", "prune", "small", "slant", "scoff", "torus", "ninny", "covey", "viper", "taken", "moral", "vogue", "owing", "token", "entry", "booth", "voter", "chide", "elfin", "ebony", "neigh", "minim", "melon", "kneed", "decoy", "voila", "ankle", "arrow", "mushy", "tribe", "cease", "eager", "birth", "graph", "odder", "terra", "weird", "tried", "clack", "color", "rough", "weigh", "uncut", "ladle", "strip", "craft", "minus", "dicey", "titan", "lucid", "vicar", "dress", "ditch", "gypsy", "pasta", "taffy", "flame", "swoop", "aloof", "sight", "broke", "teary", "chart", "sixty", "wordy", "sheer", "leper", "nosey", "bulge", "savor", "clamp", "funky", "foamy", "toxic", "brand", "plumb", "dingy", "butte", "drill", "tripe", "bicep", "tenor", "krill", "worse", "drama", "hyena", "think", "ratio", "cobra", "basil", "scrum", "bused", "phone", "court", "camel", "proof", "heard", "angel", "petal", "pouty", "throb", "maybe", "fetal", "sprig", "spine", "shout", "cadet", "macro", "dodgy", "satyr", "rarer", "binge", "trend", "nutty", "leapt", "amiss", "split", "myrrh", "width", "sonar", "tower", "baron", "fever", "waver", "spark", "belie", "sloop", "expel", "smote", "baler", "above", "north", "wafer", "scant", "frill", "awash", "snack", "scowl", "frail", "drift", "limbo", "fence", "motel", "ounce", "wreak", "revel", "talon", "prior", "knelt", "cello", "flake", "debug", "anode", "crime", "salve", "scout", "imbue", "pinky", "stave", "vague", "chock", "fight", "video", "stone", "teach", "cleft", "frost", "prawn", "booty", "twist", "apnea", "stiff", "plaza", "ledge", "tweak", "board", "grant", "medic", "bacon", "cable", "brawl", "slunk", "raspy", "forum", "drone", "women", "mucus", "boast", "toddy", "coven", "tumor", "truer", "wrath", "stall", "steam", "axial", "purer", "daily", "trail", "niche", "mealy", "juice", "nylon", "plump", "merry", "flail", "papal", "wheat", "berry", "cower", "erect", "brute", "leggy", "snipe", "sinew", "skier", "penny", "jumpy", "rally", "umbra", "scary", "modem", "gross", "avian", "greed", "satin", "tonic", "parka", "sniff", "livid", "stark", "trump", "giddy", "reuse", "taboo", "avoid", "quote", "devil", "liken", "gloss", "gayer", "beret", "noise", "gland", "dealt", "sling", "rumor", "opera", "thigh", "tonga", "flare", "wound", "white", "bulky", "etude", "horse", "circa", "paddy", "inbox", "fizzy", "grain", "exert", "surge", "gleam", "belle", "salvo", "crush", "fruit", "sappy", "taker", "tract", "ovine", "spiky", "frank", "reedy", "filth", "spasm", "heave", "mambo", "right", "clank", "trust", "lumen", "borne", "spook", "sauce", "amber", "lathe", "carat", "corer", "dirty", "slyly", "affix", "alloy", "taint", "sheep", "kinky", "wooly", "mauve", "flung", "yacht", "fried", "quail", "brunt", "grimy", "curvy", "cagey", "rinse", "deuce", "state", "grasp", "milky", "bison", "graft", "sandy", "baste", "flask", "hedge", "girly", "swash", "boney", "coupe", "endow", "abhor", "welch", "blade", "tight", "geese", "miser", "mirth", "cloud", "cabal", "leech", "close", "tenth", "pecan", "droit", "grail", "clone", "guise", "ralph", "tango", "biddy", "smith", "mower", "payee", "serif", "drape", "fifth", "spank", "glaze", "allot", "truck", "kayak", "virus", "testy", "tepee", "fully", "zonal", "metro", "curry", "grand", "banjo", "axion", "bezel", "occur", "chain", "nasal", "gooey", "filer", "brace", "allay", "pubic", "raven", "plead", "gnash", "flaky", "munch", "dully", "eking", "thing", "slink", "hurry", "theft", "shorn", "pygmy", "ranch", "wring", "lemon", "shore", "mamma", "froze", "newer", "style", "moose", "antic", "drown", "vegan", "chess", "guppy", "union", "lever", "lorry", "image", "cabby", "druid", "exact", "truth", "dopey", "spear", "cried", "chime", "crony", "stunk", "timid", "batch", "gauge", "rotor", "crack", "curve", "latte", "witch", "bunch", "repel", "anvil", "soapy", "meter", "broth", "madly", "dried", "scene", "known", "magma", "roost", "woman", "thong", "punch", "pasty", "downy", "knead", "whirl", "rapid", "clang", "anger", "drive", "goofy", "email", "music", "stuff", "bleep", "rider", "mecca", "folio", "setup", "verso", "quash", "fauna", "gummy", "happy", "newly", "fussy", "relic", "guava", "ratty", "fudge", "femur", "chirp", "forte", "alibi", "whine", "petty", "golly", "plait", "fleck", "felon", "gourd", "brown", "thrum", "ficus", "stash", "decry", "wiser", "junta", "visor", "daunt", "scree", "impel", "await", "press", "whose", "turbo", "stoop", "speak", "mangy", "eying", "inlet", "crone", "pulse", "mossy", "staid", "hence", "pinch", "teddy", "sully", "snore", "ripen", "snowy", "attic", "going", "leach", "mouth", "hound", "clump", "tonal", "bigot", "peril", "piece", "blame", "haute", "spied", "undid", "intro", "basal", "rodeo", "guard", "steer", "loamy", "scamp", "scram", "manly", "hello", "vaunt", "organ", "feral", "knock", "extra", "condo", "adapt", "willy", "polka", "rayon", "skirt", "faith", "torso", "match", "mercy", "tepid", "sleek", "riser", "twixt", "peace", "flush", "catty", "login", "eject", "roger", "rival", "untie", "refit", "aorta", "adult", "judge", "rower", "artsy", "rural", "shave", "bobby", "eclat", "fella", "gaily", "harry", "hasty", "hydro", "liege", "octal", "ombre", "payer", "sooth", "unset", "unlit", "vomit", "fanny", "fetus", "butch", "stalk", "flack", "widow", "augur"];
+const ValidWords = ["aahed", "aalii", "aargh", "aarti", "abaca", "abaci", "abacs", "abaft", "abaka", "abamp", "aband", "abash", "abask", "abaya", "abbas", "abbed", "abbes", "abcee", "abeam", "abear", "abele", "abers", "abets", "abies", "abler", "ables", "ablet", "ablow", "abmho", "abohm", "aboil", "aboma", "aboon", "abord", "abore", "abram", "abray", "abrim", "abrin", "abris", "absey", "absit", "abuna", "abune", "abuts", "abuzz", "abyes", "abysm", "acais", "acari", "accas", "accoy", "acerb", "acers", "aceta", "achar", "ached", "aches", "achoo", "acids", "acidy", "acing", "acini", "ackee", "acker", "acmes", "acmic", "acned", "acnes", "acock", "acold", "acred", "acres", "acros", "acted", "actin", "acton", "acyls", "adaws", "adays", "adbot", "addax", "added", "adder", "addio", "addle", "adeem", "adhan", "adieu", "adios", "adits", "adman", "admen", "admix", "adobo", "adown", "adoze", "adrad", "adred", "adsum", "aduki", "adunc", "adust", "advew", "adyta", "adzed", "adzes", "aecia", "aedes", "aegis", "aeons", "aerie", "aeros", "aesir", "afald", "afara", "afars", "afear", "aflaj", "afore", "afrit", "afros", "agama", "agami", "agars", "agast", "agave", "agaze", "agene", "agers", "agger", "aggie", "aggri", "aggro", "aggry", "aghas", "agila", "agios", "agism", "agist", "agita", "aglee", "aglet", "agley", "agloo", "aglus", "agmas", "agoge", "agone", "agons", "agood", "agora", "agria", "agrin", "agros", "agued", "agues", "aguna", "aguti", "aheap", "ahent", "ahigh", "ahind", "ahing", "ahint", "ahold", "ahull", "ahuru", "aidas", "aided", "aides", "aidoi", "aidos", "aiery", "aigas", "aight", "ailed", "aimed", "aimer", "ainee", "ainga", "aioli", "aired", "airer", "airns", "airth", "airts", "aitch", "aitus", "aiver", "aiyee", "aizle", "ajies", "ajiva", "ajuga", "ajwan", "akees", "akela", "akene", "aking", "akita", "akkas", "alaap", "alack", "alamo", "aland", "alane", "alang", "alans", "alant", "alapa", "alaps", "alary", "alate", "alays", "albas", "albee", "alcid", "alcos", "aldea", "alder", "aldol", "aleck", "alecs", "alefs", "aleft", "aleph", "alews", "aleye", "alfas", "algal", "algas", "algid", "algin", "algor", "algum", "alias", "alifs", "aline", "alist", "aliya", "alkie", "alkos", "alkyd", "alkyl", "allee", "allel", "allis", "allod", "allyl", "almah", "almas", "almeh", "almes", "almud", "almug", "alods", "aloed", "aloes", "aloha", "aloin", "aloos", "alowe", "altho", "altos", "alula", "alums", "alure", "alvar", "alway", "amahs", "amain", "amate", "amaut", "amban", "ambit", "ambos", "ambry", "ameba", "ameer", "amene", "amens", "ament", "amias", "amice", "amici", "amide", "amido", "amids", "amies", "amiga", "amigo", "amine", "amino", "amins", "amirs", "amlas", "amman", "ammon", "ammos", "amnia", "amnic", "amnio", "amoks", "amole", "amort", "amour", "amove", "amowt", "amped", "ampul", "amrit", "amuck", "amyls", "anana", "anata", "ancho", "ancle", "ancon", "andro", "anear", "anele", "anent", "angas", "anglo", "anigh", "anile", "anils", "anima", "animi", "anion", "anise", "anker", "ankhs", "ankus", "anlas", "annal", "annas", "annat", "anoas", "anole", "anomy", "ansae", "antae", "antar", "antas", "anted", "antes", "antis", "antra", "antre", "antsy", "anura", "anyon", "apace", "apage", "apaid", "apayd", "apays", "apeak", "apeek", "apers", "apert", "apery", "apgar", "aphis", "apian", "apiol", "apish", "apism", "apode", "apods", "apoop", "aport", "appal", "appay", "appel", "appro", "appui", "appuy", "apres", "apses", "apsis", "apsos", "apted", "apter", "aquae", "aquas", "araba", "araks", "arame", "arars", "arbas", "arced", "archi", "arcos", "arcus", "ardeb", "ardri", "aread", "areae", "areal", "arear", "areas", "areca", "aredd", "arede", "arefy", "areic", "arene", "arepa", "arere", "arete", "arets", "arett", "argal", "argan", "argil", "argle", "argol", "argon", "argot", "argus", "arhat", "arias", "ariel", "ariki", "arils", "ariot", "arish", "arked", "arled", "arles", "armed", "armer", "armet", "armil", "arnas", "arnut", "aroba", "aroha", "aroid", "arpas", "arpen", "arrah", "arras", "arret", "arris", "arroz", "arsed", "arses", "arsey", "arsis", "artal", "artel", "artic", "artis", "aruhe", "arums", "arval", "arvee", "arvos", "aryls", "asana", "ascon", "ascus", "asdic", "ashed", "ashes", "ashet", "asked", "asker", "askoi", "askos", "aspen", "asper", "aspic", "aspie", "aspis", "aspro", "assai", "assam", "asses", "assez", "assot", "aster", "astir", "astun", "asura", "asway", "aswim", "asyla", "ataps", "ataxy", "atigi", "atilt", "atimy", "atlas", "atman", "atmas", "atmos", "atocs", "atoke", "atoks", "atoms", "atomy", "atony", "atopy", "atria", "atrip", "attap", "attar", "atuas", "audad", "auger", "aught", "aulas", "aulic", "auloi", "aulos", "aumil", "aunes", "aunts", "aurae", "aural", "aurar", "auras", "aurei", "aures", "auric", "auris", "aurum", "autos", "auxin", "avale", "avant", "avast", "avels", "avens", "avers", "avgas", "avine", "avion", "avise", "aviso", "avize", "avows", "avyze", "awarn", "awato", "awave", "aways", "awdls", "aweel", "aweto", "awing", "awmry", "awned", "awner", "awols", "awork", "axels", "axile", "axils", "axing", "axite", "axled", "axles", "axman", "axmen", "axoid", "axone", "axons", "ayahs", "ayaya", "ayelp", "aygre", "ayins", "ayont", "ayres", "ayrie", "azans", "azide", "azido", "azine", "azlon", "azoic", "azole", "azons", "azote", "azoth", "azuki", "azurn", "azury", "azygy", "azyme", "azyms", "baaed", "baals", "babas", "babel", "babes", "babka", "baboo", "babul", "babus", "bacca", "bacco", "baccy", "bacha", "bachs", "backs", "baddy", "baels", "baffs", "baffy", "bafts", "baghs", "bagie", "bahts", "bahus", "bahut", "bails", "bairn", "baisa", "baith", "baits", "baiza", "baize", "bajan", "bajra", "bajri", "bajus", "baked", "baken", "bakes", "bakra", "balas", "balds", "baldy", "baled", "bales", "balks", "balky", "balls", "bally", "balms", "baloo", "balsa", "balti", "balun", "balus", "bambi", "banak", "banco", "bancs", "banda", "bandh", "bands", "bandy", "baned", "banes", "bangs", "bania", "banks", "banns", "bants", "bantu", "banty", "banya", "bapus", "barbe", "barbs", "barby", "barca", "barde", "bardo", "bards", "bardy", "bared", "barer", "bares", "barfi", "barfs", "baric", "barks", "barky", "barms", "barmy", "barns", "barny", "barps", "barra", "barre", "barro", "barry", "barye", "basan", "based", "basen", "baser", "bases", "basho", "basij", "basks", "bason", "basse", "bassi", "basso", "bassy", "basta", "basti", "basto", "basts", "bated", "bates", "baths", "batik", "batta", "batts", "battu", "bauds", "bauks", "baulk", "baurs", "bavin", "bawds", "bawks", "bawls", "bawns", "bawrs", "bawty", "bayed", "bayer", "bayes", "bayle", "bayts", "bazar", "bazoo", "beads", "beaks", "beaky", "beals", "beams", "beamy", "beano", "beans", "beany", "beare", "bears", "beath", "beats", "beaty", "beaus", "beaut", "beaux", "bebop", "becap", "becke", "becks", "bedad", "bedel", "bedes", "bedew", "bedim", "bedye", "beedi", "beefs", "beeps", "beers", "beery", "beets", "befog", "begad", "begar", "begem", "begot", "begum", "beige", "beigy", "beins", "bekah", "belah", "belar", "belay", "belee", "belga", "bells", "belon", "belts", "bemad", "bemas", "bemix", "bemud", "bends", "bendy", "benes", "benet", "benga", "benis", "benne", "benni", "benny", "bento", "bents", "benty", "bepat", "beray", "beres", "bergs", "berko", "berks", "berme", "berms", "berob", "beryl", "besat", "besaw", "besee", "beses", "besit", "besom", "besot", "besti", "bests", "betas", "beted", "betes", "beths", "betid", "beton", "betta", "betty", "bever", "bevor", "bevue", "bevvy", "bewet", "bewig", "bezes", "bezil", "bezzy", "bhais", "bhaji", "bhang", "bhats", "bhels", "bhoot", "bhuna", "bhuts", "biach", "biali", "bialy", "bibbs", "bibes", "biccy", "bices", "bided", "bider", "bides", "bidet", "bidis", "bidon", "bield", "biers", "biffo", "biffs", "biffy", "bifid", "bigae", "biggs", "biggy", "bigha", "bight", "bigly", "bigos", "bijou", "biked", "biker", "bikes", "bikie", "bilbo", "bilby", "biled", "biles", "bilgy", "bilks", "bills", "bimah", "bimas", "bimbo", "binal", "bindi", "binds", "biner", "bines", "bings", "bingy", "binit", "binks", "bints", "biogs", "biont", "biota", "biped", "bipod", "birds", "birks", "birle", "birls", "biros", "birrs", "birse", "birsy", "bises", "bisks", "bisom", "bitch", "biter", "bites", "bitos", "bitou", "bitsy", "bitte", "bitts", "bivia", "bivvy", "bizes", "bizzo", "bizzy", "blabs", "blads", "blady", "blaer", "blaes", "blaff", "blags", "blahs", "blain", "blams", "blart", "blase", "blash", "blate", "blats", "blatt", "blaud", "blawn", "blaws", "blays", "blear", "blebs", "blech", "blees", "blent", "blert", "blest", "blets", "bleys", "blimy", "bling", "blini", "blins", "bliny", "blips", "blist", "blite", "blits", "blive", "blobs", "blocs", "blogs", "blook", "bloop", "blore", "blots", "blows", "blowy", "blubs", "blude", "bluds", "bludy", "blued", "blues", "bluet", "bluey", "bluid", "blume", "blunk", "blurs", "blype", "boabs", "boaks", "boars", "boart", "boats", "bobac", "bobak", "bobas", "bobol", "bobos", "bocca", "bocce", "bocci", "boche", "bocks", "boded", "bodes", "bodge", "bodhi", "bodle", "boeps", "boets", "boeuf", "boffo", "boffs", "bogan", "bogey", "boggy", "bogie", "bogle", "bogue", "bogus", "bohea", "bohos", "boils", "boing", "boink", "boite", "boked", "bokeh", "bokes", "bokos", "bolar", "bolas", "bolds", "boles", "bolix", "bolls", "bolos", "bolts", "bolus", "bomas", "bombe", "bombo", "bombs", "bonce", "bonds", "boned", "boner", "bones", "bongs", "bonie", "bonks", "bonne", "bonny", "bonza", "bonze", "booai", "booay", "boobs", "boody", "booed", "boofy", "boogy", "boohs", "books", "booky", "bools", "booms", "boomy", "boong", "boons", "boord", "boors", "boose", "boots", "boppy", "borak", "boral", "boras", "borde", "bords", "bored", "boree", "borel", "borer", "bores", "borgo", "boric", "borks", "borms", "borna", "boron", "borts", "borty", "bortz", "bosie", "bosks", "bosky", "boson", "bosun", "botas", "botel", "botes", "bothy", "botte", "botts", "botty", "bouge", "bouks", "boult", "bouns", "bourd", "bourg", "bourn", "bouse", "bousy", "bouts", "bovid", "bowat", "bowed", "bower", "bowes", "bowet", "bowie", "bowls", "bowne", "bowrs", "bowse", "boxed", "boxen", "boxes", "boxla", "boxty", "boyar", "boyau", "boyed", "boyfs", "boygs", "boyla", "boyos", "boysy", "bozos", "braai", "brach", "brack", "bract", "brads", "braes", "brags", "brail", "braks", "braky", "brame", "brane", "brank", "brans", "brant", "brast", "brats", "brava", "bravi", "braws", "braxy", "brays", "braza", "braze", "bream", "brede", "breds", "breem", "breer", "brees", "breid", "breis", "breme", "brens", "brent", "brere", "brers", "breve", "brews", "breys", "brier", "bries", "brigs", "briki", "briks", "brill", "brims", "brins", "brios", "brise", "briss", "brith", "brits", "britt", "brize", "broch", "brock", "brods", "brogh", "brogs", "brome", "bromo", "bronc", "brond", "brool", "broos", "brose", "brosy", "brows", "brugh", "bruin", "bruit", "brule", "brume", "brung", "brusk", "brust", "bruts", "buats", "buaze", "bubal", "bubas", "bubba", "bubbe", "bubby", "bubus", "buchu", "bucko", "bucks", "bucku", "budas", "budis", "budos", "buffa", "buffe", "buffi", "buffo", "buffs", "buffy", "bufos", "bufty", "buhls", "buhrs", "buiks", "buist", "bukes", "bulbs", "bulgy", "bulks", "bulla", "bulls", "bulse", "bumbo", "bumfs", "bumph", "bumps", "bumpy", "bunas", "bunce", "bunco", "bunde", "bundh", "bunds", "bundt", "bundu", "bundy", "bungs", "bungy", "bunia", "bunje", "bunjy", "bunko", "bunks", "bunns", "bunts", "bunty", "bunya", "buoys", "buppy", "buran", "buras", "burbs", "burds", "buret", "burfi", "burgh", "burgs", "burin", "burka", "burke", "burks", "burls", "burns", "buroo", "burps", "burqa", "burro", "burrs", "burry", "bursa", "burse", "busby", "buses", "busks", "busky", "bussu", "busti", "busts", "busty", "buteo", "butes", "butle", "butoh", "butts", "butty", "butut", "butyl", "buzzy", "bwana", "bwazi", "byded", "bydes", "byked", "bykes", "byres", "byrls", "byssi", "bytes", "byway", "caaed", "cabas", "caber", "cabob", "caboc", "cabre", "cacas", "cacks", "cacky", "cadee", "cades", "cadge", "cadgy", "cadie", "cadis", "cadre", "caeca", "caese", "cafes", "caffs", "caged", "cager", "cages", "cagot", "cahow", "caids", "cains", "caird", "cajon", "cajun", "caked", "cakes", "cakey", "calfs", "calid", "calif", "calix", "calks", "calla", "calls", "calms", "calmy", "calos", "calpa", "calps", "calve", "calyx", "caman", "camas", "cames", "camis", "camos", "campi", "campo", "camps", "campy", "camus", "caned", "caneh", "caner", "canes", "cangs", "canid", "canna", "canns", "canso", "canst", "canto", "cants", "canty", "capas", "caped", "capes", "capex", "caphs", "capiz", "caple", "capon", "capos", "capot", "capri", "capul", "carap", "carbo", "carbs", "carby", "cardi", "cards", "cardy", "cared", "carer", "cares", "caret", "carex", "carks", "carle", "carls", "carns", "carny", "carob", "carom", "caron", "carpi", "carps", "carrs", "carse", "carta", "carte", "carts", "carvy", "casas", "casco", "cased", "cases", "casks", "casky", "casts", "casus", "cates", "cauda", "cauks", "cauld", "cauls", "caums", "caups", "cauri", "causa", "cavas", "caved", "cavel", "caver", "caves", "cavie", "cawed", "cawks", "caxon", "ceaze", "cebid", "cecal", "cecum", "ceded", "ceder", "cedes", "cedis", "ceiba", "ceili", "ceils", "celeb", "cella", "celli", "cells", "celom", "celts", "cense", "cento", "cents", "centu", "ceorl", "cepes", "cerci", "cered", "ceres", "cerge", "ceria", "ceric", "cerne", "ceroc", "ceros", "certs", "certy", "cesse", "cesta", "cesti", "cetes", "cetyl", "cezve", "chace", "chack", "chaco", "chado", "chads", "chaft", "chais", "chals", "chams", "chana", "chang", "chank", "chape", "chaps", "chapt", "chara", "chare", "chark", "charr", "chars", "chary", "chats", "chave", "chavs", "chawk", "chaws", "chaya", "chays", "cheep", "chefs", "cheka", "chela", "chelp", "chemo", "chems", "chere", "chert", "cheth", "chevy", "chews", "chewy", "chiao", "chias", "chibs", "chica", "chich", "chico", "chics", "chiel", "chiks", "chile", "chimb", "chimo", "chimp", "chine", "ching", "chink", "chino", "chins", "chips", "chirk", "chirl", "chirm", "chiro", "chirr", "chirt", "chiru", "chits", "chive", "chivs", "chivy", "chizz", "choco", "chocs", "chode", "chogs", "choil", "choko", "choky", "chola", "choli", "cholo", "chomp", "chons", "choof", "chook", "choom", "choon", "chops", "chota", "chott", "chout", "choux", "chowk", "chows", "chubs", "chufa", "chuff", "chugs", "chums", "churl", "churr", "chuse", "chuts", "chyle", "chyme", "chynd", "cibol", "cided", "cides", "ciels", "ciggy", "cilia", "cills", "cimar", "cimex", "cinct", "cines", "cinqs", "cions", "cippi", "circs", "cires", "cirls", "cirri", "cisco", "cissy", "cists", "cital", "cited", "citer", "cites", "cives", "civet", "civie", "civvy", "clach", "clade", "clads", "claes", "clags", "clame", "clams", "clans", "claps", "clapt", "claro", "clart", "clary", "clast", "clats", "claut", "clave", "clavi", "claws", "clays", "cleck", "cleek", "cleep", "clefs", "clegs", "cleik", "clems", "clepe", "clept", "cleve", "clews", "clied", "clies", "clift", "clime", "cline", "clint", "clipe", "clips", "clipt", "clits", "cloam", "clods", "cloff", "clogs", "cloke", "clomb", "clomp", "clonk", "clons", "cloop", "cloot", "clops", "clote", "clots", "clour", "clous", "clows", "cloye", "cloys", "cloze", "clubs", "clues", "cluey", "clunk", "clype", "cnida", "coact", "coady", "coala", "coals", "coaly", "coapt", "coarb", "coate", "coati", "coats", "cobbs", "cobby", "cobia", "coble", "cobza", "cocas", "cocci", "cocco", "cocks", "cocky", "cocos", "codas", "codec", "coded", "coden", "coder", "codes", "codex", "codon", "coeds", "coffs", "cogie", "cogon", "cogue", "cohab", "cohen", "cohoe", "cohog", "cohos", "coifs", "coign", "coils", "coins", "coirs", "coits", "coked", "cokes", "colas", "colby", "colds", "coled", "coles", "coley", "colic", "colin", "colls", "colly", "colog", "colts", "colza", "comae", "comal", "comas", "combe", "combi", "combo", "combs", "comby", "comer", "comes", "comix", "commo", "comms", "commy", "compo", "comps", "compt", "comte", "comus", "coned", "cones", "coney", "confs", "conga", "conge", "congo", "conia", "conin", "conks", "conky", "conne", "conns", "conte", "conto", "conus", "convo", "cooch", "cooed", "cooee", "cooer", "cooey", "coofs", "cooks", "cooky", "cools", "cooly", "coomb", "cooms", "coomy", "coons", "coops", "coopt", "coost", "coots", "cooze", "copal", "copay", "coped", "copen", "coper", "copes", "coppy", "copra", "copsy", "coqui", "coram", "corbe", "corby", "cords", "cored", "cores", "corey", "corgi", "coria", "corks", "corky", "corms", "corni", "corno", "corns", "cornu", "corps", "corse", "corso", "cosec", "cosed", "coses", "coset", "cosey", "cosie", "costa", "coste", "costs", "cotan", "coted", "cotes", "coths", "cotta", "cotts", "coude", "coups", "courb", "courd", "coure", "cours", "couta", "couth", "coved", "coves", "covin", "cowal", "cowan", "cowed", "cowks", "cowls", "cowps", "cowry", "coxae", "coxal", "coxed", "coxes", "coxib", "coyau", "coyed", "coyer", "coypu", "cozed", "cozen", "cozes", "cozey", "cozie", "craal", "crabs", "crags", "craic", "craig", "crake", "crame", "crams", "crans", "crape", "craps", "crapy", "crare", "craws", "crays", "creds", "creel", "crees", "crems", "crena", "creps", "crepy", "crewe", "crews", "crias", "cribs", "cries", "crims", "crine", "crios", "cripe", "crips", "crise", "crith", "crits", "croci", "crocs", "croft", "crogs", "cromb", "crome", "cronk", "crons", "crool", "croon", "crops", "crore", "crost", "crout", "crows", "croze", "cruck", "crudo", "cruds", "crudy", "crues", "cruet", "cruft", "crunk", "cruor", "crura", "cruse", "crusy", "cruve", "crwth", "cryer", "ctene", "cubby", "cubeb", "cubed", "cuber", "cubes", "cubit", "cuddy", "cuffo", "cuffs", "cuifs", "cuing", "cuish", "cuits", "cukes", "culch", "culet", "culex", "culls", "cully", "culms", "culpa", "culti", "cults", "culty", "cumec", "cundy", "cunei", "cunit", "cunts", "cupel", "cupid", "cuppa", "cuppy", "curat", "curbs", "curch", "curds", "curdy", "cured", "curer", "cures", "curet", "curfs", "curia", "curie", "curli", "curls", "curns", "curny", "currs", "cursi", "curst", "cusec", "cushy", "cusks", "cusps", "cuspy", "cusso", "cusum", "cutch", "cuter", "cutes", "cutey", "cutin", "cutis", "cutto", "cutty", "cutup", "cuvee", "cuzes", "cwtch", "cyano", "cyans", "cycad", "cycas", "cyclo", "cyder", "cylix", "cymae", "cymar", "cymas", "cymes", "cymol", "cysts", "cytes", "cyton", "czars", "daals", "dabba", "daces", "dacha", "dacks", "dadah", "dadas", "dados", "daffs", "daffy", "dagga", "daggy", "dagos", "dahls", "daiko", "daine", "daint", "daker", "daled", "dales", "dalis", "dalle", "dalts", "daman", "damar", "dames", "damme", "damns", "damps", "dampy", "dancy", "dangs", "danio", "danks", "danny", "dants", "daraf", "darbs", "darcy", "dared", "darer", "dares", "darga", "dargs", "daric", "daris", "darks", "darky", "darns", "darre", "darts", "darzi", "dashi", "dashy", "datal", "dated", "dater", "dates", "datos", "datto", "daube", "daubs", "dauby", "dauds", "dault", "daurs", "dauts", "daven", "davit", "dawah", "dawds", "dawed", "dawen", "dawks", "dawns", "dawts", "dayan", "daych", "daynt", "dazed", "dazer", "dazes", "deads", "deair", "deals", "deans", "deare", "dearn", "dears", "deary", "deash", "deave", "deaws", "deawy", "debag", "debby", "debel", "debes", "debts", "debud", "debur", "debus", "debye", "decad", "decaf", "decan", "decko", "decks", "decos", "dedal", "deeds", "deedy", "deely", "deems", "deens", "deeps", "deere", "deers", "deets", "deeve", "deevs", "defat", "deffo", "defis", "defog", "degas", "degum", "degus", "deice", "deids", "deify", "deils", "deism", "deist", "deked", "dekes", "dekko", "deled", "deles", "delfs", "delft", "delis", "dells", "delly", "delos", "delph", "delts", "deman", "demes", "demic", "demit", "demob", "demoi", "demos", "dempt", "denar", "denay", "dench", "denes", "denet", "denis", "dents", "deoxy", "derat", "deray", "dered", "deres", "derig", "derma", "derms", "derns", "derny", "deros", "derro", "derry", "derth", "dervs", "desex", "deshi", "desis", "desks", "desse", "devas", "devel", "devis", "devon", "devos", "devot", "dewan", "dewar", "dewax", "dewed", "dexes", "dexie", "dhaba", "dhaks", "dhals", "dhikr", "dhobi", "dhole", "dholl", "dhols", "dhoti", "dhows", "dhuti", "diact", "dials", "diane", "diazo", "dibbs", "diced", "dicer", "dices", "dicht", "dicks", "dicky", "dicot", "dicta", "dicts", "dicty", "diddy", "didie", "didos", "didst", "diebs", "diels", "diene", "diets", "diffs", "dight", "dikas", "diked", "diker", "dikes", "dikey", "dildo", "dilli", "dills", "dimbo", "dimer", "dimes", "dimps", "dinar", "dined", "dines", "dinge", "dings", "dinic", "dinks", "dinky", "dinna", "dinos", "dints", "diols", "diota", "dippy", "dipso", "diram", "direr", "dirke", "dirks", "dirls", "dirts", "disas", "disci", "discs", "dishy", "disks", "disme", "dital", "ditas", "dited", "dites", "ditsy", "ditts", "ditzy", "divan", "divas", "dived", "dives", "divis", "divna", "divos", "divot", "divvy", "diwan", "dixie", "dixit", "diyas", "dizen", "djinn", "djins", "doabs", "doats", "dobby", "dobes", "dobie", "dobla", "dobra", "dobro", "docht", "docks", "docos", "docus", "doddy", "dodos", "doeks", "doers", "doest", "doeth", "doffs", "dogan", "doges", "dogey", "doggo", "doggy", "dogie", "dohyo", "doilt", "doily", "doits", "dojos", "dolce", "dolci", "doled", "doles", "dolia", "dolls", "dolma", "dolor", "dolos", "dolts", "domal", "domed", "domes", "domic", "donah", "donas", "donee", "doner", "donga", "dongs", "donko", "donna", "donne", "donny", "donsy", "doobs", "dooce", "doody", "dooks", "doole", "dools", "dooly", "dooms", "doomy", "doona", "doorn", "doors", "doozy", "dopas", "doped", "doper", "dopes", "dorad", "dorba", "dorbs", "doree", "dores", "doric", "doris", "dorks", "dorky", "dorms", "dormy", "dorps", "dorrs", "dorsa", "dorse", "dorts", "dorty", "dosai", "dosas", "dosed", "doseh", "doser", "doses", "dosha", "dotal", "doted", "doter", "dotes", "dotty", "douar", "douce", "doucs", "douks", "doula", "douma", "doums", "doups", "doura", "douse", "douts", "doved", "doven", "dover", "doves", "dovie", "dowar", "dowds", "dowed", "dower", "dowie", "dowle", "dowls", "dowly", "downa", "downs", "dowps", "dowse", "dowts", "doxed", "doxes", "doxie", "doyen", "doyly", "dozed", "dozer", "dozes", "drabs", "drack", "draco", "draff", "drags", "drail", "drams", "drant", "draps", "drats", "drave", "draws", "drays", "drear", "dreck", "dreed", "dreer", "drees", "dregs", "dreks", "drent", "drere", "drest", "dreys", "dribs", "drice", "dries", "drily", "drips", "dript", "droid", "droil", "droke", "drole", "drome", "drony", "droob", "droog", "drook", "drops", "dropt", "drouk", "drows", "drubs", "drugs", "drums", "drupe", "druse", "drusy", "druxy", "dryad", "dryas", "dsobo", "dsomo", "duads", "duals", "duans", "duars", "dubbo", "ducal", "ducat", "duces", "ducks", "ducky", "ducts", "duddy", "duded", "dudes", "duels", "duets", "duett", "duffs", "dufus", "duing", "duits", "dukas", "duked", "dukes", "dukka", "dulce", "dules", "dulia", "dulls", "dulse", "dumas", "dumbo", "dumbs", "dumka", "dumky", "dumps", "dunam", "dunch", "dunes", "dungs", "dungy", "dunks", "dunno", "dunny", "dunsh", "dunts", "duomi", "duomo", "duped", "duper", "dupes", "duple", "duply", "duppy", "dural", "duras", "dured", "dures", "durgy", "durns", "duroc", "duros", "duroy", "durra", "durrs", "durry", "durst", "durum", "durzi", "dusks", "dusts", "duxes", "dwaal", "dwale", "dwalm", "dwams", "dwang", "dwaum", "dweeb", "dwile", "dwine", "dyads", "dyers", "dyked", "dykes", "dykey", "dykon", "dynel", "dynes", "dzhos", "eagre", "ealed", "eales", "eaned", "eards", "eared", "earls", "earns", "earnt", "earst", "eased", "easer", "eases", "easle", "easts", "eathe", "eaved", "eaves", "ebbed", "ebbet", "ebons", "ebook", "ecads", "eched", "eches", "echos", "ecrus", "edema", "edged", "edger", "edges", "edile", "edits", "educe", "educt", "eejit", "eensy", "eeven", "eevns", "effed", "egads", "egers", "egest", "eggar", "egged", "egger", "egmas", "ehing", "eider", "eidos", "eigne", "eiked", "eikon", "eilds", "eisel", "ejido", "ekkas", "elain", "eland", "elans", "elchi", "eldin", "elemi", "elfed", "eliad", "elint", "elmen", "eloge", "elogy", "eloin", "elops", "elpee", "elsin", "elute", "elvan", "elven", "elver", "elves", "emacs", "embar", "embay", "embog", "embow", "embox", "embus", "emeer", "emend", "emerg", "emery", "emeus", "emics", "emirs", "emits", "emmas", "emmer", "emmet", "emmew", "emmys", "emoji", "emong", "emote", "emove", "empts", "emule", "emure", "emyde", "emyds", "enarm", "enate", "ended", "ender", "endew", "endue", "enews", "enfix", "eniac", "enlit", "enmew", "ennog", "enoki", "enols", "enorm", "enows", "enrol", "ensew", "ensky", "entia", "enure", "enurn", "envoi", "enzym", "eorls", "eosin", "epact", "epees", "ephah", "ephas", "ephod", "ephor", "epics", "epode", "epopt", "epris", "eques", "equid", "erbia", "erevs", "ergon", "ergos", "ergot", "erhus", "erica", "erick", "erics", "ering", "erned", "ernes", "erose", "erred", "erses", "eruct", "erugo", "eruvs", "erven", "ervil", "escar", "escot", "esile", "eskar", "esker", "esnes", "esses", "estoc", "estop", "estro", "etage", "etape", "etats", "etens", "ethal", "ethne", "ethyl", "etics", "etnas", "ettin", "ettle", "etuis", "etwee", "etyma", "eughs", "euked", "eupad", "euros", "eusol", "evens", "evert", "evets", "evhoe", "evils", "evite", "evohe", "ewers", "ewest", "ewhow", "ewked", "exams", "exeat", "execs", "exeem", "exeme", "exfil", "exies", "exine", "exing", "exits", "exode", "exome", "exons", "expat", "expos", "exude", "exuls", "exurb", "eyass", "eyers", "eyots", "eyras", "eyres", "eyrie", "eyrir", "ezine", "fabby", "faced", "facer", "faces", "facia", "facta", "facts", "faddy", "faded", "fader", "fades", "fadge", "fados", "faena", "faery", "faffs", "faffy", "faggy", "fagin", "fagot", "faiks", "fails", "faine", "fains", "fairs", "faked", "faker", "fakes", "fakey", "fakie", "fakir", "falaj", "falls", "famed", "fames", "fanal", "fands", "fanes", "fanga", "fango", "fangs", "fanks", "fanon", "fanos", "fanum", "faqir", "farad", "farci", "farcy", "fards", "fared", "farer", "fares", "farle", "farls", "farms", "faros", "farro", "farse", "farts", "fasci", "fasti", "fasts", "fated", "fates", "fatly", "fatso", "fatwa", "faugh", "fauld", "fauns", "faurd", "fauts", "fauve", "favas", "favel", "faver", "faves", "favus", "fawns", "fawny", "faxed", "faxes", "fayed", "fayer", "fayne", "fayre", "fazed", "fazes", "feals", "feare", "fears", "feart", "fease", "feats", "feaze", "feces", "fecht", "fecit", "fecks", "fedex", "feebs", "feeds", "feels", "feens", "feers", "feese", "feeze", "fehme", "feint", "feist", "felch", "felid", "fells", "felly", "felts", "felty", "femal", "femes", "femmy", "fends", "fendy", "fenis", "fenks", "fenny", "fents", "feods", "feoff", "ferer", "feres", "feria", "ferly", "fermi", "ferms", "ferns", "ferny", "fesse", "festa", "fests", "festy", "fetas", "feted", "fetes", "fetor", "fetta", "fetts", "fetwa", "feuar", "feuds", "feued", "feyed", "feyer", "feyly", "fezes", "fezzy", "fiars", "fiats", "fibre", "fibro", "fices", "fiche", "fichu", "ficin", "ficos", "fides", "fidge", "fidos", "fiefs", "fient", "fiere", "fiers", "fiest", "fifed", "fifer", "fifes", "fifis", "figgy", "figos", "fiked", "fikes", "filar", "filch", "filed", "files", "filii", "filks", "fille", "fillo", "fills", "filmi", "films", "filos", "filum", "finca", "finds", "fined", "fines", "finis", "finks", "finny", "finos", "fiord", "fiqhs", "fique", "fired", "firer", "fires", "firie", "firks", "firms", "firns", "firry", "firth", "fiscs", "fisks", "fists", "fisty", "fitch", "fitly", "fitna", "fitte", "fitts", "fiver", "fives", "fixed", "fixes", "fixit", "fjeld", "flabs", "flaff", "flags", "flaks", "flamm", "flams", "flamy", "flane", "flans", "flaps", "flary", "flats", "flava", "flawn", "flaws", "flawy", "flaxy", "flays", "fleam", "fleas", "fleek", "fleer", "flees", "flegs", "fleme", "fleur", "flews", "flexi", "flexo", "fleys", "flics", "flied", "flies", "flimp", "flims", "flips", "flirs", "flisk", "flite", "flits", "flitt", "flobs", "flocs", "floes", "flogs", "flong", "flops", "flors", "flory", "flosh", "flota", "flote", "flows", "flubs", "flued", "flues", "fluey", "fluky", "flump", "fluor", "flurr", "fluty", "fluyt", "flyby", "flype", "flyte", "foals", "foams", "foehn", "fogey", "fogie", "fogle", "fogou", "fohns", "foids", "foils", "foins", "folds", "foley", "folia", "folic", "folie", "folks", "folky", "fomes", "fonda", "fonds", "fondu", "fones", "fonly", "fonts", "foods", "foody", "fools", "foots", "footy", "foram", "forbs", "forby", "fordo", "fords", "forel", "fores", "forex", "forks", "forky", "forme", "forms", "forts", "forza", "forze", "fossa", "fosse", "fouat", "fouds", "fouer", "fouet", "foule", "fouls", "fount", "fours", "fouth", "fovea", "fowls", "fowth", "foxed", "foxes", "foxie", "foyle", "foyne", "frabs", "frack", "fract", "frags", "fraim", "franc", "frape", "fraps", "frass", "frate", "frati", "frats", "fraus", "frays", "frees", "freet", "freit", "fremd", "frena", "freon", "frere", "frets", "fribs", "frier", "fries", "frigs", "frise", "frist", "frith", "frits", "fritt", "frize", "frizz", "froes", "frogs", "frons", "frore", "frorn", "frory", "frosh", "frows", "frowy", "frugs", "frump", "frush", "frust", "fryer", "fubar", "fubby", "fubsy", "fucks", "fucus", "fuddy", "fudgy", "fuels", "fuero", "fuffs", "fuffy", "fugal", "fuggy", "fugie", "fugio", "fugle", "fugly", "fugus", "fujis", "fulls", "fumed", "fumer", "fumes", "fumet", "fundi", "funds", "fundy", "fungo", "fungs", "funks", "fural", "furan", "furca", "furls", "furol", "furrs", "furth", "furze", "furzy", "fused", "fusee", "fusel", "fuses", "fusil", "fusks", "fusts", "fusty", "futon", "fuzed", "fuzee", "fuzes", "fuzil", "fyces", "fyked", "fykes", "fyles", "fyrds", "fytte", "gabba", "gabby", "gable", "gaddi", "gades", "gadge", "gadid", "gadis", "gadje", "gadjo", "gadso", "gaffs", "gaged", "gager", "gages", "gaids", "gains", "gairs", "gaita", "gaits", "gaitt", "gajos", "galah", "galas", "galax", "galea", "galed", "gales", "galls", "gally", "galop", "galut", "galvo", "gamas", "gamay", "gamba", "gambe", "gambo", "gambs", "gamed", "games", "gamey", "gamic", "gamin", "gamme", "gammy", "gamps", "ganch", "gandy", "ganef", "ganev", "gangs", "ganja", "ganof", "gants", "gaols", "gaped", "gaper", "gapes", "gapos", "gappy", "garbe", "garbo", "garbs", "garda", "gares", "garis", "garms", "garni", "garre", "garth", "garum", "gases", "gasps", "gaspy", "gasts", "gatch", "gated", "gater", "gates", "gaths", "gator", "gauch", "gaucy", "gauds", "gauje", "gault", "gaums", "gaumy", "gaups", "gaurs", "gauss", "gauzy", "gavot", "gawcy", "gawds", "gawks", "gawps", "gawsy", "gayal", "gazal", "gazar", "gazed", "gazes", "gazon", "gazoo", "geals", "geans", "geare", "gears", "geats", "gebur", "gecks", "geeks", "geeps", "geest", "geist", "geits", "gelds", "gelee", "gelid", "gelly", "gelts", "gemel", "gemma", "gemmy", "gemot", "genal", "genas", "genes", "genet", "genic", "genii", "genip", "genny", "genoa", "genom", "genro", "gents", "genty", "genua", "genus", "geode", "geoid", "gerah", "gerbe", "geres", "gerle", "germs", "germy", "gerne", "gesse", "gesso", "geste", "gests", "getas", "getup", "geums", "geyan", "geyer", "ghast", "ghats", "ghaut", "ghazi", "ghees", "ghest", "ghyll", "gibed", "gibel", "giber", "gibes", "gibli", "gibus", "gifts", "gigas", "gighe", "gigot", "gigue", "gilas", "gilds", "gilet", "gills", "gilly", "gilpy", "gilts", "gimel", "gimme", "gimps", "gimpy", "ginch", "ginge", "gings", "ginks", "ginny", "ginzo", "gipon", "gippo", "gippy", "girds", "girls", "girns", "giron", "giros", "girrs", "girsh", "girts", "gismo", "gisms", "gists", "gitch", "gites", "giust", "gived", "gives", "gizmo", "glace", "glads", "glady", "glaik", "glair", "glams", "glans", "glary", "glaum", "glaur", "glazy", "gleba", "glebe", "gleby", "glede", "gleds", "gleed", "gleek", "glees", "gleet", "gleis", "glens", "glent", "gleys", "glial", "glias", "glibs", "gliff", "glift", "glike", "glime", "glims", "glisk", "glits", "glitz", "gloam", "globi", "globs", "globy", "glode", "glogg", "gloms", "gloop", "glops", "glost", "glout", "glows", "gloze", "glued", "gluer", "glues", "gluey", "glugs", "glume", "glums", "gluon", "glute", "gluts", "gnarl", "gnarr", "gnars", "gnats", "gnawn", "gnaws", "gnows", "goads", "goafs", "goals", "goary", "goats", "goaty", "goban", "gobar", "gobbi", "gobbo", "gobby", "gobis", "gobos", "godet", "godso", "goels", "goers", "goest", "goeth", "goety", "gofer", "goffs", "gogga", "gogos", "goier", "gojis", "golds", "goldy", "goles", "golfs", "golpe", "golps", "gombo", "gomer", "gompa", "gonch", "gonef", "gongs", "gonia", "gonif", "gonks", "gonna", "gonof", "gonys", "gonzo", "gooby", "goods", "goofs", "googs", "gooks", "gooky", "goold", "gools", "gooly", "goons", "goony", "goops", "goopy", "goors", "goory", "goosy", "gopak", "gopik", "goral", "goras", "gored", "gores", "goris", "gorms", "gormy", "gorps", "gorse", "gorsy", "gosht", "gosse", "gotch", "goths", "gothy", "gotta", "gouch", "gouks", "goura", "gouts", "gouty", "gowan", "gowds", "gowfs", "gowks", "gowls", "gowns", "goxes", "goyim", "goyle", "graal", "grabs", "grads", "graff", "graip", "grama", "grame", "gramp", "grams", "grana", "grans", "grapy", "gravs", "grays", "grebe", "grebo", "grece", "greek", "grees", "grege", "grego", "grein", "grens", "grese", "greve", "grews", "greys", "grice", "gride", "grids", "griff", "grift", "grigs", "grike", "grins", "griot", "grips", "gript", "gripy", "grise", "grist", "grisy", "grith", "grits", "grize", "groat", "grody", "grogs", "groks", "groma", "grone", "groof", "grosz", "grots", "grouf", "grovy", "grows", "grrls", "grrrl", "grubs", "grued", "grues", "grufe", "grume", "grump", "grund", "gryce", "gryde", "gryke", "grype", "grypt", "guaco", "guana", "guano", "guans", "guars", "gucks", "gucky", "gudes", "guffs", "gugas", "guids", "guimp", "guiro", "gulag", "gular", "gulas", "gules", "gulet", "gulfs", "gulfy", "gulls", "gulph", "gulps", "gulpy", "gumma", "gummi", "gumps", "gundy", "gunge", "gungy", "gunks", "gunky", "gunny", "guqin", "gurdy", "gurge", "gurls", "gurly", "gurns", "gurry", "gursh", "gurus", "gushy", "gusla", "gusle", "gusli", "gussy", "gusts", "gutsy", "gutta", "gutty", "guyed", "guyle", "guyot", "guyse", "gwine", "gyals", "gyans", "gybed", "gybes", "gyeld", "gymps", "gynae", "gynie", "gynny", "gynos", "gyoza", "gypos", "gyppo", "gyppy", "gyral", "gyred", "gyres", "gyron", "gyros", "gyrus", "gytes", "gyved", "gyves", "haafs", "haars", "hable", "habus", "hacek", "hacks", "hadal", "haded", "hades", "hadji", "hadst", "haems", "haets", "haffs", "hafiz", "hafts", "haggs", "hahas", "haick", "haika", "haiks", "haiku", "hails", "haily", "hains", "haint", "hairs", "haith", "hajes", "hajis", "hajji", "hakam", "hakas", "hakea", "hakes", "hakim", "hakus", "halal", "haled", "haler", "hales", "halfa", "halfs", "halid", "hallo", "halls", "halma", "halms", "halon", "halos", "halse", "halts", "halva", "halwa", "hamal", "hamba", "hamed", "hames", "hammy", "hamza", "hanap", "hance", "hanch", "hands", "hangi", "hangs", "hanks", "hanky", "hansa", "hanse", "hants", "haole", "haoma", "hapax", "haply", "happi", "hapus", "haram", "hards", "hared", "hares", "harim", "harks", "harls", "harms", "harns", "haros", "harps", "harts", "hashy", "hasks", "hasps", "hasta", "hated", "hates", "hatha", "hauds", "haufs", "haugh", "hauld", "haulm", "hauls", "hault", "hauns", "hause", "haver", "haves", "hawed", "hawks", "hawms", "hawse", "hayed", "hayer", "hayey", "hayle", "hazan", "hazed", "hazer", "hazes", "heads", "heald", "heals", "heame", "heaps", "heapy", "heare", "hears", "heast", "heats", "heben", "hebes", "hecht", "hecks", "heder", "hedgy", "heeds", "heedy", "heels", "heeze", "hefte", "hefts", "heids", "heigh", "heils", "heirs", "hejab", "hejra", "heled", "heles", "helio", "hells", "helms", "helos", "helot", "helps", "helve", "hemal", "hemes", "hemic", "hemin", "hemps", "hempy", "hench", "hends", "henge", "henna", "henny", "henry", "hents", "hepar", "herbs", "herby", "herds", "heres", "herls", "herma", "herms", "herns", "heros", "herry", "herse", "hertz", "herye", "hesps", "hests", "hetes", "heths", "heuch", "heugh", "hevea", "hewed", "hewer", "hewgh", "hexad", "hexed", "hexer", "hexes", "hexyl", "heyed", "hiant", "hicks", "hided", "hider", "hides", "hiems", "highs", "hight", "hijab", "hijra", "hiked", "hiker", "hikes", "hikoi", "hilar", "hilch", "hillo", "hills", "hilts", "hilum", "hilus", "himbo", "hinau", "hinds", "hings", "hinky", "hinny", "hints", "hiois", "hiply", "hired", "hiree", "hirer", "hires", "hissy", "hists", "hithe", "hived", "hiver", "hives", "hizen", "hoaed", "hoagy", "hoars", "hoary", "hoast", "hobos", "hocks", "hocus", "hodad", "hodja", "hoers", "hogan", "hogen", "hoggs", "hoghs", "hohed", "hoick", "hoied", "hoiks", "hoing", "hoise", "hokas", "hoked", "hokes", "hokey", "hokis", "hokku", "hokum", "holds", "holed", "holes", "holey", "holks", "holla", "hollo", "holme", "holms", "holon", "holos", "holts", "homas", "homed", "homes", "homey", "homie", "homme", "homos", "honan", "honda", "honds", "honed", "honer", "hones", "hongi", "hongs", "honks", "honky", "hooch", "hoods", "hoody", "hooey", "hoofs", "hooka", "hooks", "hooky", "hooly", "hoons", "hoops", "hoord", "hoors", "hoosh", "hoots", "hooty", "hoove", "hopak", "hoped", "hoper", "hopes", "hoppy", "horah", "horal", "horas", "horis", "horks", "horme", "horns", "horst", "horsy", "hosed", "hosel", "hosen", "hoser", "hoses", "hosey", "hosta", "hosts", "hotch", "hoten", "hotty", "houff", "houfs", "hough", "houri", "hours", "houts", "hovea", "hoved", "hoven", "hoves", "howbe", "howes", "howff", "howfs", "howks", "howls", "howre", "howso", "hoxed", "hoxes", "hoyas", "hoyed", "hoyle", "hubby", "hucks", "hudna", "hudud", "huers", "huffs", "huffy", "huger", "huggy", "huhus", "huias", "hulas", "hules", "hulks", "hulky", "hullo", "hulls", "hully", "humas", "humfs", "humic", "humps", "humpy", "hunks", "hunts", "hurds", "hurls", "hurly", "hurra", "hurst", "hurts", "hushy", "husks", "husos", "hutia", "huzza", "huzzy", "hwyls", "hydra", "hyens", "hygge", "hying", "hykes", "hylas", "hyleg", "hyles", "hylic", "hymns", "hynde", "hyoid", "hyped", "hypes", "hypha", "hyphy", "hypos", "hyrax", "hyson", "hythe", "iambi", "iambs", "ibrik", "icers", "iched", "iches", "ichor", "icier", "icker", "ickle", "icons", "ictal", "ictic", "ictus", "idant", "ideas", "idees", "ident", "idled", "idles", "idola", "idols", "idyls", "iftar", "igapo", "igged", "iglus", "ihram", "ikans", "ikats", "ikons", "ileac", "ileal", "ileum", "ileus", "iliad", "ilial", "ilium", "iller", "illth", "imago", "imams", "imari", "imaum", "imbar", "imbed", "imide", "imido", "imids", "imine", "imino", "immew", "immit", "immix", "imped", "impis", "impot", "impro", "imshi", "imshy", "inapt", "inarm", "inbye", "incel", "incle", "incog", "incus", "incut", "indew", "india", "indie", "indol", "indow", "indri", "indue", "inerm", "infix", "infos", "infra", "ingan", "ingle", "inion", "inked", "inker", "inkle", "inned", "innit", "inorb", "inrun", "inset", "inspo", "intel", "intil", "intis", "intra", "inula", "inure", "inurn", "inust", "invar", "inwit", "iodic", "iodid", "iodin", "iotas", "ippon", "irade", "irids", "iring", "irked", "iroko", "irone", "irons", "isbas", "ishes", "isled", "isles", "isnae", "issei", "istle", "items", "ither", "ivied", "ivies", "ixias", "ixnay", "ixora", "ixtle", "izard", "izars", "izzat", "jaaps", "jabot", "jacal", "jacks", "jacky", "jaded", "jades", "jafas", "jaffa", "jagas", "jager", "jaggs", "jaggy", "jagir", "jagra", "jails", "jaker", "jakes", "jakey", "jalap", "jalop", "jambe", "jambo", "jambs", "jambu", "james", "jammy", "jamon", "janes", "janns", "janny", "janty", "japan", "japed", "japer", "japes", "jarks", "jarls", "jarps", "jarta", "jarul", "jasey", "jaspe", "jasps", "jatos", "jauks", "jaups", "javas", "javel", "jawan", "jawed", "jaxie", "jeans", "jeats", "jebel", "jedis", "jeels", "jeely", "jeeps", "jeers", "jeeze", "jefes", "jeffs", "jehad", "jehus", "jelab", "jello", "jells", "jembe", "jemmy", "jenny", "jeons", "jerid", "jerks", "jerry", "jesse", "jests", "jesus", "jetes", "jeton", "jeune", "jewed", "jewie", "jhala", "jiaos", "jibba", "jibbs", "jibed", "jiber", "jibes", "jiffs", "jiggy", "jigot", "jihad", "jills", "jilts", "jimmy", "jimpy", "jingo", "jinks", "jinne", "jinni", "jinns", "jirds", "jirga", "jirre", "jisms", "jived", "jiver", "jives", "jivey", "jnana", "jobed", "jobes", "jocko", "jocks", "jocky", "jocos", "jodel", "joeys", "johns", "joins", "joked", "jokes", "jokey", "jokol", "joled", "joles", "jolls", "jolts", "jolty", "jomon", "jomos", "jones", "jongs", "jonty", "jooks", "joram", "jorum", "jotas", "jotty", "jotun", "joual", "jougs", "jouks", "joule", "jours", "jowar", "jowed", "jowls", "jowly", "joyed", "jubas", "jubes", "jucos", "judas", "judgy", "judos", "jugal", "jugum", "jujus", "juked", "jukes", "jukus", "julep", "jumar", "jumby", "jumps", "junco", "junks", "junky", "jupes", "jupon", "jural", "jurat", "jurel", "jures", "justs", "jutes", "jutty", "juves", "juvie", "kaama", "kabab", "kabar", "kabob", "kacha", "kacks", "kadai", "kades", "kadis", "kafir", "kagos", "kagus", "kahal", "kaiak", "kaids", "kaies", "kaifs", "kaika", "kaiks", "kails", "kaims", "kaing", "kains", "kakas", "kakis", "kalam", "kales", "kalif", "kalis", "kalpa", "kamas", "kames", "kamik", "kamis", "kamme", "kanae", "kanas", "kandy", "kaneh", "kanes", "kanga", "kangs", "kanji", "kants", "kanzu", "kaons", "kapas", "kaphs", "kapok", "kapow", "kapus", "kaput", "karas", "karat", "karks", "karns", "karoo", "karos", "karri", "karst", "karsy", "karts", "karzy", "kasha", "kasme", "katal", "katas", "katis", "katti", "kaugh", "kauri", "kauru", "kaury", "kaval", "kavas", "kawas", "kawau", "kawed", "kayle", "kayos", "kazis", "kazoo", "kbars", "kebar", "kebob", "kecks", "kedge", "kedgy", "keech", "keefs", "keeks", "keels", "keema", "keeno", "keens", "keeps", "keets", "keeve", "kefir", "kehua", "keirs", "kelep", "kelim", "kells", "kelly", "kelps", "kelpy", "kelts", "kelty", "kembo", "kembs", "kemps", "kempt", "kempy", "kenaf", "kench", "kendo", "kenos", "kente", "kents", "kepis", "kerbs", "kerel", "kerfs", "kerky", "kerma", "kerne", "kerns", "keros", "kerry", "kerve", "kesar", "kests", "ketas", "ketch", "ketes", "ketol", "kevel", "kevil", "kexes", "keyed", "keyer", "khadi", "khafs", "khans", "khaph", "khats", "khaya", "khazi", "kheda", "kheth", "khets", "khoja", "khors", "khoum", "khuds", "kiaat", "kiack", "kiang", "kibbe", "kibbi", "kibei", "kibes", "kibla", "kicks", "kicky", "kiddo", "kiddy", "kidel", "kidge", "kiefs", "kiers", "kieve", "kievs", "kight", "kikes", "kikoi", "kiley", "kilim", "kills", "kilns", "kilos", "kilps", "kilts", "kilty", "kimbo", "kinas", "kinda", "kinds", "kindy", "kines", "kings", "kinin", "kinks", "kinos", "kiore", "kipes", "kippa", "kipps", "kirby", "kirks", "kirns", "kirri", "kisan", "kissy", "kists", "kited", "kiter", "kites", "kithe", "kiths", "kitul", "kivas", "kiwis", "klang", "klaps", "klett", "klick", "klieg", "kliks", "klong", "kloof", "kluge", "klutz", "knags", "knaps", "knarl", "knars", "knaur", "knawe", "knees", "knell", "knish", "knits", "knive", "knobs", "knops", "knosp", "knots", "knout", "knowe", "knows", "knubs", "knurl", "knurr", "knurs", "knuts", "koans", "koaps", "koban", "kobos", "koels", "koffs", "kofta", "kogal", "kohas", "kohen", "kohls", "koine", "kojis", "kokam", "kokas", "koker", "kokra", "kokum", "kolas", "kolos", "kombu", "konbu", "kondo", "konks", "kooks", "kooky", "koori", "kopek", "kophs", "kopje", "koppa", "korai", "koran", "koras", "korat", "kores", "korma", "koros", "korun", "korus", "koses", "kotch", "kotos", "kotow", "koura", "kraal", "krabs", "kraft", "krais", "krait", "krang", "krans", "kranz", "kraut", "krays", "kreep", "kreng", "krewe", "krona", "krone", "kroon", "krubi", "krunk", "ksars", "kubie", "kudos", "kudus", "kudzu", "kufis", "kugel", "kuias", "kukri", "kukus", "kulak", "kulan", "kulas", "kulfi", "kumis", "kumys", "kuris", "kurre", "kurta", "kurus", "kusso", "kutas", "kutch", "kutis", "kutus", "kuzus", "kvass", "kvell", "kwela", "kyack", "kyaks", "kyang", "kyars", "kyats", "kybos", "kydst", "kyles", "kylie", "kylin", "kylix", "kyloe", "kynde", "kynds", "kypes", "kyrie", "kytes", "kythe", "laari", "labda", "labia", "labis", "labra", "laced", "lacer", "laces", "lacet", "lacey", "lacks", "laddy", "laded", "lader", "lades", "laers", "laevo", "lagan", "lahal", "lahar", "laich", "laics", "laids", "laigh", "laika", "laiks", "laird", "lairs", "lairy", "laith", "laity", "laked", "laker", "lakes", "lakhs", "lakin", "laksa", "laldy", "lalls", "lamas", "lambs", "lamby", "lamed", "lamer", "lames", "lamia", "lammy", "lamps", "lanai", "lanas", "lanch", "lande", "lands", "lanes", "lanks", "lants", "lapin", "lapis", "lapje", "larch", "lards", "lardy", "laree", "lares", "largo", "laris", "larks", "larky", "larns", "larnt", "larum", "lased", "laser", "lases", "lassi", "lassu", "lassy", "lasts", "latah", "lated", "laten", "latex", "lathi", "laths", "lathy", "latke", "latus", "lauan", "lauch", "lauds", "laufs", "laund", "laura", "laval", "lavas", "laved", "laver", "laves", "lavra", "lavvy", "lawed", "lawer", "lawin", "lawks", "lawns", "lawny", "laxed", "laxer", "laxes", "laxly", "layed", "layin", "layup", "lazar", "lazed", "lazes", "lazos", "lazzi", "lazzo", "leads", "leady", "leafs", "leaks", "leams", "leans", "leany", "leaps", "leare", "lears", "leary", "leats", "leavy", "leaze", "leben", "leccy", "ledes", "ledgy", "ledum", "leear", "leeks", "leeps", "leers", "leese", "leets", "leeze", "lefte", "lefts", "leger", "leges", "legge", "leggo", "legit", "lehrs", "lehua", "leirs", "leish", "leman", "lemed", "lemel", "lemes", "lemma", "lemme", "lends", "lenes", "lengs", "lenis", "lenos", "lense", "lenti", "lento", "leone", "lepid", "lepra", "lepta", "lered", "leres", "lerps", "lesbo", "leses", "lests", "letch", "lethe", "letup", "leuch", "leuco", "leuds", "leugh", "levas", "levee", "leves", "levin", "levis", "lewis", "lexes", "lexis", "lezes", "lezza", "lezzy", "liana", "liane", "liang", "liard", "liars", "liart", "liber", "libra", "libri", "lichi", "licht", "licit", "licks", "lidar", "lidos", "liefs", "liens", "liers", "lieus", "lieve", "lifer", "lifes", "lifts", "ligan", "liger", "ligge", "ligne", "liked", "liker", "likes", "likin", "lills", "lilos", "lilts", "liman", "limas", "limax", "limba", "limbi", "limbs", "limby", "limed", "limen", "limes", "limey", "limma", "limns", "limos", "limpa", "limps", "linac", "linch", "linds", "lindy", "lined", "lines", "liney", "linga", "lings", "lingy", "linin", "links", "linky", "linns", "linny", "linos", "lints", "linty", "linum", "linux", "lions", "lipas", "lipes", "lipin", "lipos", "lippy", "liras", "lirks", "lirot", "lisks", "lisle", "lisps", "lists", "litai", "litas", "lited", "liter", "lites", "litho", "liths", "litre", "lived", "liven", "lives", "livor", "livre", "llano", "loach", "loads", "loafs", "loams", "loans", "loast", "loave", "lobar", "lobed", "lobes", "lobos", "lobus", "loche", "lochs", "locie", "locis", "locks", "locos", "locum", "loden", "lodes", "loess", "lofts", "logan", "loges", "loggy", "logia", "logie", "logoi", "logon", "logos", "lohan", "loids", "loins", "loipe", "loirs", "lokes", "lolls", "lolly", "lolog", "lomas", "lomed", "lomes", "loner", "longa", "longe", "longs", "looby", "looed", "looey", "loofa", "loofs", "looie", "looks", "looky", "looms", "loons", "loony", "loops", "loord", "loots", "loped", "loper", "lopes", "loppy", "loral", "loran", "lords", "lordy", "lorel", "lores", "loric", "loris", "losed", "losel", "losen", "loses", "lossy", "lotah", "lotas", "lotes", "lotic", "lotos", "lotsa", "lotta", "lotte", "lotto", "lotus", "loued", "lough", "louie", "louis", "louma", "lound", "louns", "loupe", "loups", "loure", "lours", "loury", "louts", "lovat", "loved", "loves", "lovey", "lovie", "lowan", "lowed", "lowes", "lownd", "lowne", "lowns", "lowps", "lowry", "lowse", "lowts", "loxed", "loxes", "lozen", "luach", "luaus", "lubed", "lubes", "lubra", "luces", "lucks", "lucre", "ludes", "ludic", "ludos", "luffa", "luffs", "luged", "luger", "luges", "lulls", "lulus", "lumas", "lumbi", "lumme", "lummy", "lumps", "lunas", "lunes", "lunet", "lungi", "lungs", "lunks", "lunts", "lupin", "lured", "lurer", "lures", "lurex", "lurgi", "lurgy", "lurks", "lurry", "lurve", "luser", "lushy", "lusks", "lusts", "lusus", "lutea", "luted", "luter", "lutes", "luvvy", "luxed", "luxer", "luxes", "lweis", "lyams", "lyard", "lyart", "lyase", "lycea", "lycee", "lycra", "lymes", "lynch", "lynes", "lyres", "lysed", "lyses", "lysin", "lysis", "lysol", "lyssa", "lyted", "lytes", "lythe", "lytic", "lytta", "maaed", "maare", "maars", "mabes", "macas", "maced", "macer", "maces", "mache", "machi", "machs", "macks", "macle", "macon", "madge", "madid", "madre", "maerl", "mafic", "mages", "maggs", "magot", "magus", "mahoe", "mahua", "mahwa", "maids", "maiko", "maiks", "maile", "maill", "mails", "maims", "mains", "maire", "mairs", "maise", "maist", "makar", "makes", "makis", "makos", "malam", "malar", "malas", "malax", "males", "malic", "malik", "malis", "malls", "malms", "malmy", "malts", "malty", "malus", "malva", "malwa", "mamas", "mamba", "mamee", "mamey", "mamie", "manas", "manat", "mandi", "maneb", "maned", "maneh", "manes", "manet", "mangs", "manis", "manky", "manna", "manos", "manse", "manta", "manto", "manty", "manul", "manus", "mapau", "maqui", "marae", "marah", "maras", "marcs", "mardy", "mares", "marge", "margs", "maria", "marid", "marka", "marks", "marle", "marls", "marly", "marms", "maron", "maror", "marra", "marri", "marse", "marts", "marvy", "masas", "mased", "maser", "mases", "mashy", "masks", "massa", "massy", "masts", "masty", "masus", "matai", "mated", "mater", "mates", "maths", "matin", "matlo", "matte", "matts", "matza", "matzo", "mauby", "mauds", "mauls", "maund", "mauri", "mausy", "mauts", "mauzy", "maven", "mavie", "mavin", "mavis", "mawed", "mawks", "mawky", "mawns", "mawrs", "maxed", "maxes", "maxis", "mayan", "mayas", "mayed", "mayos", "mayst", "mazed", "mazer", "mazes", "mazey", "mazut", "mbira", "meads", "meals", "meane", "means", "meany", "meare", "mease", "meath", "meats", "mebos", "mechs", "mecks", "medii", "medle", "meeds", "meers", "meets", "meffs", "meins", "meint", "meiny", "meith", "mekka", "melas", "melba", "melds", "melic", "melik", "mells", "melts", "melty", "memes", "memos", "menad", "mends", "mened", "menes", "menge", "mengs", "mensa", "mense", "mensh", "menta", "mento", "menus", "meous", "meows", "merch", "mercs", "merde", "mered", "merel", "merer", "meres", "meril", "meris", "merks", "merle", "merls", "merse", "mesal", "mesas", "mesel", "meses", "meshy", "mesic", "mesne", "meson", "messy", "mesto", "meted", "metes", "metho", "meths", "metic", "metif", "metis", "metol", "metre", "meuse", "meved", "meves", "mewed", "mewls", "meynt", "mezes", "mezze", "mezzo", "mhorr", "miaou", "miaow", "miasm", "miaul", "micas", "miche", "micht", "micks", "micky", "micos", "micra", "middy", "midgy", "midis", "miens", "mieve", "miffs", "miffy", "mifty", "miggs", "mihas", "mihis", "miked", "mikes", "mikra", "mikva", "milch", "milds", "miler", "miles", "milfs", "milia", "milko", "milks", "mille", "mills", "milor", "milos", "milpa", "milts", "milty", "miltz", "mimed", "mimeo", "mimer", "mimes", "mimsy", "minae", "minar", "minas", "mincy", "minds", "mined", "mines", "minge", "mings", "mingy", "minis", "minke", "minks", "minny", "minos", "mints", "mired", "mires", "mirex", "mirid", "mirin", "mirks", "mirky", "mirly", "miros", "mirvs", "mirza", "misch", "misdo", "mises", "misgo", "misos", "missa", "mists", "misty", "mitch", "miter", "mites", "mitis", "mitre", "mitts", "mixed", "mixen", "mixer", "mixes", "mixte", "mixup", "mizen", "mizzy", "mneme", "moans", "moats", "mobby", "mobes", "mobey", "mobie", "moble", "mochi", "mochs", "mochy", "mocks", "moder", "modes", "modge", "modii", "modus", "moers", "mofos", "moggy", "mohel", "mohos", "mohrs", "mohua", "mohur", "moile", "moils", "moira", "moire", "moits", "mojos", "mokes", "mokis", "mokos", "molal", "molas", "molds", "moled", "moles", "molla", "molls", "molly", "molto", "molts", "molys", "momes", "momma", "mommy", "momus", "monad", "monal", "monas", "monde", "mondo", "moner", "mongo", "mongs", "monic", "monie", "monks", "monos", "monte", "monty", "moobs", "mooch", "moods", "mooed", "mooks", "moola", "mooli", "mools", "mooly", "moong", "moons", "moony", "moops", "moors", "moory", "moots", "moove", "moped", "moper", "mopes", "mopey", "moppy", "mopsy", "mopus", "morae", "moras", "morat", "moray", "morel", "mores", "moria", "morne", "morns", "morra", "morro", "morse", "morts", "mosed", "moses", "mosey", "mosks", "mosso", "moste", "mosts", "moted", "moten", "motes", "motet", "motey", "moths", "mothy", "motis", "motte", "motts", "motty", "motus", "motza", "mouch", "moues", "mould", "mouls", "moups", "moust", "mousy", "moved", "moves", "mowas", "mowed", "mowra", "moxas", "moxie", "moyas", "moyle", "moyls", "mozed", "mozes", "mozos", "mpret", "mucho", "mucic", "mucid", "mucin", "mucks", "mucor", "mucro", "mudge", "mudir", "mudra", "muffs", "mufti", "mugga", "muggs", "muggy", "muhly", "muids", "muils", "muirs", "muist", "mujik", "mulct", "muled", "mules", "muley", "mulga", "mulie", "mulla", "mulls", "mulse", "mulsh", "mumms", "mumps", "mumsy", "mumus", "munga", "munge", "mungo", "mungs", "munis", "munts", "muntu", "muons", "muras", "mured", "mures", "murex", "murid", "murks", "murls", "murly", "murra", "murre", "murri", "murrs", "murry", "murti", "murva", "musar", "musca", "mused", "muser", "muses", "muset", "musha", "musit", "musks", "musos", "musse", "mussy", "musth", "musts", "mutch", "muted", "muter", "mutes", "mutha", "mutis", "muton", "mutts", "muxed", "muxes", "muzak", "muzzy", "mvule", "myall", "mylar", "mynah", "mynas", "myoid", "myoma", "myope", "myops", "myopy", "mysid", "mythi", "myths", "mythy", "myxos", "mzees", "naams", "naans", "nabes", "nabis", "nabks", "nabla", "nabob", "nache", "nacho", "nacre", "nadas", "naeve", "naevi", "naffs", "nagas", "naggy", "nagor", "nahal", "naiad", "naifs", "naiks", "nails", "naira", "nairu", "naked", "naker", "nakfa", "nalas", "naled", "nalla", "named", "namer", "names", "namma", "namus", "nanas", "nance", "nancy", "nandu", "nanna", "nanos", "nanua", "napas", "naped", "napes", "napoo", "nappa", "nappe", "nappy", "naras", "narco", "narcs", "nards", "nares", "naric", "naris", "narks", "narky", "narre", "nashi", "natch", "nates", "natis", "natty", "nauch", "naunt", "navar", "naves", "navew", "navvy", "nawab", "nazes", "nazir", "nazis", "nduja", "neafe", "neals", "neaps", "nears", "neath", "neats", "nebek", "nebel", "necks", "neddy", "needs", "neeld", "neele", "neemb", "neems", "neeps", "neese", "neeze", "negro", "negus", "neifs", "neist", "neive", "nelis", "nelly", "nemas", "nemns", "nempt", "nenes", "neons", "neper", "nepit", "neral", "nerds", "nerka", "nerks", "nerol", "nerts", "nertz", "nervy", "nests", "netes", "netop", "netts", "netty", "neuks", "neume", "neums", "nevel", "neves", "nevus", "newbs", "newed", "newel", "newie", "newsy", "newts", "nexts", "nexus", "ngaio", "ngana", "ngati", "ngoma", "ngwee", "nicad", "nicht", "nicks", "nicol", "nidal", "nided", "nides", "nidor", "nidus", "niefs", "nieve", "nifes", "niffs", "niffy", "nifty", "niger", "nighs", "nihil", "nikab", "nikah", "nikau", "nills", "nimbi", "nimbs", "nimps", "niner", "nines", "ninon", "nipas", "nippy", "niqab", "nirls", "nirly", "nisei", "nisse", "nisus", "niter", "nites", "nitid", "niton", "nitre", "nitro", "nitry", "nitty", "nival", "nixed", "nixer", "nixes", "nixie", "nizam", "nkosi", "noahs", "nobby", "nocks", "nodal", "noddy", "nodes", "nodus", "noels", "noggs", "nohow", "noils", "noily", "noint", "noirs", "noles", "nolls", "nolos", "nomas", "nomen", "nomes", "nomic", "nomoi", "nomos", "nonas", "nonce", "nones", "nonet", "nongs", "nonis", "nonny", "nonyl", "noobs", "nooit", "nooks", "nooky", "noons", "noops", "nopal", "noria", "noris", "norks", "norma", "norms", "nosed", "noser", "noses", "notal", "noted", "noter", "notes", "notum", "nould", "noule", "nouls", "nouns", "nouny", "noups", "novae", "novas", "novum", "noway", "nowed", "nowls", "nowts", "nowty", "noxal", "noxes", "noyau", "noyed", "noyes", "nubby", "nubia", "nucha", "nuddy", "nuder", "nudes", "nudie", "nudzh", "nuffs", "nugae", "nuked", "nukes", "nulla", "nulls", "numbs", "numen", "nummy", "nunny", "nurds", "nurdy", "nurls", "nurrs", "nutso", "nutsy", "nyaff", "nyala", "nying", "nyssa", "oaked", "oaker", "oakum", "oared", "oases", "oasis", "oasts", "oaten", "oater", "oaths", "oaves", "obang", "obeah", "obeli", "obeys", "obias", "obied", "obiit", "obits", "objet", "oboes", "obole", "oboli", "obols", "occam", "ocher", "oches", "ochre", "ochry", "ocker", "ocrea", "octad", "octan", "octas", "octyl", "oculi", "odahs", "odals", "odeon", "odeum", "odism", "odist", "odium", "odors", "odour", "odyle", "odyls", "ofays", "offed", "offie", "oflag", "ofter", "ogams", "ogeed", "ogees", "oggin", "ogham", "ogive", "ogled", "ogler", "ogles", "ogmic", "ogres", "ohias", "ohing", "ohmic", "ohone", "oidia", "oiled", "oiler", "oinks", "oints", "ojime", "okapi", "okays", "okehs", "okras", "oktas", "oldie", "oleic", "olein", "olent", "oleos", "oleum", "olios", "ollas", "ollav", "oller", "ollie", "ology", "olpae", "olpes", "omasa", "omber", "ombus", "omens", "omers", "omits", "omlah", "omovs", "omrah", "oncer", "onces", "oncet", "oncus", "onely", "oners", "onery", "onium", "onkus", "onlay", "onned", "ontic", "oobit", "oohed", "oomph", "oonts", "ooped", "oorie", "ooses", "ootid", "oozed", "oozes", "opahs", "opals", "opens", "opepe", "oping", "oppos", "opsin", "opted", "opter", "orach", "oracy", "orals", "orang", "orant", "orate", "orbed", "orcas", "orcin", "ordos", "oread", "orfes", "orgia", "orgic", "orgue", "oribi", "oriel", "orixa", "orles", "orlon", "orlop", "ormer", "ornis", "orpin", "orris", "ortho", "orval", "orzos", "oscar", "oshac", "osier", "osmic", "osmol", "ossia", "ostia", "otaku", "otary", "ottar", "ottos", "oubit", "oucht", "ouens", "ouija", "oulks", "oumas", "oundy", "oupas", "ouped", "ouphe", "ouphs", "ourie", "ousel", "ousts", "outby", "outed", "outre", "outro", "outta", "ouzel", "ouzos", "ovals", "ovels", "ovens", "overs", "ovist", "ovoli", "ovolo", "ovule", "owche", "owies", "owled", "owler", "owlet", "owned", "owres", "owrie", "owsen", "oxbow", "oxers", "oxeye", "oxids", "oxies", "oxime", "oxims", "oxlip", "oxter", "oyers", "ozeki", "ozzie", "paals", "paans", "pacas", "paced", "pacer", "paces", "pacey", "pacha", "packs", "pacos", "pacta", "pacts", "padis", "padle", "padma", "padre", "padri", "paean", "paedo", "paeon", "paged", "pager", "pages", "pagle", "pagod", "pagri", "paiks", "pails", "pains", "paire", "pairs", "paisa", "paise", "pakka", "palas", "palay", "palea", "paled", "pales", "palet", "palis", "palki", "palla", "palls", "pally", "palms", "palmy", "palpi", "palps", "palsa", "pampa", "panax", "pance", "panda", "pands", "pandy", "paned", "panes", "panga", "pangs", "panim", "panko", "panne", "panni", "panto", "pants", "panty", "paoli", "paolo", "papas", "papaw", "papes", "pappi", "pappy", "parae", "paras", "parch", "pardi", "pards", "pardy", "pared", "paren", "pareo", "pares", "pareu", "parev", "parge", "pargo", "paris", "parki", "parks", "parky", "parle", "parly", "parma", "parol", "parps", "parra", "parrs", "parti", "parts", "parve", "parvo", "paseo", "pases", "pasha", "pashm", "paska", "paspy", "passe", "pasts", "pated", "paten", "pater", "pates", "paths", "patin", "patka", "patly", "patte", "patus", "pauas", "pauls", "pavan", "paved", "paven", "paver", "paves", "pavid", "pavin", "pavis", "pawas", "pawaw", "pawed", "pawer", "pawks", "pawky", "pawls", "pawns", "paxes", "payed", "payor", "paysd", "peage", "peags", "peaks", "peaky", "peals", "peans", "peare", "pears", "peart", "pease", "peats", "peaty", "peavy", "peaze", "pebas", "pechs", "pecke", "pecks", "pecky", "pedes", "pedis", "pedro", "peece", "peeks", "peels", "peens", "peeoy", "peepe", "peeps", "peers", "peery", "peeve", "peggy", "peghs", "peins", "peise", "peize", "pekan", "pekes", "pekin", "pekoe", "pelas", "pelau", "peles", "pelfs", "pells", "pelma", "pelon", "pelta", "pelts", "pends", "pendu", "pened", "penes", "pengo", "penie", "penis", "penks", "penna", "penni", "pents", "peons", "peony", "pepla", "pepos", "peppy", "pepsi", "perai", "perce", "percs", "perdu", "perdy", "perea", "peres", "peris", "perks", "perms", "perns", "perog", "perps", "perry", "perse", "perst", "perts", "perve", "pervo", "pervs", "pervy", "pesos", "pests", "pesty", "petar", "peter", "petit", "petre", "petri", "petti", "petto", "pewee", "pewit", "peyse", "phage", "phang", "phare", "pharm", "pheer", "phene", "pheon", "phese", "phial", "phish", "phizz", "phlox", "phoca", "phono", "phons", "phots", "phpht", "phuts", "phyla", "phyle", "piani", "pians", "pibal", "pical", "picas", "piccy", "picks", "picot", "picra", "picul", "piend", "piers", "piert", "pieta", "piets", "piezo", "pight", "pigmy", "piing", "pikas", "pikau", "piked", "piker", "pikes", "pikey", "pikis", "pikul", "pilae", "pilaf", "pilao", "pilar", "pilau", "pilaw", "pilch", "pilea", "piled", "pilei", "piler", "piles", "pilis", "pills", "pilow", "pilum", "pilus", "pimas", "pimps", "pinas", "pined", "pines", "pingo", "pings", "pinko", "pinks", "pinna", "pinny", "pinon", "pinot", "pinta", "pints", "pinup", "pions", "piony", "pious", "pioye", "pioys", "pipal", "pipas", "piped", "pipes", "pipet", "pipis", "pipit", "pippy", "pipul", "pirai", "pirls", "pirns", "pirog", "pisco", "pises", "pisky", "pisos", "pissy", "piste", "pitas", "piths", "piton", "pitot", "pitta", "piums", "pixes", "pized", "pizes", "plaas", "plack", "plage", "plans", "plaps", "plash", "plasm", "plast", "plats", "platt", "platy", "playa", "plays", "pleas", "plebe", "plebs", "plena", "pleon", "plesh", "plews", "plica", "plies", "plims", "pling", "plink", "ploat", "plods", "plong", "plonk", "plook", "plops", "plots", "plotz", "plouk", "plows", "ploye", "ploys", "plues", "pluff", "plugs", "plums", "plumy", "pluot", "pluto", "plyer", "poach", "poaka", "poake", "poboy", "pocks", "pocky", "podal", "poddy", "podex", "podge", "podgy", "podia", "poems", "poeps", "poets", "pogey", "pogge", "pogos", "pohed", "poilu", "poind", "pokal", "poked", "pokes", "pokey", "pokie", "poled", "poler", "poles", "poley", "polio", "polis", "polje", "polks", "polls", "polly", "polos", "polts", "polys", "pombe", "pomes", "pommy", "pomos", "pomps", "ponce", "poncy", "ponds", "pones", "poney", "ponga", "pongo", "pongs", "pongy", "ponks", "ponts", "ponty", "ponzu", "poods", "pooed", "poofs", "poofy", "poohs", "pooja", "pooka", "pooks", "pools", "poons", "poops", "poopy", "poori", "poort", "poots", "poove", "poovy", "popes", "poppa", "popsy", "porae", "poral", "pored", "porer", "pores", "porge", "porgy", "porin", "porks", "porky", "porno", "porns", "porny", "porta", "ports", "porty", "posed", "poses", "posey", "posho", "posts", "potae", "potch", "poted", "potes", "potin", "potoo", "potsy", "potto", "potts", "potty", "pouff", "poufs", "pouke", "pouks", "poule", "poulp", "poult", "poupe", "poupt", "pours", "pouts", "powan", "powin", "pownd", "powns", "powny", "powre", "poxed", "poxes", "poynt", "poyou", "poyse", "pozzy", "praam", "prads", "prahu", "prams", "prana", "prang", "praos", "prase", "prate", "prats", "pratt", "praty", "praus", "prays", "predy", "preed", "prees", "preif", "prems", "premy", "prent", "preon", "preop", "preps", "presa", "prese", "prest", "preve", "prexy", "preys", "prial", "pricy", "prief", "prier", "pries", "prigs", "prill", "prima", "primi", "primp", "prims", "primy", "prink", "prion", "prise", "priss", "proas", "probs", "prods", "proem", "profs", "progs", "proin", "proke", "prole", "proll", "promo", "proms", "pronk", "props", "prore", "proso", "pross", "prost", "prosy", "proto", "proul", "prows", "proyn", "prunt", "pruta", "pryer", "pryse", "pseud", "pshaw", "psion", "psoae", "psoai", "psoas", "psora", "psych", "psyop", "pubco", "pubes", "pubis", "pucan", "pucer", "puces", "pucka", "pucks", "puddy", "pudge", "pudic", "pudor", "pudsy", "pudus", "puers", "puffa", "puffs", "puggy", "pugil", "puhas", "pujah", "pujas", "pukas", "puked", "puker", "pukes", "pukey", "pukka", "pukus", "pulao", "pulas", "puled", "puler", "pules", "pulik", "pulis", "pulka", "pulks", "pulli", "pulls", "pully", "pulmo", "pulps", "pulus", "pumas", "pumie", "pumps", "punas", "punce", "punga", "pungs", "punji", "punka", "punks", "punky", "punny", "punto", "punts", "punty", "pupae", "pupal", "pupas", "pupus", "purda", "pured", "pures", "purin", "puris", "purls", "purpy", "purrs", "pursy", "purty", "puses", "pusle", "pussy", "putid", "puton", "putti", "putto", "putts", "puzel", "pwned", "pyats", "pyets", "pygal", "pyins", "pylon", "pyned", "pynes", "pyoid", "pyots", "pyral", "pyran", "pyres", "pyrex", "pyric", "pyros", "pyxed", "pyxes", "pyxie", "pyxis", "pzazz", "qadis", "qaids", "qajaq", "qanat", "qapik", "qibla", "qophs", "qorma", "quads", "quaff", "quags", "quair", "quais", "quaky", "quale", "quant", "quare", "quass", "quate", "quats", "quayd", "quays", "qubit", "quean", "queme", "quena", "quern", "queyn", "queys", "quich", "quids", "quiff", "quims", "quina", "quine", "quino", "quins", "quint", "quipo", "quips", "quipu", "quire", "quirt", "quist", "quits", "quoad", "quods", "quoif", "quoin", "quoit", "quoll", "quonk", "quops", "quran", "qursh", "quyte", "rabat", "rabic", "rabis", "raced", "races", "rache", "racks", "racon", "radge", "radix", "radon", "raffs", "rafts", "ragas", "ragde", "raged", "ragee", "rager", "rages", "ragga", "raggs", "raggy", "ragis", "ragus", "rahed", "rahui", "raias", "raids", "raiks", "raile", "rails", "raine", "rains", "raird", "raita", "raits", "rajas", "rajes", "raked", "rakee", "raker", "rakes", "rakia", "rakis", "rakus", "rales", "ramal", "ramee", "ramet", "ramie", "ramin", "ramis", "rammy", "ramps", "ramus", "ranas", "rance", "rands", "ranee", "ranga", "rangi", "rangs", "rangy", "ranid", "ranis", "ranke", "ranks", "rants", "raped", "raper", "rapes", "raphe", "rappe", "rared", "raree", "rares", "rarks", "rased", "raser", "rases", "rasps", "rasse", "rasta", "ratal", "ratan", "ratas", "ratch", "rated", "ratel", "rater", "rates", "ratha", "rathe", "raths", "ratoo", "ratos", "ratus", "rauns", "raupo", "raved", "ravel", "raver", "raves", "ravey", "ravin", "rawer", "rawin", "rawly", "rawns", "raxed", "raxes", "rayah", "rayas", "rayed", "rayle", "rayne", "razed", "razee", "razer", "razes", "razoo", "readd", "reads", "reais", "reaks", "realo", "reals", "reame", "reams", "reamy", "reans", "reaps", "rears", "reast", "reata", "reate", "reave", "rebbe", "rebec", "rebid", "rebit", "rebop", "rebuy", "recal", "recce", "recco", "reccy", "recit", "recks", "recon", "recta", "recti", "recto", "redan", "redds", "reddy", "reded", "redes", "redia", "redid", "redip", "redly", "redon", "redos", "redox", "redry", "redub", "redux", "redye", "reech", "reede", "reeds", "reefs", "reefy", "reeks", "reeky", "reels", "reens", "reest", "reeve", "refed", "refel", "reffo", "refis", "refix", "refly", "refry", "regar", "reges", "reggo", "regie", "regma", "regna", "regos", "regur", "rehem", "reifs", "reify", "reiki", "reiks", "reink", "reins", "reird", "reist", "reive", "rejig", "rejon", "reked", "rekes", "rekey", "relet", "relie", "relit", "rello", "reman", "remap", "remen", "remet", "remex", "remix", "renay", "rends", "reney", "renga", "renig", "renin", "renne", "renos", "rente", "rents", "reoil", "reorg", "repeg", "repin", "repla", "repos", "repot", "repps", "repro", "reran", "rerig", "resat", "resaw", "resay", "resee", "reses", "resew", "resid", "resit", "resod", "resow", "resto", "rests", "resty", "resus", "retag", "retax", "retem", "retia", "retie", "retox", "revet", "revie", "rewan", "rewax", "rewed", "rewet", "rewin", "rewon", "rewth", "rexes", "rezes", "rheas", "rheme", "rheum", "rhies", "rhime", "rhine", "rhody", "rhomb", "rhone", "rhumb", "rhyne", "rhyta", "riads", "rials", "riant", "riata", "ribas", "ribby", "ribes", "riced", "ricer", "rices", "ricey", "richt", "ricin", "ricks", "rides", "ridgy", "ridic", "riels", "riems", "rieve", "rifer", "riffs", "rifte", "rifts", "rifty", "riggs", "rigol", "riled", "riles", "riley", "rille", "rills", "rimae", "rimed", "rimer", "rimes", "rimus", "rinds", "rindy", "rines", "rings", "rinks", "rioja", "riots", "riped", "ripes", "ripps", "rises", "rishi", "risks", "risps", "risus", "rites", "ritts", "ritzy", "rivas", "rived", "rivel", "riven", "rives", "riyal", "rizas", "roads", "roams", "roans", "roars", "roary", "roate", "robed", "robes", "roble", "rocks", "roded", "rodes", "roguy", "rohes", "roids", "roils", "roily", "roins", "roist", "rojak", "rojis", "roked", "roker", "rokes", "rolag", "roles", "rolfs", "rolls", "romal", "roman", "romeo", "romps", "ronde", "rondo", "roneo", "rones", "ronin", "ronne", "ronte", "ronts", "roods", "roofs", "roofy", "rooks", "rooky", "rooms", "roons", "roops", "roopy", "roosa", "roose", "roots", "rooty", "roped", "roper", "ropes", "ropey", "roque", "roral", "rores", "roric", "rorid", "rorie", "rorts", "rorty", "rosed", "roses", "roset", "roshi", "rosin", "rosit", "rosti", "rosts", "rotal", "rotan", "rotas", "rotch", "roted", "rotes", "rotis", "rotls", "roton", "rotos", "rotte", "rouen", "roues", "roule", "rouls", "roums", "roups", "roupy", "roust", "routh", "routs", "roved", "roven", "roves", "rowan", "rowed", "rowel", "rowen", "rowie", "rowme", "rownd", "rowth", "rowts", "royne", "royst", "rozet", "rozit", "ruana", "rubai", "rubby", "rubel", "rubes", "rubin", "ruble", "rubli", "rubus", "ruche", "rucks", "rudas", "rudds", "rudes", "rudie", "rudis", "rueda", "ruers", "ruffe", "ruffs", "rugae", "rugal", "ruggy", "ruing", "ruins", "rukhs", "ruled", "rules", "rumal", "rumbo", "rumen", "rumes", "rumly", "rummy", "rumpo", "rumps", "rumpy", "runch", "runds", "runed", "runes", "rungs", "runic", "runny", "runts", "runty", "rupia", "rurps", "rurus", "rusas", "ruses", "rushy", "rusks", "rusma", "russe", "rusts", "ruths", "rutin", "rutty", "ryals", "rybat", "ryked", "rykes", "rymme", "rynds", "ryots", "ryper", "saags", "sabal", "sabed", "saber", "sabes", "sabha", "sabin", "sabir", "sable", "sabot", "sabra", "sabre", "sacks", "sacra", "saddo", "sades", "sadhe", "sadhu", "sadis", "sados", "sadza", "safed", "safes", "sagas", "sager", "sages", "saggy", "sagos", "sagum", "saheb", "sahib", "saice", "saick", "saics", "saids", "saiga", "sails", "saims", "saine", "sains", "sairs", "saist", "saith", "sajou", "sakai", "saker", "sakes", "sakia", "sakis", "sakti", "salal", "salat", "salep", "sales", "salet", "salic", "salix", "salle", "salmi", "salol", "salop", "salpa", "salps", "salse", "salto", "salts", "salue", "salut", "saman", "samas", "samba", "sambo", "samek", "samel", "samen", "sames", "samey", "samfu", "sammy", "sampi", "samps", "sands", "saned", "sanes", "sanga", "sangh", "sango", "sangs", "sanko", "sansa", "santo", "sants", "saola", "sapan", "sapid", "sapor", "saran", "sards", "sared", "saree", "sarge", "sargo", "sarin", "saris", "sarks", "sarky", "sarod", "saros", "sarus", "saser", "sasin", "sasse", "satai", "satay", "sated", "satem", "sates", "satis", "sauba", "sauch", "saugh", "sauls", "sault", "saunt", "saury", "sauts", "saved", "saver", "saves", "savey", "savin", "sawah", "sawed", "sawer", "saxes", "sayed", "sayer", "sayid", "sayne", "sayon", "sayst", "sazes", "scabs", "scads", "scaff", "scags", "scail", "scala", "scall", "scams", "scand", "scans", "scapa", "scape", "scapi", "scarp", "scars", "scart", "scath", "scats", "scatt", "scaud", "scaup", "scaur", "scaws", "sceat", "scena", "scend", "schav", "schmo", "schul", "schwa", "sclim", "scody", "scogs", "scoog", "scoot", "scopa", "scops", "scots", "scoug", "scoup", "scowp", "scows", "scrab", "scrae", "scrag", "scran", "scrat", "scraw", "scray", "scrim", "scrip", "scrob", "scrod", "scrog", "scrow", "scudi", "scudo", "scuds", "scuff", "scuft", "scugs", "sculk", "scull", "sculp", "sculs", "scums", "scups", "scurf", "scurs", "scuse", "scuta", "scute", "scuts", "scuzz", "scyes", "sdayn", "sdein", "seals", "seame", "seams", "seamy", "seans", "seare", "sears", "sease", "seats", "seaze", "sebum", "secco", "sechs", "sects", "seder", "sedes", "sedge", "sedgy", "sedum", "seeds", "seeks", "seeld", "seels", "seely", "seems", "seeps", "seepy", "seers", "sefer", "segar", "segni", "segno", "segol", "segos", "sehri", "seifs", "seils", "seine", "seirs", "seise", "seism", "seity", "seiza", "sekos", "sekts", "selah", "seles", "selfs", "sella", "selle", "sells", "selva", "semee", "semes", "semie", "semis", "senas", "sends", "senes", "sengi", "senna", "senor", "sensa", "sensi", "sente", "senti", "sents", "senvy", "senza", "sepad", "sepal", "sepic", "sepoy", "septa", "septs", "serac", "serai", "seral", "sered", "serer", "seres", "serfs", "serge", "seric", "serin", "serks", "seron", "serow", "serra", "serre", "serrs", "serry", "servo", "sesey", "sessa", "setae", "setal", "seton", "setts", "sewan", "sewar", "sewed", "sewel", "sewen", "sewin", "sexed", "sexer", "sexes", "sexto", "sexts", "seyen", "shads", "shags", "shahs", "shako", "shakt", "shalm", "shaly", "shama", "shams", "shand", "shans", "shaps", "sharn", "shash", "shaul", "shawm", "shawn", "shaws", "shaya", "shays", "shchi", "sheaf", "sheal", "sheas", "sheds", "sheel", "shend", "shent", "sheol", "sherd", "shere", "shero", "shets", "sheva", "shewn", "shews", "shiai", "shiel", "shier", "shies", "shill", "shily", "shims", "shins", "ships", "shirr", "shirs", "shish", "shiso", "shist", "shite", "shits", "shiur", "shiva", "shive", "shivs", "shlep", "shlub", "shmek", "shmoe", "shoat", "shoed", "shoer", "shoes", "shogi", "shogs", "shoji", "shojo", "shola", "shool", "shoon", "shoos", "shope", "shops", "shorl", "shote", "shots", "shott", "showd", "shows", "shoyu", "shred", "shris", "shrow", "shtik", "shtum", "shtup", "shule", "shuln", "shuls", "shuns", "shura", "shute", "shuts", "shwas", "shyer", "sials", "sibbs", "sibyl", "sices", "sicht", "sicko", "sicks", "sicky", "sidas", "sided", "sider", "sides", "sidha", "sidhe", "sidle", "sield", "siens", "sient", "sieth", "sieur", "sifts", "sighs", "sigil", "sigla", "signa", "signs", "sijos", "sikas", "siker", "sikes", "silds", "siled", "silen", "siler", "siles", "silex", "silks", "sills", "silos", "silts", "silty", "silva", "simar", "simas", "simba", "simis", "simps", "simul", "sinds", "sined", "sines", "sings", "sinhs", "sinks", "sinky", "sinus", "siped", "sipes", "sippy", "sired", "siree", "sires", "sirih", "siris", "siroc", "sirra", "sirup", "sisal", "sises", "sista", "sists", "sitar", "sited", "sites", "sithe", "sitka", "situp", "situs", "siver", "sixer", "sixes", "sixmo", "sixte", "sizar", "sized", "sizel", "sizer", "sizes", "skags", "skail", "skald", "skank", "skart", "skats", "skatt", "skaws", "skean", "skear", "skeds", "skeed", "skeef", "skeen", "skeer", "skees", "skeet", "skegg", "skegs", "skein", "skelf", "skell", "skelm", "skelp", "skene", "skens", "skeos", "skeps", "skers", "skets", "skews", "skids", "skied", "skies", "skiey", "skimo", "skims", "skink", "skins", "skint", "skios", "skips", "skirl", "skirr", "skite", "skits", "skive", "skivy", "sklim", "skoal", "skody", "skoff", "skogs", "skols", "skool", "skort", "skosh", "skran", "skrik", "skuas", "skugs", "skyed", "skyer", "skyey", "skyfs", "skyre", "skyrs", "skyte", "slabs", "slade", "slaes", "slags", "slaid", "slake", "slams", "slane", "slank", "slaps", "slart", "slats", "slaty", "slave", "slaws", "slays", "slebs", "sleds", "sleer", "slews", "sleys", "slier", "slily", "slims", "slipe", "slips", "slipt", "slish", "slits", "slive", "sloan", "slobs", "sloes", "slogs", "sloid", "slojd", "slomo", "sloom", "sloot", "slops", "slopy", "slorm", "slots", "slove", "slows", "sloyd", "slubb", "slubs", "slued", "slues", "sluff", "slugs", "sluit", "slums", "slurb", "slurs", "sluse", "sluts", "slyer", "slype", "smaak", "smaik", "smalm", "smalt", "smarm", "smaze", "smeek", "smees", "smeik", "smeke", "smerk", "smews", "smirr", "smirs", "smits", "smogs", "smoko", "smolt", "smoor", "smoot", "smore", "smorg", "smout", "smowt", "smugs", "smurs", "smush", "smuts", "snabs", "snafu", "snags", "snaps", "snarf", "snark", "snars", "snary", "snash", "snath", "snaws", "snead", "sneap", "snebs", "sneck", "sneds", "sneed", "snees", "snell", "snibs", "snick", "snies", "snift", "snigs", "snips", "snipy", "snirt", "snits", "snobs", "snods", "snoek", "snoep", "snogs", "snoke", "snood", "snook", "snool", "snoot", "snots", "snowk", "snows", "snubs", "snugs", "snush", "snyes", "soaks", "soaps", "soare", "soars", "soave", "sobas", "socas", "soces", "socko", "socks", "socle", "sodas", "soddy", "sodic", "sodom", "sofar", "sofas", "softa", "softs", "softy", "soger", "sohur", "soils", "soily", "sojas", "sojus", "sokah", "soken", "sokes", "sokol", "solah", "solan", "solas", "solde", "soldi", "soldo", "solds", "soled", "solei", "soler", "soles", "solon", "solos", "solum", "solus", "soman", "somas", "sonce", "sonde", "sones", "songs", "sonly", "sonne", "sonny", "sonse", "sonsy", "sooey", "sooks", "sooky", "soole", "sools", "sooms", "soops", "soote", "soots", "sophs", "sophy", "sopor", "soppy", "sopra", "soral", "soras", "sorbo", "sorbs", "sorda", "sordo", "sords", "sored", "soree", "sorel", "sorer", "sores", "sorex", "sorgo", "sorns", "sorra", "sorta", "sorts", "sorus", "soths", "sotol", "souce", "souct", "sough", "souks", "souls", "soums", "soups", "soupy", "sours", "souse", "souts", "sowar", "sowce", "sowed", "sowff", "sowfs", "sowle", "sowls", "sowms", "sownd", "sowne", "sowps", "sowse", "sowth", "soyas", "soyle", "soyuz", "sozin", "spacy", "spado", "spaed", "spaer", "spaes", "spags", "spahi", "spail", "spain", "spait", "spake", "spald", "spale", "spall", "spalt", "spams", "spane", "spang", "spans", "spard", "spars", "spart", "spate", "spats", "spaul", "spawl", "spaws", "spayd", "spays", "spaza", "spazz", "speal", "spean", "speat", "specs", "spect", "speel", "speer", "speil", "speir", "speks", "speld", "spelk", "speos", "spets", "speug", "spews", "spewy", "spial", "spica", "spick", "spics", "spide", "spier", "spies", "spiff", "spifs", "spiks", "spile", "spims", "spina", "spink", "spins", "spirt", "spiry", "spits", "spitz", "spivs", "splay", "splog", "spode", "spods", "spoom", "spoor", "spoot", "spork", "sposh", "spots", "sprad", "sprag", "sprat", "spred", "sprew", "sprit", "sprod", "sprog", "sprue", "sprug", "spuds", "spued", "spuer", "spues", "spugs", "spule", "spume", "spumy", "spurs", "sputa", "spyal", "spyre", "squab", "squaw", "squeg", "squid", "squit", "squiz", "stabs", "stade", "stags", "stagy", "staig", "stane", "stang", "staph", "staps", "starn", "starr", "stars", "stats", "staun", "staws", "stays", "stean", "stear", "stedd", "stede", "steds", "steek", "steem", "steen", "steil", "stela", "stele", "stell", "steme", "stems", "stend", "steno", "stens", "stent", "steps", "stept", "stere", "stets", "stews", "stewy", "steys", "stich", "stied", "sties", "stilb", "stile", "stime", "stims", "stimy", "stipa", "stipe", "stire", "stirk", "stirp", "stirs", "stive", "stivy", "stoae", "stoai", "stoas", "stoat", "stobs", "stoep", "stogy", "stoit", "stoln", "stoma", "stond", "stong", "stonk", "stonn", "stook", "stoor", "stope", "stops", "stopt", "stoss", "stots", "stott", "stoun", "stoup", "stour", "stown", "stowp", "stows", "strad", "strae", "strag", "strak", "strep", "strew", "stria", "strig", "strim", "strop", "strow", "stroy", "strum", "stubs", "stude", "studs", "stull", "stulm", "stumm", "stums", "stuns", "stupa", "stupe", "sture", "sturt", "styed", "styes", "styli", "stylo", "styme", "stymy", "styre", "styte", "subah", "subas", "subby", "suber", "subha", "succi", "sucks", "sucky", "sucre", "sudds", "sudor", "sudsy", "suede", "suent", "suers", "suete", "suets", "suety", "sugan", "sughs", "sugos", "suhur", "suids", "suint", "suits", "sujee", "sukhs", "sukuk", "sulci", "sulfa", "sulfo", "sulks", "sulph", "sulus", "sumis", "summa", "sumos", "sumph", "sumps", "sunis", "sunks", "sunna", "sunns", "sunup", "supes", "supra", "surah", "sural", "suras", "surat", "surds", "sured", "sures", "surfs", "surfy", "surgy", "surra", "sused", "suses", "susus", "sutor", "sutra", "sutta", "swabs", "swack", "swads", "swage", "swags", "swail", "swain", "swale", "swaly", "swamy", "swang", "swank", "swans", "swaps", "swapt", "sward", "sware", "swarf", "swart", "swats", "swayl", "sways", "sweal", "swede", "sweed", "sweel", "sweer", "swees", "sweir", "swelt", "swerf", "sweys", "swies", "swigs", "swile", "swims", "swink", "swipe", "swire", "swiss", "swith", "swits", "swive", "swizz", "swobs", "swole", "swoln", "swops", "swopt", "swots", "swoun", "sybbe", "sybil", "syboe", "sybow", "sycee", "syces", "sycon", "syens", "syker", "sykes", "sylis", "sylph", "sylva", "symar", "synch", "syncs", "synds", "syned", "synes", "synth", "syped", "sypes", "syphs", "syrah", "syren", "sysop", "sythe", "syver", "taals", "taata", "taber", "tabes", "tabid", "tabis", "tabla", "tabor", "tabun", "tabus", "tacan", "taces", "tacet", "tache", "tacho", "tachs", "tacks", "tacos", "tacts", "taels", "tafia", "taggy", "tagma", "tahas", "tahrs", "taiga", "taigs", "taiko", "tails", "tains", "taira", "taish", "taits", "tajes", "takas", "takes", "takhi", "takin", "takis", "takky", "talak", "talaq", "talar", "talas", "talcs", "talcy", "talea", "taler", "tales", "talks", "talky", "talls", "talma", "talpa", "taluk", "talus", "tamal", "tamed", "tames", "tamin", "tamis", "tammy", "tamps", "tanas", "tanga", "tangi", "tangs", "tanhs", "tanka", "tanks", "tanky", "tanna", "tansy", "tanti", "tanto", "tanty", "tapas", "taped", "tapen", "tapes", "tapet", "tapis", "tappa", "tapus", "taras", "tardo", "tared", "tares", "targa", "targe", "tarns", "taroc", "tarok", "taros", "tarps", "tarre", "tarry", "tarsi", "tarts", "tarty", "tasar", "tased", "taser", "tases", "tasks", "tassa", "tasse", "tasso", "tatar", "tater", "tates", "taths", "tatie", "tatou", "tatts", "tatus", "taube", "tauld", "tauon", "taupe", "tauts", "tavah", "tavas", "taver", "tawai", "tawas", "tawed", "tawer", "tawie", "tawse", "tawts", "taxed", "taxer", "taxes", "taxis", "taxol", "taxon", "taxor", "taxus", "tayra", "tazza", "tazze", "teade", "teads", "teaed", "teaks", "teals", "teams", "tears", "teats", "teaze", "techs", "techy", "tecta", "teels", "teems", "teend", "teene", "teens", "teeny", "teers", "teffs", "teggs", "tegua", "tegus", "tehrs", "teiid", "teils", "teind", "teins", "telae", "telco", "teles", "telex", "telia", "telic", "tells", "telly", "teloi", "telos", "temed", "temes", "tempi", "temps", "tempt", "temse", "tench", "tends", "tendu", "tenes", "tenge", "tenia", "tenne", "tenno", "tenny", "tenon", "tents", "tenty", "tenue", "tepal", "tepas", "tepoy", "terai", "teras", "terce", "terek", "teres", "terfe", "terfs", "terga", "terms", "terne", "terns", "terry", "terts", "tesla", "testa", "teste", "tests", "tetes", "teths", "tetra", "tetri", "teuch", "teugh", "tewed", "tewel", "tewit", "texas", "texes", "texts", "thack", "thagi", "thaim", "thale", "thali", "thana", "thane", "thang", "thans", "thanx", "tharm", "thars", "thaws", "thawy", "thebe", "theca", "theed", "theek", "thees", "thegn", "theic", "thein", "thelf", "thema", "thens", "theow", "therm", "thesp", "thete", "thews", "thewy", "thigs", "thilk", "thill", "thine", "thins", "thiol", "thirl", "thoft", "thole", "tholi", "thoro", "thorp", "thous", "thowl", "thrae", "thraw", "thrid", "thrip", "throe", "thuds", "thugs", "thuja", "thunk", "thurl", "thuya", "thymi", "thymy", "tians", "tiars", "tical", "ticca", "ticed", "tices", "tichy", "ticks", "ticky", "tiddy", "tided", "tides", "tiers", "tiffs", "tifos", "tifts", "tiges", "tigon", "tikas", "tikes", "tikis", "tikka", "tilak", "tiled", "tiler", "tiles", "tills", "tilly", "tilth", "tilts", "timbo", "timed", "times", "timon", "timps", "tinas", "tinct", "tinds", "tinea", "tined", "tines", "tinge", "tings", "tinks", "tinny", "tints", "tinty", "tipis", "tippy", "tired", "tires", "tirls", "tiros", "tirrs", "titch", "titer", "titis", "titre", "titty", "titup", "tiyin", "tiyns", "tizes", "tizzy", "toads", "toady", "toaze", "tocks", "tocky", "tocos", "todde", "toeas", "toffs", "toffy", "tofts", "tofus", "togae", "togas", "toged", "toges", "togue", "tohos", "toile", "toils", "toing", "toise", "toits", "tokay", "toked", "toker", "tokes", "tokos", "tolan", "tolar", "tolas", "toled", "toles", "tolls", "tolly", "tolts", "tolus", "tolyl", "toman", "tombs", "tomes", "tomia", "tommy", "tomos", "tondi", "tondo", "toned", "toner", "tones", "toney", "tongs", "tonka", "tonks", "tonne", "tonus", "tools", "tooms", "toons", "toots", "toped", "topee", "topek", "toper", "topes", "tophe", "tophi", "tophs", "topis", "topoi", "topos", "toppy", "toque", "torah", "toran", "toras", "torcs", "tores", "toric", "torii", "toros", "torot", "torrs", "torse", "torsi", "torsk", "torta", "torte", "torts", "tosas", "tosed", "toses", "toshy", "tossy", "toted", "toter", "totes", "totty", "touks", "touns", "tours", "touse", "tousy", "touts", "touze", "touzy", "towed", "towie", "towns", "towny", "towse", "towsy", "towts", "towze", "towzy", "toyed", "toyer", "toyon", "toyos", "tozed", "tozes", "tozie", "trabs", "trads", "tragi", "traik", "trams", "trank", "tranq", "trans", "trant", "trape", "traps", "trapt", "trass", "trats", "tratt", "trave", "trayf", "trays", "treck", "treed", "treen", "trees", "trefa", "treif", "treks", "trema", "trems", "tress", "trest", "trets", "trews", "treyf", "treys", "triac", "tride", "trier", "tries", "triff", "trigo", "trigs", "trike", "trild", "trill", "trims", "trine", "trins", "triol", "trior", "trios", "trips", "tripy", "trist", "troad", "troak", "troat", "trock", "trode", "trods", "trogs", "trois", "troke", "tromp", "trona", "tronc", "trone", "tronk", "trons", "trooz", "troth", "trots", "trows", "troys", "trued", "trues", "trugo", "trugs", "trull", "tryer", "tryke", "tryma", "tryps", "tsade", "tsadi", "tsars", "tsked", "tsuba", "tsubo", "tuans", "tuart", "tuath", "tubae", "tubar", "tubas", "tubby", "tubed", "tubes", "tucks", "tufas", "tuffe", "tuffs", "tufts", "tufty", "tugra", "tuile", "tuina", "tuism", "tuktu", "tules", "tulpa", "tulsi", "tumid", "tummy", "tumps", "tumpy", "tunas", "tunds", "tuned", "tuner", "tunes", "tungs", "tunny", "tupek", "tupik", "tuple", "tuque", "turds", "turfs", "turfy", "turks", "turme", "turms", "turns", "turnt", "turps", "turrs", "tushy", "tusks", "tusky", "tutee", "tutti", "tutty", "tutus", "tuxes", "tuyer", "twaes", "twain", "twals", "twank", "twats", "tways", "tweel", "tween", "tweep", "tweer", "twerk", "twerp", "twier", "twigs", "twill", "twilt", "twink", "twins", "twiny", "twire", "twirp", "twite", "twits", "twoer", "twyer", "tyees", "tyers", "tyiyn", "tykes", "tyler", "tymps", "tynde", "tyned", "tynes", "typal", "typed", "types", "typey", "typic", "typos", "typps", "typto", "tyran", "tyred", "tyres", "tyros", "tythe", "tzars", "udals", "udons", "ugali", "ugged", "uhlan", "uhuru", "ukase", "ulama", "ulans", "ulema", "ulmin", "ulnad", "ulnae", "ulnar", "ulnas", "ulpan", "ulvas", "ulyie", "ulzie", "umami", "umbel", "umber", "umble", "umbos", "umbre", "umiac", "umiak", "umiaq", "ummah", "ummas", "ummed", "umped", "umphs", "umpie", "umpty", "umrah", "umras", "unais", "unapt", "unarm", "unary", "unaus", "unbag", "unban", "unbar", "unbed", "unbid", "unbox", "uncap", "unces", "uncia", "uncos", "uncoy", "uncus", "undam", "undee", "undos", "undug", "uneth", "unfix", "ungag", "unget", "ungod", "ungot", "ungum", "unhat", "unhip", "unica", "units", "unjam", "unked", "unket", "unkid", "unlaw", "unlay", "unled", "unlet", "unlid", "unman", "unmew", "unmix", "unpay", "unpeg", "unpen", "unpin", "unred", "unrid", "unrig", "unrip", "unsaw", "unsay", "unsee", "unsew", "unsex", "unsod", "untax", "untin", "unwet", "unwit", "unwon", "upbow", "upbye", "updos", "updry", "upend", "upjet", "uplay", "upled", "uplit", "upped", "upran", "uprun", "upsee", "upsey", "uptak", "upter", "uptie", "uraei", "urali", "uraos", "urare", "urari", "urase", "urate", "urbex", "urbia", "urdee", "ureal", "ureas", "uredo", "ureic", "urena", "urent", "urged", "urger", "urges", "urial", "urite", "urman", "urnal", "urned", "urped", "ursae", "ursid", "urson", "urubu", "urvas", "users", "usnea", "usque", "usure", "usury", "uteri", "uveal", "uveas", "uvula", "vacua", "vaded", "vades", "vagal", "vagus", "vails", "vaire", "vairs", "vairy", "vakas", "vakil", "vales", "valis", "valse", "vamps", "vampy", "vanda", "vaned", "vanes", "vangs", "vants", "vaped", "vaper", "vapes", "varan", "varas", "vardy", "varec", "vares", "varia", "varix", "varna", "varus", "varve", "vasal", "vases", "vasts", "vasty", "vatic", "vatus", "vauch", "vaute", "vauts", "vawte", "vaxes", "veale", "veals", "vealy", "veena", "veeps", "veers", "veery", "vegas", "veges", "vegie", "vegos", "vehme", "veils", "veily", "veins", "veiny", "velar", "velds", "veldt", "veles", "vells", "velum", "venae", "venal", "vends", "vendu", "veney", "venge", "venin", "vents", "venus", "verbs", "verra", "verry", "verst", "verts", "vertu", "vespa", "vesta", "vests", "vetch", "vexed", "vexer", "vexes", "vexil", "vezir", "vials", "viand", "vibes", "vibex", "vibey", "viced", "vices", "vichy", "viers", "views", "viewy", "vifda", "viffs", "vigas", "vigia", "vilde", "viler", "villi", "vills", "vimen", "vinal", "vinas", "vinca", "vined", "viner", "vines", "vinew", "vinic", "vinos", "vints", "viold", "viols", "vired", "vireo", "vires", "virga", "virge", "virid", "virls", "virtu", "visas", "vised", "vises", "visie", "visne", "vison", "visto", "vitae", "vitas", "vitex", "vitro", "vitta", "vivas", "vivat", "vivda", "viver", "vives", "vizir", "vizor", "vleis", "vlies", "vlogs", "voars", "vocab", "voces", "voddy", "vodou", "vodun", "voema", "vogie", "voids", "voile", "voips", "volae", "volar", "voled", "voles", "volet", "volks", "volta", "volte", "volti", "volts", "volva", "volve", "vomer", "voted", "votes", "vouge", "voulu", "vowed", "vower", "voxel", "vozhd", "vraic", "vrils", "vroom", "vrous", "vrouw", "vrows", "vuggs", "vuggy", "vughs", "vughy", "vulgo", "vulns", "vulva", "vutty", "waacs", "wacke", "wacko", "wacks", "wadds", "waddy", "waded", "wader", "wades", "wadge", "wadis", "wadts", "waffs", "wafts", "waged", "wages", "wagga", "wagyu", "wahoo", "waide", "waifs", "waift", "wails", "wains", "wairs", "waite", "waits", "wakas", "waked", "waken", "waker", "wakes", "wakfs", "waldo", "walds", "waled", "waler", "wales", "walie", "walis", "walks", "walla", "walls", "wally", "walty", "wamed", "wames", "wamus", "wands", "waned", "wanes", "waney", "wangs", "wanks", "wanky", "wanle", "wanly", "wanna", "wants", "wanty", "wanze", "waqfs", "warbs", "warby", "wards", "wared", "wares", "warez", "warks", "warms", "warns", "warps", "warre", "warst", "warts", "wases", "washy", "wasms", "wasps", "waspy", "wasts", "watap", "watts", "wauff", "waugh", "wauks", "waulk", "wauls", "waurs", "waved", "waves", "wavey", "wawas", "wawes", "wawls", "waxed", "waxer", "waxes", "wayed", "wazir", "wazoo", "weald", "weals", "weamb", "weans", "wears", "webby", "weber", "wecht", "wedel", "wedgy", "weeds", "weeke", "weeks", "weels", "weems", "weens", "weeny", "weeps", "weepy", "weest", "weete", "weets", "wefte", "wefts", "weids", "weils", "weirs", "weise", "weize", "wekas", "welds", "welke", "welks", "welkt", "wells", "welly", "welts", "wembs", "wench", "wends", "wenge", "wenny", "wents", "weros", "wersh", "wests", "wetas", "wetly", "wexed", "wexes", "whamo", "whams", "whang", "whaps", "whare", "whata", "whats", "whaup", "whaur", "wheal", "whear", "wheen", "wheep", "wheft", "whelk", "whelm", "whens", "whets", "whews", "wheys", "whids", "whift", "whigs", "whilk", "whims", "whins", "whios", "whips", "whipt", "whirr", "whirs", "whish", "whiss", "whist", "whits", "whity", "whizz", "whomp", "whoof", "whoot", "whops", "whore", "whorl", "whort", "whoso", "whows", "whump", "whups", "whyda", "wicca", "wicks", "wicky", "widdy", "wides", "wiels", "wifed", "wifes", "wifey", "wifie", "wifty", "wigan", "wigga", "wiggy", "wikis", "wilco", "wilds", "wiled", "wiles", "wilga", "wilis", "wilja", "wills", "wilts", "wimps", "winds", "wined", "wines", "winey", "winge", "wings", "wingy", "winks", "winna", "winns", "winos", "winze", "wiped", "wiper", "wipes", "wired", "wirer", "wires", "wirra", "wised", "wises", "wisha", "wisht", "wisps", "wists", "witan", "wited", "wites", "withe", "withs", "withy", "wived", "wiver", "wives", "wizen", "wizes", "woads", "woald", "wocks", "wodge", "woful", "wojus", "woker", "wokka", "wolds", "wolfs", "wolly", "wolve", "wombs", "womby", "womyn", "wonga", "wongi", "wonks", "wonky", "wonts", "woods", "wooed", "woofs", "woofy", "woold", "wools", "woons", "woops", "woopy", "woose", "woosh", "wootz", "words", "works", "worms", "wormy", "worts", "wowed", "wowee", "woxen", "wrang", "wraps", "wrapt", "wrast", "wrate", "wrawl", "wrens", "wrick", "wried", "wrier", "wries", "writs", "wroke", "wroot", "wroth", "wryer", "wuddy", "wudus", "wulls", "wurst", "wuses", "wushu", "wussy", "wuxia", "wyled", "wyles", "wynds", "wynns", "wyted", "wytes", "xebec", "xenia", "xenic", "xenon", "xeric", "xerox", "xerus", "xoana", "xrays", "xylan", "xylem", "xylic", "xylol", "xylyl", "xysti", "xysts", "yaars", "yabas", "yabba", "yabby", "yacca", "yacka", "yacks", "yaffs", "yager", "yages", "yagis", "yahoo", "yaird", "yakka", "yakow", "yales", "yamen", "yampy", "yamun", "yangs", "yanks", "yapok", "yapon", "yapps", "yappy", "yarak", "yarco", "yards", "yarer", "yarfa", "yarks", "yarns", "yarrs", "yarta", "yarto", "yates", "yauds", "yauld", "yaups", "yawed", "yawey", "yawls", "yawns", "yawny", "yawps", "ybore", "yclad", "ycled", "ycond", "ydrad", "ydred", "yeads", "yeahs", "yealm", "yeans", "yeard", "years", "yecch", "yechs", "yechy", "yedes", "yeeds", "yeesh", "yeggs", "yelks", "yells", "yelms", "yelps", "yelts", "yenta", "yente", "yerba", "yerds", "yerks", "yeses", "yesks", "yests", "yesty", "yetis", "yetts", "yeuks", "yeuky", "yeven", "yeves", "yewen", "yexed", "yexes", "yfere", "yiked", "yikes", "yills", "yince", "yipes", "yippy", "yirds", "yirks", "yirrs", "yirth", "yites", "yitie", "ylems", "ylike", "ylkes", "ymolt", "ympes", "yobbo", "yobby", "yocks", "yodel", "yodhs", "yodle", "yogas", "yogee", "yoghs", "yogic", "yogin", "yogis", "yoick", "yojan", "yoked", "yokel", "yoker", "yokes", "yokul", "yolks", "yolky", "yomim", "yomps", "yonic", "yonis", "yonks", "yoofs", "yoops", "yores", "yorks", "yorps", "youks", "yourn", "yours", "yourt", "youse", "yowed", "yowes", "yowie", "yowls", "yowza", "yrapt", "yrent", "yrivd", "yrneh", "ysame", "ytost", "yuans", "yucas", "yucca", "yucch", "yucko", "yucks", "yucky", "yufts", "yugas", "yuked", "yukes", "yukky", "yukos", "yulan", "yules", "yummo", "yummy", "yumps", "yupon", "yuppy", "yurta", "yurts", "yuzus", "zabra", "zacks", "zaida", "zaidy", "zaire", "zakat", "zaman", "zambo", "zamia", "zanja", "zante", "zanza", "zanze", "zappy", "zarfs", "zaris", "zatis", "zaxes", "zayin", "zazen", "zeals", "zebec", "zebub", "zebus", "zedas", "zeins", "zendo", "zerda", "zerks", "zeros", "zests", "zetas", "zexes", "zezes", "zhomo", "zibet", "ziffs", "zigan", "zilas", "zilch", "zilla", "zills", "zimbi", "zimbs", "zinco", "zincs", "zincy", "zineb", "zines", "zings", "zingy", "zinke", "zinky", "zippo", "zippy", "ziram", "zitis", "zizel", "zizit", "zlote", "zloty", "zoaea", "zobos", "zobus", "zocco", "zoeae", "zoeal", "zoeas", "zoism", "zoist", "zombi", "zonae", "zonda", "zoned", "zoner", "zones", "zonks", "zooea", "zooey", "zooid", "zooks", "zooms", "zoons", "zooty", "zoppa", "zoppo", "zoril", "zoris", "zorro", "zouks", "zowee", "zowie", "zulus", "zupan", "zupas", "zuppa", "zurfs", "zuzim", "zygal", "zygon", "zymes", "zymic"];
+function isValidWord(word) {
+    let index = -1;
+    index = SolutionWords.findIndex(val => val === word);
+    if (index > -1)
+        return true;
+    index = ValidWords.findIndex(val => val === word);
+    return index > -1;
+}
+function getRandomSolution(seed) {
+    let index = (Math.random() * SolutionWords.length) >> 0;
+    return SolutionWords[index];
+}
+
+function getNewState(seed) {
+    return {
+        wrd: [
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+            [null, null, null, null, null],
+        ],
+        fbk: [
+            [
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+            ],
+            [
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+            ],
+            [
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+            ],
+            [
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+            ],
+            [
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+            ],
+            [
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+                0 /* empty */,
+            ],
+        ],
+        kbd: {
+            a: 0 /* empty */,
+            b: 0 /* empty */,
+            c: 0 /* empty */,
+            d: 0 /* empty */,
+            e: 0 /* empty */,
+            f: 0 /* empty */,
+            g: 0 /* empty */,
+            h: 0 /* empty */,
+            i: 0 /* empty */,
+            j: 0 /* empty */,
+            k: 0 /* empty */,
+            l: 0 /* empty */,
+            m: 0 /* empty */,
+            n: 0 /* empty */,
+            o: 0 /* empty */,
+            p: 0 /* empty */,
+            q: 0 /* empty */,
+            r: 0 /* empty */,
+            s: 0 /* empty */,
+            t: 0 /* empty */,
+            u: 0 /* empty */,
+            v: 0 /* empty */,
+            w: 0 /* empty */,
+            x: 0 /* empty */,
+            y: 0 /* empty */,
+            z: 0 /* empty */,
+        },
+        row: 0,
+        col: 0,
+        sol: getRandomSolution().split(''),
+        msg: 0 /* none */,
+        fin: false,
+    };
+}
+function addAplhabet(state, alpha) {
+    const nextState = fn(state, draft => {
+        draft.msg = 0 /* none */;
+        if (draft.col === 5)
+            return;
+        draft.wrd[draft.row][draft.col] = alpha;
+        draft.col++;
+    });
+    return nextState;
+}
+function removeAlphabet(state) {
+    const nextState = fn(state, draft => {
+        draft.msg = 0 /* none */;
+        if (draft.col === 0)
+            return;
+        draft.col--;
+        draft.wrd[draft.row][draft.col] = null;
+    });
+    return nextState;
+}
+function evaluateGuess(guess, solution) {
+    const feedback = new Array(5).fill(1 /* absent */);
+    const markedGuess = new Array(5).fill(false);
+    const markedSolution = new Array(5).fill(false);
+    guess.forEach((char, i) => {
+        if (char !== solution[i])
+            return;
+        feedback[i] = 3 /* correct */;
+        markedGuess[i] = true;
+        markedSolution[i] = true;
+    });
+    guess.forEach((char, ci) => {
+        if (markedGuess[ci])
+            return;
+        for (let si = 0; si < 5; si++) {
+            if (markedSolution[si])
+                continue;
+            if (char !== solution[si])
+                continue;
+            feedback[ci] = 2 /* present */;
+            markedSolution[si] = true;
+            break;
+        }
+    });
+    return feedback;
+}
+function updateKeyboard(keyboard, guess, feedback) {
+    const newKbd = fn(keyboard, draft => {
+        guess.forEach((char, i) => {
+            draft[char] = Math.max(draft[char], feedback[i]);
+        });
+    });
+    return newKbd;
+}
+function submitGuess(state) {
+    const nextState = fn(state, draft => {
+        if (draft.col !== 5) {
+            draft.msg = 1 /* less */;
+            return;
+        }
+        if (!isValidWord(draft.wrd[draft.row].join(''))) {
+            draft.msg = 2 /* invalid */;
+            return;
+        }
+        draft.fbk[draft.row] = evaluateGuess(draft.wrd[draft.row], draft.sol);
+        draft.kbd = updateKeyboard(draft.kbd, draft.wrd[draft.row], draft.fbk[draft.row]);
+        if (draft.wrd[draft.row].join('') === draft.sol.join('')) {
+            draft.msg = 3 /* win */;
+            draft.fin = true;
+        }
+        draft.row++;
+        draft.col = 0;
+        if (!draft.fin && draft.row === 6) {
+            draft.fin = true;
+            draft.msg = 4 /* lose */;
+        }
+    });
+    return nextState;
+}
+
+function play(state, action = 'new') {
+    if (!state || state.fin || action === 'new') {
+        return getNewState();
+    }
+    if (action === 'bksp') {
+        return removeAlphabet(state);
+    }
+    if (action === 'enter') {
+        return submitGuess(state);
+    }
+    if (action.length === 1 && action >= 'a' && action <= 'z') {
+        return addAplhabet(state, action);
+    }
+    return state;
+}
+
+// format
+// row col msg fin sol kbd wrd fbk
+//    bits    start   end   type    value   data  
+//    3       0       3     row     001     1
+//    3       3       6     col     001     1
+//    3       6       9     msg     000     none
+//    1       9       10    fin     0       false
+//    5       10      15    sol[0]  00010   't'
+//    5       15      20    sol[1]  00000   'u'
+//    5       20      25    sol[2]  00000   'l'
+//    5       25      30    sol[3]  00000   'i'
+//    5       30      35    sol[4]  00000   'p'
+//    2       35      37    kbd.a   00      empty
+//    2       37      39    kbd.b   00      empty
+//    2       39      41    kbd.c   00      empty
+//    2       41      43    kbd.d   00      empty
+//    2       43      45    kbd.e   00      empty
+//    2       45      47    kbd.f   00      empty
+//    2       47      49    kbd.g   00      empty
+//    2       49      51    kbd.h   00      empty
+//    2       51      53    kbd.i   00      empty
+//    2       53      55    kbd.j   00      empty
+//    2       55      57    kbd.k   00      empty
+//    2       57      59    kbd.l   00      empty
+//    2       59      61    kbd.m   00      empty
+//    2       61      63    kbd.n   00      empty
+//    2       63      65    kbd.o   00      empty
+//    2       65      67    kbd.p   00      empty
+//    2       67      69    kbd.q   00      empty
+//    2       69      71    kbd.r   00      empty
+//    2       71      73    kbd.s   00      empty
+//    2       73      75    kbd.t   00      empty
+//    2       75      77    kbd.u   00      empty
+//    2       77      79    kbd.v   00      empty
+//    2       79      81    kbd.w   00      empty
+//    2       81      83    kbd.x   00      empty
+//    2       83      85    kbd.y   00      empty
+//    2       85      87    kbd.z   00      empty
+//    5       87      92    wrd0:0  00000   'c'
+//    5       92      97    wrd0:1  00000   'r'
+//    5       97      102   wrd0:2  00000   'a'
+//    5       102     107   wrd0:3  00000   'n'
+//    5       107     112   wrd0:4  00000   'e'
+//    5       112     117   wrd1:1  00000   'g'
+//    2       117     119   fbk0:0  00      absent
+//    2       119     121   fbk0:1  00      absent
+//    2       121     123   fbk0:2  00      absent
+//    2       123     125   fbk0:3  00      absent
+//    2       125     127   fbk0:4  00      absent  
+// 000 000 000 0 00000 01000 10010 01011 00100 00000000000000000000000000 00000000000000000000000000 000
+function serialize(state) {
+    let str = '';
+    // row col msg fin
+    str += state.row.toString(2).padStart(3, '0');
+    str += state.col.toString(2).padStart(3, '0');
+    str += state.msg.toString(2).padStart(3, '0');
+    str += Number(state.fin).toString(2);
+    // sol
+    str += asciiToBin(state.sol.join(''));
+    // kbd
+    str += Object.entries(state.kbd)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(x => x[1])
+        .map(x => x.toString(2).padStart(2, '0'))
+        .join('');
+    // wrd
+    str += asciiToBin(state.wrd.map((chars) => chars.join('')).join(''));
+    // fbk
+    str += state.fbk
+        .slice(0, state.row)
+        .map(row => row.map(x => x.toString(2).padStart(2, '0')).join(''))
+        .join('');
+    return binToB32(str);
+}
+function deserialize(str) {
+    const state = {};
+    str = b32ToBin(str);
+    let cursor = 0;
+    const consume = (x) => {
+        return parseInt(str.slice(cursor, cursor += x).padEnd(x, '0'), 2);
+    };
+    // row col msg fin
+    state.row = consume(3);
+    state.col = consume(3);
+    state.msg = consume(3);
+    state.fin = Boolean(consume(1));
+    // sol
+    state.sol = String.fromCharCode(...new Array(5).fill(null).map(_ => consume(5) + 97)).split('');
+    // kbd
+    state.kbd = Object.fromEntries(new Array(26).fill(null)
+        .map((_, i) => [String.fromCharCode(i + 97), consume(2)]));
+    // wrd
+    const wordsLen = state.row * 5 + state.col;
+    const words = String.fromCharCode(...new Array(wordsLen).fill(null).map(_ => consume(5) + 97)).split('');
+    const nullWords = new Array(30 - wordsLen).fill(null);
+    const allWords = [...words, ...nullWords];
+    const wrd = [];
+    while (allWords.length)
+        wrd.push(allWords.splice(0, 5));
+    state.wrd = wrd;
+    // fbk
+    const feedbacksLen = state.row * 5;
+    const feedbacks = new Array(feedbacksLen).fill(null).map(_ => consume(2));
+    const emptyFeedbacks = new Array(30 - feedbacksLen).fill(0 /* empty */);
+    const allFeedbacks = [...feedbacks, ...emptyFeedbacks];
+    const fbk = [];
+    while (allFeedbacks.length)
+        fbk.push(allFeedbacks.splice(0, 5));
+    state.fbk = fbk;
+    return state;
+}
+function asciiToBin(char) {
+    if (char.length === 0)
+        return '';
+    if (char.length === 1) {
+        if (char < 'a' || char > 'z')
+            return '';
+        return (char.charCodeAt(0) - 97).toString(2).padStart(5, '0');
+    }
+    return char.split('').map(c => asciiToBin(c)).join('');
+}
+function binToB32(binStr) {
+    var _a, _b;
+    return (_b = (_a = binStr
+        .match(/[01]{1,5}/g)) === null || _a === void 0 ? void 0 : _a.map(num => parseInt(num.padEnd(5, '0'), 2).toString(32)).join('')) !== null && _b !== void 0 ? _b : '';
+}
+function b32ToBin(b32Str) {
+    return b32Str
+        .split('')
+        .map(num => parseInt(num, 32).toString(2).padStart(5, '0'))
+        .join('');
+}
+
+const messages = {
+    [0 /* none */]: [''],
+    [1 /* less */]: [
+        'not enough characters',
+        'guess must be a five letter word',
+    ],
+    [2 /* invalid */]: ['not a valid word', 'word not valid'],
+    [3 /* win */]: ['Great', 'Awesome', 'You Win', 'Genius'],
+    [4 /* lose */]: ['Loser', 'You Suck!', 'Better Luck next tym.'],
+};
+function getMessageString(type) {
+    const msgs = messages[type];
+    const index = Math.floor(Math.random() * msgs.length);
+    return msgs[index];
+}
+
+var lib$9 = {exports: {}};
+
+var ArrayProto = Array.prototype;
+var ObjProto = Object.prototype;
+var escapeMap = {
+  '&': '&amp;',
+  '"': '&quot;',
+  '\'': '&#39;',
+  '<': '&lt;',
+  '>': '&gt;'
+};
+var escapeRegex = /[&"'<>]/g;
+
+var _exports$1 = lib$9.exports = {};
+
+function hasOwnProp(obj, k) {
+  return ObjProto.hasOwnProperty.call(obj, k);
+}
+
+_exports$1.hasOwnProp = hasOwnProp;
+
+function lookupEscape(ch) {
+  return escapeMap[ch];
+}
+
+function _prettifyError$1(path, withInternals, err) {
+  if (!err.Update) {
+    // not one of ours, cast it
+    err = new _exports$1.TemplateError(err);
+  }
+
+  err.Update(path); // Unless they marked the dev flag, show them a trace from here
+
+  if (!withInternals) {
+    var old = err;
+    err = new Error(old.message);
+    err.name = old.name;
+  }
+
+  return err;
+}
+
+_exports$1._prettifyError = _prettifyError$1;
+
+function TemplateError$1(message, lineno, colno) {
+  var err;
+  var cause;
+
+  if (message instanceof Error) {
+    cause = message;
+    message = cause.name + ": " + cause.message;
+  }
+
+  if (Object.setPrototypeOf) {
+    err = new Error(message);
+    Object.setPrototypeOf(err, TemplateError$1.prototype);
+  } else {
+    err = this;
+    Object.defineProperty(err, 'message', {
+      enumerable: false,
+      writable: true,
+      value: message
+    });
+  }
+
+  Object.defineProperty(err, 'name', {
+    value: 'Template render error'
+  });
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(err, this.constructor);
+  }
+
+  var getStack;
+
+  if (cause) {
+    var stackDescriptor = Object.getOwnPropertyDescriptor(cause, 'stack');
+
+    getStack = stackDescriptor && (stackDescriptor.get || function () {
+      return stackDescriptor.value;
+    });
+
+    if (!getStack) {
+      getStack = function getStack() {
+        return cause.stack;
+      };
+    }
+  } else {
+    var stack = new Error(message).stack;
+
+    getStack = function getStack() {
+      return stack;
+    };
+  }
+
+  Object.defineProperty(err, 'stack', {
+    get: function get() {
+      return getStack.call(err);
+    }
+  });
+  Object.defineProperty(err, 'cause', {
+    value: cause
+  });
+  err.lineno = lineno;
+  err.colno = colno;
+  err.firstUpdate = true;
+
+  err.Update = function Update(path) {
+    var msg = '(' + (path || 'unknown path') + ')'; // only show lineno + colno next to path of template
+    // where error occurred
+
+    if (this.firstUpdate) {
+      if (this.lineno && this.colno) {
+        msg += " [Line " + this.lineno + ", Column " + this.colno + "]";
+      } else if (this.lineno) {
+        msg += " [Line " + this.lineno + "]";
+      }
+    }
+
+    msg += '\n ';
+
+    if (this.firstUpdate) {
+      msg += ' ';
+    }
+
+    this.message = msg + (this.message || '');
+    this.firstUpdate = false;
+    return this;
+  };
+
+  return err;
+}
+
+if (Object.setPrototypeOf) {
+  Object.setPrototypeOf(TemplateError$1.prototype, Error.prototype);
+} else {
+  TemplateError$1.prototype = Object.create(Error.prototype, {
+    constructor: {
+      value: TemplateError$1
+    }
+  });
+}
+
+_exports$1.TemplateError = TemplateError$1;
+
+function escape$1(val) {
+  return val.replace(escapeRegex, lookupEscape);
+}
+
+_exports$1.escape = escape$1;
+
+function isFunction$1(obj) {
+  return ObjProto.toString.call(obj) === '[object Function]';
+}
+
+_exports$1.isFunction = isFunction$1;
+
+function isArray(obj) {
+  return ObjProto.toString.call(obj) === '[object Array]';
+}
+
+_exports$1.isArray = isArray;
+
+function isString$1(obj) {
+  return ObjProto.toString.call(obj) === '[object String]';
+}
+
+_exports$1.isString = isString$1;
+
+function isObject$1(obj) {
+  return ObjProto.toString.call(obj) === '[object Object]';
+}
+
+_exports$1.isObject = isObject$1;
+/**
+ * @param {string|number} attr
+ * @returns {(string|number)[]}
+ * @private
+ */
+
+function _prepareAttributeParts(attr) {
+  if (!attr) {
+    return [];
+  }
+
+  if (typeof attr === 'string') {
+    return attr.split('.');
+  }
+
+  return [attr];
+}
+/**
+ * @param {string}   attribute      Attribute value. Dots allowed.
+ * @returns {function(Object): *}
+ */
+
+
+function getAttrGetter(attribute) {
+  var parts = _prepareAttributeParts(attribute);
+
+  return function attrGetter(item) {
+    var _item = item;
+
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i]; // If item is not an object, and we still got parts to handle, it means
+      // that something goes wrong. Just roll out to undefined in that case.
+
+      if (hasOwnProp(_item, part)) {
+        _item = _item[part];
+      } else {
+        return undefined;
+      }
+    }
+
+    return _item;
+  };
+}
+
+_exports$1.getAttrGetter = getAttrGetter;
+
+function groupBy(obj, val, throwOnUndefined) {
+  var result = {};
+  var iterator = isFunction$1(val) ? val : getAttrGetter(val);
+
+  for (var i = 0; i < obj.length; i++) {
+    var value = obj[i];
+    var key = iterator(value, i);
+
+    if (key === undefined && throwOnUndefined === true) {
+      throw new TypeError("groupby: attribute \"" + val + "\" resolved to undefined");
+    }
+
+    (result[key] || (result[key] = [])).push(value);
+  }
+
+  return result;
+}
+
+_exports$1.groupBy = groupBy;
+
+function toArray(obj) {
+  return Array.prototype.slice.call(obj);
+}
+
+_exports$1.toArray = toArray;
+
+function without(array) {
+  var result = [];
+
+  if (!array) {
+    return result;
+  }
+
+  var length = array.length;
+  var contains = toArray(arguments).slice(1);
+  var index = -1;
+
+  while (++index < length) {
+    if (indexOf(contains, array[index]) === -1) {
+      result.push(array[index]);
+    }
+  }
+
+  return result;
+}
+
+_exports$1.without = without;
+
+function repeat(char_, n) {
+  var str = '';
+
+  for (var i = 0; i < n; i++) {
+    str += char_;
+  }
+
+  return str;
+}
+
+_exports$1.repeat = repeat;
+
+function each(obj, func, context) {
+  if (obj == null) {
+    return;
+  }
+
+  if (ArrayProto.forEach && obj.forEach === ArrayProto.forEach) {
+    obj.forEach(func, context);
+  } else if (obj.length === +obj.length) {
+    for (var i = 0, l = obj.length; i < l; i++) {
+      func.call(context, obj[i], i, obj);
+    }
+  }
+}
+
+_exports$1.each = each;
+
+function map$1(obj, func) {
+  var results = [];
+
+  if (obj == null) {
+    return results;
+  }
+
+  if (ArrayProto.map && obj.map === ArrayProto.map) {
+    return obj.map(func);
+  }
+
+  for (var i = 0; i < obj.length; i++) {
+    results[results.length] = func(obj[i], i);
+  }
+
+  if (obj.length === +obj.length) {
+    results.length = obj.length;
+  }
+
+  return results;
+}
+
+_exports$1.map = map$1;
+
+function asyncIter(arr, iter, cb) {
+  var i = -1;
+
+  function next() {
+    i++;
+
+    if (i < arr.length) {
+      iter(arr[i], i, next, cb);
+    } else {
+      cb();
+    }
+  }
+
+  next();
+}
+
+_exports$1.asyncIter = asyncIter;
+
+function asyncFor(obj, iter, cb) {
+  var keys = keys_(obj || {});
+  var len = keys.length;
+  var i = -1;
+
+  function next() {
+    i++;
+    var k = keys[i];
+
+    if (i < len) {
+      iter(k, obj[k], i, len, next);
+    } else {
+      cb();
+    }
+  }
+
+  next();
+}
+
+_exports$1.asyncFor = asyncFor;
+
+function indexOf(arr, searchElement, fromIndex) {
+  return Array.prototype.indexOf.call(arr || [], searchElement, fromIndex);
+}
+
+_exports$1.indexOf = indexOf;
+
+function keys_(obj) {
+  /* eslint-disable no-restricted-syntax */
+  var arr = [];
+
+  for (var k in obj) {
+    if (hasOwnProp(obj, k)) {
+      arr.push(k);
+    }
+  }
+
+  return arr;
+}
+
+_exports$1.keys = keys_;
+
+function _entries(obj) {
+  return keys_(obj).map(function (k) {
+    return [k, obj[k]];
+  });
+}
+
+_exports$1._entries = _entries;
+
+function _values(obj) {
+  return keys_(obj).map(function (k) {
+    return obj[k];
+  });
+}
+
+_exports$1._values = _values;
+
+function extend(obj1, obj2) {
+  obj1 = obj1 || {};
+  keys_(obj2).forEach(function (k) {
+    obj1[k] = obj2[k];
+  });
+  return obj1;
+}
+
+_exports$1._assign = _exports$1.extend = extend;
+
+function inOperator(key, val) {
+  if (isArray(val) || isString$1(val)) {
+    return val.indexOf(key) !== -1;
+  } else if (isObject$1(val)) {
+    return key in val;
+  }
+
+  throw new Error('Cannot use "in" operator to search for "' + key + '" in unexpected types.');
+}
+
+_exports$1.inOperator = inOperator;
+
+var domain; // The domain module is executed on demand
+var hasSetImmediate = typeof setImmediate === "function";
+
+// Use the fastest means possible to execute a task in its own turn, with
+// priority over other events including network IO events in Node.js.
+//
+// An exception thrown by a task will permanently interrupt the processing of
+// subsequent tasks. The higher level `asap` function ensures that if an
+// exception is thrown by a task, that the task queue will continue flushing as
+// soon as possible, but if you use `rawAsap` directly, you are responsible to
+// either ensure that no exceptions are thrown from your task, or to manually
+// call `rawAsap.requestFlush` if an exception is thrown.
+var raw = rawAsap$1;
+function rawAsap$1(task) {
+    if (!queue.length) {
+        requestFlush();
+        flushing = true;
+    }
+    // Avoids a function call
+    queue[queue.length] = task;
+}
+
+var queue = [];
+// Once a flush has been requested, no further calls to `requestFlush` are
+// necessary until the next `flush` completes.
+var flushing = false;
+// The position of the next task to execute in the task queue. This is
+// preserved between calls to `flush` so that it can be resumed if
+// a task throws an exception.
+var index = 0;
+// If a task schedules additional tasks recursively, the task queue can grow
+// unbounded. To prevent memory excaustion, the task queue will periodically
+// truncate already-completed tasks.
+var capacity = 1024;
+
+// The flush function processes all tasks that have been scheduled with
+// `rawAsap` unless and until one of those tasks throws an exception.
+// If a task throws an exception, `flush` ensures that its state will remain
+// consistent and will resume where it left off when called again.
+// However, `flush` does not make any arrangements to be called again if an
+// exception is thrown.
+function flush() {
+    while (index < queue.length) {
+        var currentIndex = index;
+        // Advance the index before calling the task. This ensures that we will
+        // begin flushing on the next task the task throws an error.
+        index = index + 1;
+        queue[currentIndex].call();
+        // Prevent leaking memory for long chains of recursive calls to `asap`.
+        // If we call `asap` within tasks scheduled by `asap`, the queue will
+        // grow, but to avoid an O(n) walk for every task we execute, we don't
+        // shift tasks off the queue after they have been executed.
+        // Instead, we periodically shift 1024 tasks off the queue.
+        if (index > capacity) {
+            // Manually shift all values starting at the index back to the
+            // beginning of the queue.
+            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+                queue[scan] = queue[scan + index];
+            }
+            queue.length -= index;
+            index = 0;
+        }
+    }
+    queue.length = 0;
+    index = 0;
+    flushing = false;
+}
+
+rawAsap$1.requestFlush = requestFlush;
+function requestFlush() {
+    // Ensure flushing is not bound to any domain.
+    // It is not sufficient to exit the domain, because domains exist on a stack.
+    // To execute code outside of any domain, the following dance is necessary.
+    var parentDomain = process.domain;
+    if (parentDomain) {
+        if (!domain) {
+            // Lazy execute the domain module.
+            // Only employed if the user elects to use domains.
+            domain = require$$0__default$4["default"];
+        }
+        domain.active = process.domain = null;
+    }
+
+    // `setImmediate` is slower that `process.nextTick`, but `process.nextTick`
+    // cannot handle recursion.
+    // `requestFlush` will only be called recursively from `asap.js`, to resume
+    // flushing after an error is thrown into a domain.
+    // Conveniently, `setImmediate` was introduced in the same version
+    // `process.nextTick` started throwing recursion errors.
+    if (flushing && hasSetImmediate) {
+        setImmediate(flush);
+    } else {
+        process.nextTick(flush);
+    }
+
+    if (parentDomain) {
+        domain.active = process.domain = parentDomain;
+    }
+}
+
+var rawAsap = raw;
+var freeTasks = [];
+
+/**
+ * Calls a task as soon as possible after returning, in its own event, with
+ * priority over IO events. An exception thrown in a task can be handled by
+ * `process.on("uncaughtException") or `domain.on("error")`, but will otherwise
+ * crash the process. If the error is handled, all subsequent tasks will
+ * resume.
+ *
+ * @param {{call}} task A callable object, typically a function that takes no
+ * arguments.
+ */
+var asap_1 = asap$1;
+function asap$1(task) {
+    var rawTask;
+    if (freeTasks.length) {
+        rawTask = freeTasks.pop();
+    } else {
+        rawTask = new RawTask();
+    }
+    rawTask.task = task;
+    rawTask.domain = process.domain;
+    rawAsap(rawTask);
+}
+
+function RawTask() {
+    this.task = null;
+    this.domain = null;
+}
+
+RawTask.prototype.call = function () {
+    if (this.domain) {
+        this.domain.enter();
+    }
+    var threw = true;
+    try {
+        this.task.call();
+        threw = false;
+        // If the task throws an exception (presumably) Node.js restores the
+        // domain stack for the next event.
+        if (this.domain) {
+            this.domain.exit();
+        }
+    } finally {
+        // We use try/finally and a threw flag to avoid messing up stack traces
+        // when we catch and release errors.
+        if (threw) {
+            // In Node.js, uncaught exceptions are considered fatal errors.
+            // Re-throw them to interrupt flushing!
+            // Ensure that flushing continues if an uncaught exception is
+            // suppressed listening process.on("uncaughtException") or
+            // domain.on("error").
+            rawAsap.requestFlush();
+        }
+        // If the task threw an error, we do not want to exit the domain here.
+        // Exiting the domain would prevent the domain from catching the error.
+        this.task = null;
+        this.domain = null;
+        freeTasks.push(this);
+    }
+};
+
+var aSyncWaterfall = {exports: {}};
+
+(function (module) {
+	// MIT license (by Elan Shanker).
+	(function(globals) {
+
+	  var executeSync = function(){
+	    var args = Array.prototype.slice.call(arguments);
+	    if (typeof args[0] === 'function'){
+	      args[0].apply(null, args.splice(1));
+	    }
+	  };
+
+	  var executeAsync = function(fn){
+	    if (typeof setImmediate === 'function') {
+	      setImmediate(fn);
+	    } else if (typeof process !== 'undefined' && process.nextTick) {
+	      process.nextTick(fn);
+	    } else {
+	      setTimeout(fn, 0);
+	    }
+	  };
+
+	  var makeIterator = function (tasks) {
+	    var makeCallback = function (index) {
+	      var fn = function () {
+	        if (tasks.length) {
+	          tasks[index].apply(null, arguments);
+	        }
+	        return fn.next();
+	      };
+	      fn.next = function () {
+	        return (index < tasks.length - 1) ? makeCallback(index + 1): null;
+	      };
+	      return fn;
+	    };
+	    return makeCallback(0);
+	  };
+	  
+	  var _isArray = Array.isArray || function(maybeArray){
+	    return Object.prototype.toString.call(maybeArray) === '[object Array]';
+	  };
+
+	  var waterfall = function (tasks, callback, forceAsync) {
+	    var nextTick = forceAsync ? executeAsync : executeSync;
+	    callback = callback || function () {};
+	    if (!_isArray(tasks)) {
+	      var err = new Error('First argument to waterfall must be an array of functions');
+	      return callback(err);
+	    }
+	    if (!tasks.length) {
+	      return callback();
+	    }
+	    var wrapIterator = function (iterator) {
+	      return function (err) {
+	        if (err) {
+	          callback.apply(null, arguments);
+	          callback = function () {};
+	        } else {
+	          var args = Array.prototype.slice.call(arguments, 1);
+	          var next = iterator.next();
+	          if (next) {
+	            args.push(wrapIterator(next));
+	          } else {
+	            args.push(callback);
+	          }
+	          nextTick(function () {
+	            iterator.apply(null, args);
+	          });
+	        }
+	      };
+	    };
+	    wrapIterator(makeIterator(tasks))();
+	  };
+
+	  if (module.exports) {
+	    module.exports = waterfall; // CommonJS
+	  } else {
+	    globals.waterfall = waterfall; // <script>
+	  }
+	})(commonjsGlobal);
+} (aSyncWaterfall));
+
+var lib$8 = lib$9.exports;
+
+var whitespaceChars = " \n\t\r\xA0";
+var delimChars = '()[]{}%*-+~/#,:|.<>=!';
+var intChars = '0123456789';
+var BLOCK_START = '{%';
+var BLOCK_END = '%}';
+var VARIABLE_START = '{{';
+var VARIABLE_END = '}}';
+var COMMENT_START = '{#';
+var COMMENT_END = '#}';
+var TOKEN_STRING = 'string';
+var TOKEN_WHITESPACE = 'whitespace';
+var TOKEN_DATA = 'data';
+var TOKEN_BLOCK_START = 'block-start';
+var TOKEN_BLOCK_END = 'block-end';
+var TOKEN_VARIABLE_START = 'variable-start';
+var TOKEN_VARIABLE_END = 'variable-end';
+var TOKEN_COMMENT = 'comment';
+var TOKEN_LEFT_PAREN = 'left-paren';
+var TOKEN_RIGHT_PAREN = 'right-paren';
+var TOKEN_LEFT_BRACKET = 'left-bracket';
+var TOKEN_RIGHT_BRACKET = 'right-bracket';
+var TOKEN_LEFT_CURLY = 'left-curly';
+var TOKEN_RIGHT_CURLY = 'right-curly';
+var TOKEN_OPERATOR = 'operator';
+var TOKEN_COMMA = 'comma';
+var TOKEN_COLON = 'colon';
+var TOKEN_TILDE = 'tilde';
+var TOKEN_PIPE = 'pipe';
+var TOKEN_INT = 'int';
+var TOKEN_FLOAT = 'float';
+var TOKEN_BOOLEAN = 'boolean';
+var TOKEN_NONE = 'none';
+var TOKEN_SYMBOL = 'symbol';
+var TOKEN_SPECIAL = 'special';
+var TOKEN_REGEX = 'regex';
+
+function token$1(type, value, lineno, colno) {
+  return {
+    type: type,
+    value: value,
+    lineno: lineno,
+    colno: colno
+  };
+}
+
+var Tokenizer = /*#__PURE__*/function () {
+  function Tokenizer(str, opts) {
+    this.str = str;
+    this.index = 0;
+    this.len = str.length;
+    this.lineno = 0;
+    this.colno = 0;
+    this.in_code = false;
+    opts = opts || {};
+    var tags = opts.tags || {};
+    this.tags = {
+      BLOCK_START: tags.blockStart || BLOCK_START,
+      BLOCK_END: tags.blockEnd || BLOCK_END,
+      VARIABLE_START: tags.variableStart || VARIABLE_START,
+      VARIABLE_END: tags.variableEnd || VARIABLE_END,
+      COMMENT_START: tags.commentStart || COMMENT_START,
+      COMMENT_END: tags.commentEnd || COMMENT_END
+    };
+    this.trimBlocks = !!opts.trimBlocks;
+    this.lstripBlocks = !!opts.lstripBlocks;
+  }
+
+  var _proto = Tokenizer.prototype;
+
+  _proto.nextToken = function nextToken() {
+    var lineno = this.lineno;
+    var colno = this.colno;
+    var tok;
+
+    if (this.in_code) {
+      // Otherwise, if we are in a block parse it as code
+      var cur = this.current();
+
+      if (this.isFinished()) {
+        // We have nothing else to parse
+        return null;
+      } else if (cur === '"' || cur === '\'') {
+        // We've hit a string
+        return token$1(TOKEN_STRING, this._parseString(cur), lineno, colno);
+      } else if (tok = this._extract(whitespaceChars)) {
+        // We hit some whitespace
+        return token$1(TOKEN_WHITESPACE, tok, lineno, colno);
+      } else if ((tok = this._extractString(this.tags.BLOCK_END)) || (tok = this._extractString('-' + this.tags.BLOCK_END))) {
+        // Special check for the block end tag
+        //
+        // It is a requirement that start and end tags are composed of
+        // delimiter characters (%{}[] etc), and our code always
+        // breaks on delimiters so we can assume the token parsing
+        // doesn't consume these elsewhere
+        this.in_code = false;
+
+        if (this.trimBlocks) {
+          cur = this.current();
+
+          if (cur === '\n') {
+            // Skip newline
+            this.forward();
+          } else if (cur === '\r') {
+            // Skip CRLF newline
+            this.forward();
+            cur = this.current();
+
+            if (cur === '\n') {
+              this.forward();
+            } else {
+              // Was not a CRLF, so go back
+              this.back();
+            }
+          }
+        }
+
+        return token$1(TOKEN_BLOCK_END, tok, lineno, colno);
+      } else if ((tok = this._extractString(this.tags.VARIABLE_END)) || (tok = this._extractString('-' + this.tags.VARIABLE_END))) {
+        // Special check for variable end tag (see above)
+        this.in_code = false;
+        return token$1(TOKEN_VARIABLE_END, tok, lineno, colno);
+      } else if (cur === 'r' && this.str.charAt(this.index + 1) === '/') {
+        // Skip past 'r/'.
+        this.forwardN(2); // Extract until the end of the regex -- / ends it, \/ does not.
+
+        var regexBody = '';
+
+        while (!this.isFinished()) {
+          if (this.current() === '/' && this.previous() !== '\\') {
+            this.forward();
+            break;
+          } else {
+            regexBody += this.current();
+            this.forward();
+          }
+        } // Check for flags.
+        // The possible flags are according to https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp)
+
+
+        var POSSIBLE_FLAGS = ['g', 'i', 'm', 'y'];
+        var regexFlags = '';
+
+        while (!this.isFinished()) {
+          var isCurrentAFlag = POSSIBLE_FLAGS.indexOf(this.current()) !== -1;
+
+          if (isCurrentAFlag) {
+            regexFlags += this.current();
+            this.forward();
+          } else {
+            break;
+          }
+        }
+
+        return token$1(TOKEN_REGEX, {
+          body: regexBody,
+          flags: regexFlags
+        }, lineno, colno);
+      } else if (delimChars.indexOf(cur) !== -1) {
+        // We've hit a delimiter (a special char like a bracket)
+        this.forward();
+        var complexOps = ['==', '===', '!=', '!==', '<=', '>=', '//', '**'];
+        var curComplex = cur + this.current();
+        var type;
+
+        if (lib$8.indexOf(complexOps, curComplex) !== -1) {
+          this.forward();
+          cur = curComplex; // See if this is a strict equality/inequality comparator
+
+          if (lib$8.indexOf(complexOps, curComplex + this.current()) !== -1) {
+            cur = curComplex + this.current();
+            this.forward();
+          }
+        }
+
+        switch (cur) {
+          case '(':
+            type = TOKEN_LEFT_PAREN;
+            break;
+
+          case ')':
+            type = TOKEN_RIGHT_PAREN;
+            break;
+
+          case '[':
+            type = TOKEN_LEFT_BRACKET;
+            break;
+
+          case ']':
+            type = TOKEN_RIGHT_BRACKET;
+            break;
+
+          case '{':
+            type = TOKEN_LEFT_CURLY;
+            break;
+
+          case '}':
+            type = TOKEN_RIGHT_CURLY;
+            break;
+
+          case ',':
+            type = TOKEN_COMMA;
+            break;
+
+          case ':':
+            type = TOKEN_COLON;
+            break;
+
+          case '~':
+            type = TOKEN_TILDE;
+            break;
+
+          case '|':
+            type = TOKEN_PIPE;
+            break;
+
+          default:
+            type = TOKEN_OPERATOR;
+        }
+
+        return token$1(type, cur, lineno, colno);
+      } else {
+        // We are not at whitespace or a delimiter, so extract the
+        // text and parse it
+        tok = this._extractUntil(whitespaceChars + delimChars);
+
+        if (tok.match(/^[-+]?[0-9]+$/)) {
+          if (this.current() === '.') {
+            this.forward();
+
+            var dec = this._extract(intChars);
+
+            return token$1(TOKEN_FLOAT, tok + '.' + dec, lineno, colno);
+          } else {
+            return token$1(TOKEN_INT, tok, lineno, colno);
+          }
+        } else if (tok.match(/^(true|false)$/)) {
+          return token$1(TOKEN_BOOLEAN, tok, lineno, colno);
+        } else if (tok === 'none') {
+          return token$1(TOKEN_NONE, tok, lineno, colno);
+          /*
+           * Added to make the test `null is null` evaluate truthily.
+           * Otherwise, Nunjucks will look up null in the context and
+           * return `undefined`, which is not what we want. This *may* have
+           * consequences is someone is using null in their templates as a
+           * variable.
+           */
+        } else if (tok === 'null') {
+          return token$1(TOKEN_NONE, tok, lineno, colno);
+        } else if (tok) {
+          return token$1(TOKEN_SYMBOL, tok, lineno, colno);
+        } else {
+          throw new Error('Unexpected value while parsing: ' + tok);
+        }
+      }
+    } else {
+      // Parse out the template text, breaking on tag
+      // delimiters because we need to look for block/variable start
+      // tags (don't use the full delimChars for optimization)
+      var beginChars = this.tags.BLOCK_START.charAt(0) + this.tags.VARIABLE_START.charAt(0) + this.tags.COMMENT_START.charAt(0) + this.tags.COMMENT_END.charAt(0);
+
+      if (this.isFinished()) {
+        return null;
+      } else if ((tok = this._extractString(this.tags.BLOCK_START + '-')) || (tok = this._extractString(this.tags.BLOCK_START))) {
+        this.in_code = true;
+        return token$1(TOKEN_BLOCK_START, tok, lineno, colno);
+      } else if ((tok = this._extractString(this.tags.VARIABLE_START + '-')) || (tok = this._extractString(this.tags.VARIABLE_START))) {
+        this.in_code = true;
+        return token$1(TOKEN_VARIABLE_START, tok, lineno, colno);
+      } else {
+        tok = '';
+        var data;
+        var inComment = false;
+
+        if (this._matches(this.tags.COMMENT_START)) {
+          inComment = true;
+          tok = this._extractString(this.tags.COMMENT_START);
+        } // Continually consume text, breaking on the tag delimiter
+        // characters and checking to see if it's a start tag.
+        //
+        // We could hit the end of the template in the middle of
+        // our looping, so check for the null return value from
+        // _extractUntil
+
+
+        while ((data = this._extractUntil(beginChars)) !== null) {
+          tok += data;
+
+          if ((this._matches(this.tags.BLOCK_START) || this._matches(this.tags.VARIABLE_START) || this._matches(this.tags.COMMENT_START)) && !inComment) {
+            if (this.lstripBlocks && this._matches(this.tags.BLOCK_START) && this.colno > 0 && this.colno <= tok.length) {
+              var lastLine = tok.slice(-this.colno);
+
+              if (/^\s+$/.test(lastLine)) {
+                // Remove block leading whitespace from beginning of the string
+                tok = tok.slice(0, -this.colno);
+
+                if (!tok.length) {
+                  // All data removed, collapse to avoid unnecessary nodes
+                  // by returning next token (block start)
+                  return this.nextToken();
+                }
+              }
+            } // If it is a start tag, stop looping
+
+
+            break;
+          } else if (this._matches(this.tags.COMMENT_END)) {
+            if (!inComment) {
+              throw new Error('unexpected end of comment');
+            }
+
+            tok += this._extractString(this.tags.COMMENT_END);
+            break;
+          } else {
+            // It does not match any tag, so add the character and
+            // carry on
+            tok += this.current();
+            this.forward();
+          }
+        }
+
+        if (data === null && inComment) {
+          throw new Error('expected end of comment, got end of file');
+        }
+
+        return token$1(inComment ? TOKEN_COMMENT : TOKEN_DATA, tok, lineno, colno);
+      }
+    }
+  };
+
+  _proto._parseString = function _parseString(delimiter) {
+    this.forward();
+    var str = '';
+
+    while (!this.isFinished() && this.current() !== delimiter) {
+      var cur = this.current();
+
+      if (cur === '\\') {
+        this.forward();
+
+        switch (this.current()) {
+          case 'n':
+            str += '\n';
+            break;
+
+          case 't':
+            str += '\t';
+            break;
+
+          case 'r':
+            str += '\r';
+            break;
+
+          default:
+            str += this.current();
+        }
+
+        this.forward();
+      } else {
+        str += cur;
+        this.forward();
+      }
+    }
+
+    this.forward();
+    return str;
+  };
+
+  _proto._matches = function _matches(str) {
+    if (this.index + str.length > this.len) {
+      return null;
+    }
+
+    var m = this.str.slice(this.index, this.index + str.length);
+    return m === str;
+  };
+
+  _proto._extractString = function _extractString(str) {
+    if (this._matches(str)) {
+      this.forwardN(str.length);
+      return str;
+    }
+
+    return null;
+  };
+
+  _proto._extractUntil = function _extractUntil(charString) {
+    // Extract all non-matching chars, with the default matching set
+    // to everything
+    return this._extractMatching(true, charString || '');
+  };
+
+  _proto._extract = function _extract(charString) {
+    // Extract all matching chars (no default, so charString must be
+    // explicit)
+    return this._extractMatching(false, charString);
+  };
+
+  _proto._extractMatching = function _extractMatching(breakOnMatch, charString) {
+    // Pull out characters until a breaking char is hit.
+    // If breakOnMatch is false, a non-matching char stops it.
+    // If breakOnMatch is true, a matching char stops it.
+    if (this.isFinished()) {
+      return null;
+    }
+
+    var first = charString.indexOf(this.current()); // Only proceed if the first character doesn't meet our condition
+
+    if (breakOnMatch && first === -1 || !breakOnMatch && first !== -1) {
+      var t = this.current();
+      this.forward(); // And pull out all the chars one at a time until we hit a
+      // breaking char
+
+      var idx = charString.indexOf(this.current());
+
+      while ((breakOnMatch && idx === -1 || !breakOnMatch && idx !== -1) && !this.isFinished()) {
+        t += this.current();
+        this.forward();
+        idx = charString.indexOf(this.current());
+      }
+
+      return t;
+    }
+
+    return '';
+  };
+
+  _proto._extractRegex = function _extractRegex(regex) {
+    var matches = this.currentStr().match(regex);
+
+    if (!matches) {
+      return null;
+    } // Move forward whatever was matched
+
+
+    this.forwardN(matches[0].length);
+    return matches;
+  };
+
+  _proto.isFinished = function isFinished() {
+    return this.index >= this.len;
+  };
+
+  _proto.forwardN = function forwardN(n) {
+    for (var i = 0; i < n; i++) {
+      this.forward();
+    }
+  };
+
+  _proto.forward = function forward() {
+    this.index++;
+
+    if (this.previous() === '\n') {
+      this.lineno++;
+      this.colno = 0;
+    } else {
+      this.colno++;
+    }
+  };
+
+  _proto.backN = function backN(n) {
+    for (var i = 0; i < n; i++) {
+      this.back();
+    }
+  };
+
+  _proto.back = function back() {
+    this.index--;
+
+    if (this.current() === '\n') {
+      this.lineno--;
+      var idx = this.src.lastIndexOf('\n', this.index - 1);
+
+      if (idx === -1) {
+        this.colno = this.index;
+      } else {
+        this.colno = this.index - idx;
+      }
+    } else {
+      this.colno--;
+    }
+  } // current returns current character
+  ;
+
+  _proto.current = function current() {
+    if (!this.isFinished()) {
+      return this.str.charAt(this.index);
+    }
+
+    return '';
+  } // currentStr returns what's left of the unparsed string
+  ;
+
+  _proto.currentStr = function currentStr() {
+    if (!this.isFinished()) {
+      return this.str.substr(this.index);
+    }
+
+    return '';
+  };
+
+  _proto.previous = function previous() {
+    return this.str.charAt(this.index - 1);
+  };
+
+  return Tokenizer;
+}();
+
+var lexer$2 = {
+  lex: function lex(src, opts) {
+    return new Tokenizer(src, opts);
+  },
+  TOKEN_STRING: TOKEN_STRING,
+  TOKEN_WHITESPACE: TOKEN_WHITESPACE,
+  TOKEN_DATA: TOKEN_DATA,
+  TOKEN_BLOCK_START: TOKEN_BLOCK_START,
+  TOKEN_BLOCK_END: TOKEN_BLOCK_END,
+  TOKEN_VARIABLE_START: TOKEN_VARIABLE_START,
+  TOKEN_VARIABLE_END: TOKEN_VARIABLE_END,
+  TOKEN_COMMENT: TOKEN_COMMENT,
+  TOKEN_LEFT_PAREN: TOKEN_LEFT_PAREN,
+  TOKEN_RIGHT_PAREN: TOKEN_RIGHT_PAREN,
+  TOKEN_LEFT_BRACKET: TOKEN_LEFT_BRACKET,
+  TOKEN_RIGHT_BRACKET: TOKEN_RIGHT_BRACKET,
+  TOKEN_LEFT_CURLY: TOKEN_LEFT_CURLY,
+  TOKEN_RIGHT_CURLY: TOKEN_RIGHT_CURLY,
+  TOKEN_OPERATOR: TOKEN_OPERATOR,
+  TOKEN_COMMA: TOKEN_COMMA,
+  TOKEN_COLON: TOKEN_COLON,
+  TOKEN_TILDE: TOKEN_TILDE,
+  TOKEN_PIPE: TOKEN_PIPE,
+  TOKEN_INT: TOKEN_INT,
+  TOKEN_FLOAT: TOKEN_FLOAT,
+  TOKEN_BOOLEAN: TOKEN_BOOLEAN,
+  TOKEN_NONE: TOKEN_NONE,
+  TOKEN_SYMBOL: TOKEN_SYMBOL,
+  TOKEN_SPECIAL: TOKEN_SPECIAL,
+  TOKEN_REGEX: TOKEN_REGEX
+};
+
+function _defineProperties$1(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass$1(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties$1(Constructor.prototype, protoProps); if (staticProps) _defineProperties$1(Constructor, staticProps); return Constructor; }
+
+function _inheritsLoose$7(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf$7(subClass, superClass); }
+
+function _setPrototypeOf$7(o, p) { _setPrototypeOf$7 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$7(o, p); }
+
+var EventEmitter = require$$0__default$1["default"];
+
+var lib$7 = lib$9.exports;
+
+function parentWrap(parent, prop) {
+  if (typeof parent !== 'function' || typeof prop !== 'function') {
+    return prop;
+  }
+
+  return function wrap() {
+    // Save the current parent method
+    var tmp = this.parent; // Set parent to the previous method, call, and restore
+
+    this.parent = parent;
+    var res = prop.apply(this, arguments);
+    this.parent = tmp;
+    return res;
+  };
+}
+
+function extendClass(cls, name, props) {
+  props = props || {};
+  lib$7.keys(props).forEach(function (k) {
+    props[k] = parentWrap(cls.prototype[k], props[k]);
+  });
+
+  var subclass = /*#__PURE__*/function (_cls) {
+    _inheritsLoose$7(subclass, _cls);
+
+    function subclass() {
+      return _cls.apply(this, arguments) || this;
+    }
+
+    _createClass$1(subclass, [{
+      key: "typename",
+      get: function get() {
+        return name;
+      }
+    }]);
+
+    return subclass;
+  }(cls);
+
+  lib$7._assign(subclass.prototype, props);
+
+  return subclass;
+}
+
+var Obj$4 = /*#__PURE__*/function () {
+  function Obj() {
+    // Unfortunately necessary for backwards compatibility
+    this.init.apply(this, arguments);
+  }
+
+  var _proto = Obj.prototype;
+
+  _proto.init = function init() {};
+
+  Obj.extend = function extend(name, props) {
+    if (typeof name === 'object') {
+      props = name;
+      name = 'anonymous';
+    }
+
+    return extendClass(this, name, props);
+  };
+
+  _createClass$1(Obj, [{
+    key: "typename",
+    get: function get() {
+      return this.constructor.name;
+    }
+  }]);
+
+  return Obj;
+}();
+
+var EmitterObj$2 = /*#__PURE__*/function (_EventEmitter) {
+  _inheritsLoose$7(EmitterObj, _EventEmitter);
+
+  function EmitterObj() {
+    var _this2;
+
+    var _this;
+
+    _this = _EventEmitter.call(this) || this; // Unfortunately necessary for backwards compatibility
+
+    (_this2 = _this).init.apply(_this2, arguments);
+
+    return _this;
+  }
+
+  var _proto2 = EmitterObj.prototype;
+
+  _proto2.init = function init() {};
+
+  EmitterObj.extend = function extend(name, props) {
+    if (typeof name === 'object') {
+      props = name;
+      name = 'anonymous';
+    }
+
+    return extendClass(this, name, props);
+  };
+
+  _createClass$1(EmitterObj, [{
+    key: "typename",
+    get: function get() {
+      return this.constructor.name;
+    }
+  }]);
+
+  return EmitterObj;
+}(EventEmitter);
+
+var object = {
+  Obj: Obj$4,
+  EmitterObj: EmitterObj$2
+};
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inheritsLoose$6(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf$6(subClass, superClass); }
+
+function _setPrototypeOf$6(o, p) { _setPrototypeOf$6 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$6(o, p); }
+
+var _require$6 = object,
+    Obj$3 = _require$6.Obj;
+
+function traverseAndCheck(obj, type, results) {
+  if (obj instanceof type) {
+    results.push(obj);
+  }
+
+  if (obj instanceof Node) {
+    obj.findAll(type, results);
+  }
+}
+
+var Node = /*#__PURE__*/function (_Obj) {
+  _inheritsLoose$6(Node, _Obj);
+
+  function Node() {
+    return _Obj.apply(this, arguments) || this;
+  }
+
+  var _proto = Node.prototype;
+
+  _proto.init = function init(lineno, colno) {
+    var _arguments = arguments,
+        _this = this;
+
+    for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+      args[_key - 2] = arguments[_key];
+    }
+
+    this.lineno = lineno;
+    this.colno = colno;
+    this.fields.forEach(function (field, i) {
+      // The first two args are line/col numbers, so offset by 2
+      var val = _arguments[i + 2]; // Fields should never be undefined, but null. It makes
+      // testing easier to normalize values.
+
+      if (val === undefined) {
+        val = null;
+      }
+
+      _this[field] = val;
+    });
+  };
+
+  _proto.findAll = function findAll(type, results) {
+    var _this2 = this;
+
+    results = results || [];
+
+    if (this instanceof NodeList) {
+      this.children.forEach(function (child) {
+        return traverseAndCheck(child, type, results);
+      });
+    } else {
+      this.fields.forEach(function (field) {
+        return traverseAndCheck(_this2[field], type, results);
+      });
+    }
+
+    return results;
+  };
+
+  _proto.iterFields = function iterFields(func) {
+    var _this3 = this;
+
+    this.fields.forEach(function (field) {
+      func(_this3[field], field);
+    });
+  };
+
+  return Node;
+}(Obj$3); // Abstract nodes
+
+
+var Value = /*#__PURE__*/function (_Node) {
+  _inheritsLoose$6(Value, _Node);
+
+  function Value() {
+    return _Node.apply(this, arguments) || this;
+  }
+
+  _createClass(Value, [{
+    key: "typename",
+    get: function get() {
+      return 'Value';
+    }
+  }, {
+    key: "fields",
+    get: function get() {
+      return ['value'];
+    }
+  }]);
+
+  return Value;
+}(Node); // Concrete nodes
+
+
+var NodeList = /*#__PURE__*/function (_Node2) {
+  _inheritsLoose$6(NodeList, _Node2);
+
+  function NodeList() {
+    return _Node2.apply(this, arguments) || this;
+  }
+
+  var _proto2 = NodeList.prototype;
+
+  _proto2.init = function init(lineno, colno, nodes) {
+    _Node2.prototype.init.call(this, lineno, colno, nodes || []);
+  };
+
+  _proto2.addChild = function addChild(node) {
+    this.children.push(node);
+  };
+
+  _createClass(NodeList, [{
+    key: "typename",
+    get: function get() {
+      return 'NodeList';
+    }
+  }, {
+    key: "fields",
+    get: function get() {
+      return ['children'];
+    }
+  }]);
+
+  return NodeList;
+}(Node);
+
+var Root = NodeList.extend('Root');
+var Literal = Value.extend('Literal');
+var Symbol$1 = Value.extend('Symbol');
+var Group = NodeList.extend('Group');
+var ArrayNode = NodeList.extend('Array');
+var Pair = Node.extend('Pair', {
+  fields: ['key', 'value']
+});
+var Dict = NodeList.extend('Dict');
+var LookupVal = Node.extend('LookupVal', {
+  fields: ['target', 'val']
+});
+var If = Node.extend('If', {
+  fields: ['cond', 'body', 'else_']
+});
+var IfAsync = If.extend('IfAsync');
+var InlineIf = Node.extend('InlineIf', {
+  fields: ['cond', 'body', 'else_']
+});
+var For = Node.extend('For', {
+  fields: ['arr', 'name', 'body', 'else_']
+});
+var AsyncEach = For.extend('AsyncEach');
+var AsyncAll = For.extend('AsyncAll');
+var Macro = Node.extend('Macro', {
+  fields: ['name', 'args', 'body']
+});
+var Caller = Macro.extend('Caller');
+var Import = Node.extend('Import', {
+  fields: ['template', 'target', 'withContext']
+});
+
+var FromImport = /*#__PURE__*/function (_Node3) {
+  _inheritsLoose$6(FromImport, _Node3);
+
+  function FromImport() {
+    return _Node3.apply(this, arguments) || this;
+  }
+
+  var _proto3 = FromImport.prototype;
+
+  _proto3.init = function init(lineno, colno, template, names, withContext) {
+    _Node3.prototype.init.call(this, lineno, colno, template, names || new NodeList(), withContext);
+  };
+
+  _createClass(FromImport, [{
+    key: "typename",
+    get: function get() {
+      return 'FromImport';
+    }
+  }, {
+    key: "fields",
+    get: function get() {
+      return ['template', 'names', 'withContext'];
+    }
+  }]);
+
+  return FromImport;
+}(Node);
+
+var FunCall = Node.extend('FunCall', {
+  fields: ['name', 'args']
+});
+var Filter = FunCall.extend('Filter');
+var FilterAsync = Filter.extend('FilterAsync', {
+  fields: ['name', 'args', 'symbol']
+});
+var KeywordArgs = Dict.extend('KeywordArgs');
+var Block = Node.extend('Block', {
+  fields: ['name', 'body']
+});
+var Super = Node.extend('Super', {
+  fields: ['blockName', 'symbol']
+});
+var TemplateRef = Node.extend('TemplateRef', {
+  fields: ['template']
+});
+var Extends = TemplateRef.extend('Extends');
+var Include = Node.extend('Include', {
+  fields: ['template', 'ignoreMissing']
+});
+var Set$1 = Node.extend('Set', {
+  fields: ['targets', 'value']
+});
+var Switch = Node.extend('Switch', {
+  fields: ['expr', 'cases', 'default']
+});
+var Case = Node.extend('Case', {
+  fields: ['cond', 'body']
+});
+var Output = NodeList.extend('Output');
+var Capture = Node.extend('Capture', {
+  fields: ['body']
+});
+var TemplateData = Literal.extend('TemplateData');
+var UnaryOp = Node.extend('UnaryOp', {
+  fields: ['target']
+});
+var BinOp = Node.extend('BinOp', {
+  fields: ['left', 'right']
+});
+var In = BinOp.extend('In');
+var Is = BinOp.extend('Is');
+var Or$1 = BinOp.extend('Or');
+var And$1 = BinOp.extend('And');
+var Not$1 = UnaryOp.extend('Not');
+var Add = BinOp.extend('Add');
+var Concat = BinOp.extend('Concat');
+var Sub$1 = BinOp.extend('Sub');
+var Mul = BinOp.extend('Mul');
+var Div = BinOp.extend('Div');
+var FloorDiv = BinOp.extend('FloorDiv');
+var Mod = BinOp.extend('Mod');
+var Pow = BinOp.extend('Pow');
+var Neg = UnaryOp.extend('Neg');
+var Pos = UnaryOp.extend('Pos');
+var Compare = Node.extend('Compare', {
+  fields: ['expr', 'ops']
+});
+var CompareOperand = Node.extend('CompareOperand', {
+  fields: ['expr', 'type']
+});
+var CallExtension = Node.extend('CallExtension', {
+  init: function init(ext, prop, args, contentArgs) {
+    this.parent();
+    this.extName = ext.__name || ext;
+    this.prop = prop;
+    this.args = args || new NodeList();
+    this.contentArgs = contentArgs || [];
+    this.autoescape = ext.autoescape;
+  },
+  fields: ['extName', 'prop', 'args', 'contentArgs']
+});
+var CallExtensionAsync = CallExtension.extend('CallExtensionAsync'); // This is hacky, but this is just a debugging function anyway
+
+function print(str, indent, inline) {
+  var lines = str.split('\n');
+  lines.forEach(function (line, i) {
+    if (line && (inline && i > 0 || !inline)) {
+      process.stdout.write(' '.repeat(indent));
+    }
+
+    var nl = i === lines.length - 1 ? '' : '\n';
+    process.stdout.write("" + line + nl);
+  });
+} // Print the AST in a nicely formatted tree format for debuggin
+
+
+function printNodes(node, indent) {
+  indent = indent || 0;
+  print(node.typename + ': ', indent);
+
+  if (node instanceof NodeList) {
+    print('\n');
+    node.children.forEach(function (n) {
+      printNodes(n, indent + 2);
+    });
+  } else if (node instanceof CallExtension) {
+    print(node.extName + "." + node.prop + "\n");
+
+    if (node.args) {
+      printNodes(node.args, indent + 2);
+    }
+
+    if (node.contentArgs) {
+      node.contentArgs.forEach(function (n) {
+        printNodes(n, indent + 2);
+      });
+    }
+  } else {
+    var nodes = [];
+    var props = null;
+    node.iterFields(function (val, fieldName) {
+      if (val instanceof Node) {
+        nodes.push([fieldName, val]);
+      } else {
+        props = props || {};
+        props[fieldName] = val;
+      }
+    });
+
+    if (props) {
+      print(JSON.stringify(props, null, 2) + '\n', null, true);
+    } else {
+      print('\n');
+    }
+
+    nodes.forEach(function (_ref) {
+      var fieldName = _ref[0],
+          n = _ref[1];
+      print("[" + fieldName + "] =>", indent + 2);
+      printNodes(n, indent + 4);
+    });
+  }
+}
+
+var nodes$4 = {
+  Node: Node,
+  Root: Root,
+  NodeList: NodeList,
+  Value: Value,
+  Literal: Literal,
+  Symbol: Symbol$1,
+  Group: Group,
+  Array: ArrayNode,
+  Pair: Pair,
+  Dict: Dict,
+  Output: Output,
+  Capture: Capture,
+  TemplateData: TemplateData,
+  If: If,
+  IfAsync: IfAsync,
+  InlineIf: InlineIf,
+  For: For,
+  AsyncEach: AsyncEach,
+  AsyncAll: AsyncAll,
+  Macro: Macro,
+  Caller: Caller,
+  Import: Import,
+  FromImport: FromImport,
+  FunCall: FunCall,
+  Filter: Filter,
+  FilterAsync: FilterAsync,
+  KeywordArgs: KeywordArgs,
+  Block: Block,
+  Super: Super,
+  Extends: Extends,
+  Include: Include,
+  Set: Set$1,
+  Switch: Switch,
+  Case: Case,
+  LookupVal: LookupVal,
+  BinOp: BinOp,
+  In: In,
+  Is: Is,
+  Or: Or$1,
+  And: And$1,
+  Not: Not$1,
+  Add: Add,
+  Concat: Concat,
+  Sub: Sub$1,
+  Mul: Mul,
+  Div: Div,
+  FloorDiv: FloorDiv,
+  Mod: Mod,
+  Pow: Pow,
+  Neg: Neg,
+  Pos: Pos,
+  Compare: Compare,
+  CompareOperand: CompareOperand,
+  CallExtension: CallExtension,
+  CallExtensionAsync: CallExtensionAsync,
+  printNodes: printNodes
+};
+
+function _inheritsLoose$5(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf$5(subClass, superClass); }
+
+function _setPrototypeOf$5(o, p) { _setPrototypeOf$5 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$5(o, p); }
+
+var lexer$1 = lexer$2;
+
+var nodes$3 = nodes$4;
+
+var Obj$2 = object.Obj;
+
+var lib$6 = lib$9.exports;
+
+var Parser = /*#__PURE__*/function (_Obj) {
+  _inheritsLoose$5(Parser, _Obj);
+
+  function Parser() {
+    return _Obj.apply(this, arguments) || this;
+  }
+
+  var _proto = Parser.prototype;
+
+  _proto.init = function init(tokens) {
+    this.tokens = tokens;
+    this.peeked = null;
+    this.breakOnBlocks = null;
+    this.dropLeadingWhitespace = false;
+    this.extensions = [];
+  };
+
+  _proto.nextToken = function nextToken(withWhitespace) {
+    var tok;
+
+    if (this.peeked) {
+      if (!withWhitespace && this.peeked.type === lexer$1.TOKEN_WHITESPACE) {
+        this.peeked = null;
+      } else {
+        tok = this.peeked;
+        this.peeked = null;
+        return tok;
+      }
+    }
+
+    tok = this.tokens.nextToken();
+
+    if (!withWhitespace) {
+      while (tok && tok.type === lexer$1.TOKEN_WHITESPACE) {
+        tok = this.tokens.nextToken();
+      }
+    }
+
+    return tok;
+  };
+
+  _proto.peekToken = function peekToken() {
+    this.peeked = this.peeked || this.nextToken();
+    return this.peeked;
+  };
+
+  _proto.pushToken = function pushToken(tok) {
+    if (this.peeked) {
+      throw new Error('pushToken: can only push one token on between reads');
+    }
+
+    this.peeked = tok;
+  };
+
+  _proto.error = function error(msg, lineno, colno) {
+    if (lineno === undefined || colno === undefined) {
+      var tok = this.peekToken() || {};
+      lineno = tok.lineno;
+      colno = tok.colno;
+    }
+
+    if (lineno !== undefined) {
+      lineno += 1;
+    }
+
+    if (colno !== undefined) {
+      colno += 1;
+    }
+
+    return new lib$6.TemplateError(msg, lineno, colno);
+  };
+
+  _proto.fail = function fail(msg, lineno, colno) {
+    throw this.error(msg, lineno, colno);
+  };
+
+  _proto.skip = function skip(type) {
+    var tok = this.nextToken();
+
+    if (!tok || tok.type !== type) {
+      this.pushToken(tok);
+      return false;
+    }
+
+    return true;
+  };
+
+  _proto.expect = function expect(type) {
+    var tok = this.nextToken();
+
+    if (tok.type !== type) {
+      this.fail('expected ' + type + ', got ' + tok.type, tok.lineno, tok.colno);
+    }
+
+    return tok;
+  };
+
+  _proto.skipValue = function skipValue(type, val) {
+    var tok = this.nextToken();
+
+    if (!tok || tok.type !== type || tok.value !== val) {
+      this.pushToken(tok);
+      return false;
+    }
+
+    return true;
+  };
+
+  _proto.skipSymbol = function skipSymbol(val) {
+    return this.skipValue(lexer$1.TOKEN_SYMBOL, val);
+  };
+
+  _proto.advanceAfterBlockEnd = function advanceAfterBlockEnd(name) {
+    var tok;
+
+    if (!name) {
+      tok = this.peekToken();
+
+      if (!tok) {
+        this.fail('unexpected end of file');
+      }
+
+      if (tok.type !== lexer$1.TOKEN_SYMBOL) {
+        this.fail('advanceAfterBlockEnd: expected symbol token or ' + 'explicit name to be passed');
+      }
+
+      name = this.nextToken().value;
+    }
+
+    tok = this.nextToken();
+
+    if (tok && tok.type === lexer$1.TOKEN_BLOCK_END) {
+      if (tok.value.charAt(0) === '-') {
+        this.dropLeadingWhitespace = true;
+      }
+    } else {
+      this.fail('expected block end in ' + name + ' statement');
+    }
+
+    return tok;
+  };
+
+  _proto.advanceAfterVariableEnd = function advanceAfterVariableEnd() {
+    var tok = this.nextToken();
+
+    if (tok && tok.type === lexer$1.TOKEN_VARIABLE_END) {
+      this.dropLeadingWhitespace = tok.value.charAt(tok.value.length - this.tokens.tags.VARIABLE_END.length - 1) === '-';
+    } else {
+      this.pushToken(tok);
+      this.fail('expected variable end');
+    }
+  };
+
+  _proto.parseFor = function parseFor() {
+    var forTok = this.peekToken();
+    var node;
+    var endBlock;
+
+    if (this.skipSymbol('for')) {
+      node = new nodes$3.For(forTok.lineno, forTok.colno);
+      endBlock = 'endfor';
+    } else if (this.skipSymbol('asyncEach')) {
+      node = new nodes$3.AsyncEach(forTok.lineno, forTok.colno);
+      endBlock = 'endeach';
+    } else if (this.skipSymbol('asyncAll')) {
+      node = new nodes$3.AsyncAll(forTok.lineno, forTok.colno);
+      endBlock = 'endall';
+    } else {
+      this.fail('parseFor: expected for{Async}', forTok.lineno, forTok.colno);
+    }
+
+    node.name = this.parsePrimary();
+
+    if (!(node.name instanceof nodes$3.Symbol)) {
+      this.fail('parseFor: variable name expected for loop');
+    }
+
+    var type = this.peekToken().type;
+
+    if (type === lexer$1.TOKEN_COMMA) {
+      // key/value iteration
+      var key = node.name;
+      node.name = new nodes$3.Array(key.lineno, key.colno);
+      node.name.addChild(key);
+
+      while (this.skip(lexer$1.TOKEN_COMMA)) {
+        var prim = this.parsePrimary();
+        node.name.addChild(prim);
+      }
+    }
+
+    if (!this.skipSymbol('in')) {
+      this.fail('parseFor: expected "in" keyword for loop', forTok.lineno, forTok.colno);
+    }
+
+    node.arr = this.parseExpression();
+    this.advanceAfterBlockEnd(forTok.value);
+    node.body = this.parseUntilBlocks(endBlock, 'else');
+
+    if (this.skipSymbol('else')) {
+      this.advanceAfterBlockEnd('else');
+      node.else_ = this.parseUntilBlocks(endBlock);
+    }
+
+    this.advanceAfterBlockEnd();
+    return node;
+  };
+
+  _proto.parseMacro = function parseMacro() {
+    var macroTok = this.peekToken();
+
+    if (!this.skipSymbol('macro')) {
+      this.fail('expected macro');
+    }
+
+    var name = this.parsePrimary(true);
+    var args = this.parseSignature();
+    var node = new nodes$3.Macro(macroTok.lineno, macroTok.colno, name, args);
+    this.advanceAfterBlockEnd(macroTok.value);
+    node.body = this.parseUntilBlocks('endmacro');
+    this.advanceAfterBlockEnd();
+    return node;
+  };
+
+  _proto.parseCall = function parseCall() {
+    // a call block is parsed as a normal FunCall, but with an added
+    // 'caller' kwarg which is a Caller node.
+    var callTok = this.peekToken();
+
+    if (!this.skipSymbol('call')) {
+      this.fail('expected call');
+    }
+
+    var callerArgs = this.parseSignature(true) || new nodes$3.NodeList();
+    var macroCall = this.parsePrimary();
+    this.advanceAfterBlockEnd(callTok.value);
+    var body = this.parseUntilBlocks('endcall');
+    this.advanceAfterBlockEnd();
+    var callerName = new nodes$3.Symbol(callTok.lineno, callTok.colno, 'caller');
+    var callerNode = new nodes$3.Caller(callTok.lineno, callTok.colno, callerName, callerArgs, body); // add the additional caller kwarg, adding kwargs if necessary
+
+    var args = macroCall.args.children;
+
+    if (!(args[args.length - 1] instanceof nodes$3.KeywordArgs)) {
+      args.push(new nodes$3.KeywordArgs());
+    }
+
+    var kwargs = args[args.length - 1];
+    kwargs.addChild(new nodes$3.Pair(callTok.lineno, callTok.colno, callerName, callerNode));
+    return new nodes$3.Output(callTok.lineno, callTok.colno, [macroCall]);
+  };
+
+  _proto.parseWithContext = function parseWithContext() {
+    var tok = this.peekToken();
+    var withContext = null;
+
+    if (this.skipSymbol('with')) {
+      withContext = true;
+    } else if (this.skipSymbol('without')) {
+      withContext = false;
+    }
+
+    if (withContext !== null) {
+      if (!this.skipSymbol('context')) {
+        this.fail('parseFrom: expected context after with/without', tok.lineno, tok.colno);
+      }
+    }
+
+    return withContext;
+  };
+
+  _proto.parseImport = function parseImport() {
+    var importTok = this.peekToken();
+
+    if (!this.skipSymbol('import')) {
+      this.fail('parseImport: expected import', importTok.lineno, importTok.colno);
+    }
+
+    var template = this.parseExpression();
+
+    if (!this.skipSymbol('as')) {
+      this.fail('parseImport: expected "as" keyword', importTok.lineno, importTok.colno);
+    }
+
+    var target = this.parseExpression();
+    var withContext = this.parseWithContext();
+    var node = new nodes$3.Import(importTok.lineno, importTok.colno, template, target, withContext);
+    this.advanceAfterBlockEnd(importTok.value);
+    return node;
+  };
+
+  _proto.parseFrom = function parseFrom() {
+    var fromTok = this.peekToken();
+
+    if (!this.skipSymbol('from')) {
+      this.fail('parseFrom: expected from');
+    }
+
+    var template = this.parseExpression();
+
+    if (!this.skipSymbol('import')) {
+      this.fail('parseFrom: expected import', fromTok.lineno, fromTok.colno);
+    }
+
+    var names = new nodes$3.NodeList();
+    var withContext;
+
+    while (1) {
+      // eslint-disable-line no-constant-condition
+      var nextTok = this.peekToken();
+
+      if (nextTok.type === lexer$1.TOKEN_BLOCK_END) {
+        if (!names.children.length) {
+          this.fail('parseFrom: Expected at least one import name', fromTok.lineno, fromTok.colno);
+        } // Since we are manually advancing past the block end,
+        // need to keep track of whitespace control (normally
+        // this is done in `advanceAfterBlockEnd`
+
+
+        if (nextTok.value.charAt(0) === '-') {
+          this.dropLeadingWhitespace = true;
+        }
+
+        this.nextToken();
+        break;
+      }
+
+      if (names.children.length > 0 && !this.skip(lexer$1.TOKEN_COMMA)) {
+        this.fail('parseFrom: expected comma', fromTok.lineno, fromTok.colno);
+      }
+
+      var name = this.parsePrimary();
+
+      if (name.value.charAt(0) === '_') {
+        this.fail('parseFrom: names starting with an underscore cannot be imported', name.lineno, name.colno);
+      }
+
+      if (this.skipSymbol('as')) {
+        var alias = this.parsePrimary();
+        names.addChild(new nodes$3.Pair(name.lineno, name.colno, name, alias));
+      } else {
+        names.addChild(name);
+      }
+
+      withContext = this.parseWithContext();
+    }
+
+    return new nodes$3.FromImport(fromTok.lineno, fromTok.colno, template, names, withContext);
+  };
+
+  _proto.parseBlock = function parseBlock() {
+    var tag = this.peekToken();
+
+    if (!this.skipSymbol('block')) {
+      this.fail('parseBlock: expected block', tag.lineno, tag.colno);
+    }
+
+    var node = new nodes$3.Block(tag.lineno, tag.colno);
+    node.name = this.parsePrimary();
+
+    if (!(node.name instanceof nodes$3.Symbol)) {
+      this.fail('parseBlock: variable name expected', tag.lineno, tag.colno);
+    }
+
+    this.advanceAfterBlockEnd(tag.value);
+    node.body = this.parseUntilBlocks('endblock');
+    this.skipSymbol('endblock');
+    this.skipSymbol(node.name.value);
+    var tok = this.peekToken();
+
+    if (!tok) {
+      this.fail('parseBlock: expected endblock, got end of file');
+    }
+
+    this.advanceAfterBlockEnd(tok.value);
+    return node;
+  };
+
+  _proto.parseExtends = function parseExtends() {
+    var tagName = 'extends';
+    var tag = this.peekToken();
+
+    if (!this.skipSymbol(tagName)) {
+      this.fail('parseTemplateRef: expected ' + tagName);
+    }
+
+    var node = new nodes$3.Extends(tag.lineno, tag.colno);
+    node.template = this.parseExpression();
+    this.advanceAfterBlockEnd(tag.value);
+    return node;
+  };
+
+  _proto.parseInclude = function parseInclude() {
+    var tagName = 'include';
+    var tag = this.peekToken();
+
+    if (!this.skipSymbol(tagName)) {
+      this.fail('parseInclude: expected ' + tagName);
+    }
+
+    var node = new nodes$3.Include(tag.lineno, tag.colno);
+    node.template = this.parseExpression();
+
+    if (this.skipSymbol('ignore') && this.skipSymbol('missing')) {
+      node.ignoreMissing = true;
+    }
+
+    this.advanceAfterBlockEnd(tag.value);
+    return node;
+  };
+
+  _proto.parseIf = function parseIf() {
+    var tag = this.peekToken();
+    var node;
+
+    if (this.skipSymbol('if') || this.skipSymbol('elif') || this.skipSymbol('elseif')) {
+      node = new nodes$3.If(tag.lineno, tag.colno);
+    } else if (this.skipSymbol('ifAsync')) {
+      node = new nodes$3.IfAsync(tag.lineno, tag.colno);
+    } else {
+      this.fail('parseIf: expected if, elif, or elseif', tag.lineno, tag.colno);
+    }
+
+    node.cond = this.parseExpression();
+    this.advanceAfterBlockEnd(tag.value);
+    node.body = this.parseUntilBlocks('elif', 'elseif', 'else', 'endif');
+    var tok = this.peekToken();
+
+    switch (tok && tok.value) {
+      case 'elseif':
+      case 'elif':
+        node.else_ = this.parseIf();
+        break;
+
+      case 'else':
+        this.advanceAfterBlockEnd();
+        node.else_ = this.parseUntilBlocks('endif');
+        this.advanceAfterBlockEnd();
+        break;
+
+      case 'endif':
+        node.else_ = null;
+        this.advanceAfterBlockEnd();
+        break;
+
+      default:
+        this.fail('parseIf: expected elif, else, or endif, got end of file');
+    }
+
+    return node;
+  };
+
+  _proto.parseSet = function parseSet() {
+    var tag = this.peekToken();
+
+    if (!this.skipSymbol('set')) {
+      this.fail('parseSet: expected set', tag.lineno, tag.colno);
+    }
+
+    var node = new nodes$3.Set(tag.lineno, tag.colno, []);
+    var target;
+
+    while (target = this.parsePrimary()) {
+      node.targets.push(target);
+
+      if (!this.skip(lexer$1.TOKEN_COMMA)) {
+        break;
+      }
+    }
+
+    if (!this.skipValue(lexer$1.TOKEN_OPERATOR, '=')) {
+      if (!this.skip(lexer$1.TOKEN_BLOCK_END)) {
+        this.fail('parseSet: expected = or block end in set tag', tag.lineno, tag.colno);
+      } else {
+        node.body = new nodes$3.Capture(tag.lineno, tag.colno, this.parseUntilBlocks('endset'));
+        node.value = null;
+        this.advanceAfterBlockEnd();
+      }
+    } else {
+      node.value = this.parseExpression();
+      this.advanceAfterBlockEnd(tag.value);
+    }
+
+    return node;
+  };
+
+  _proto.parseSwitch = function parseSwitch() {
+    /*
+     * Store the tag names in variables in case someone ever wants to
+     * customize this.
+     */
+    var switchStart = 'switch';
+    var switchEnd = 'endswitch';
+    var caseStart = 'case';
+    var caseDefault = 'default'; // Get the switch tag.
+
+    var tag = this.peekToken(); // fail early if we get some unexpected tag.
+
+    if (!this.skipSymbol(switchStart) && !this.skipSymbol(caseStart) && !this.skipSymbol(caseDefault)) {
+      this.fail('parseSwitch: expected "switch," "case" or "default"', tag.lineno, tag.colno);
+    } // parse the switch expression
+
+
+    var expr = this.parseExpression(); // advance until a start of a case, a default case or an endswitch.
+
+    this.advanceAfterBlockEnd(switchStart);
+    this.parseUntilBlocks(caseStart, caseDefault, switchEnd); // this is the first case. it could also be an endswitch, we'll check.
+
+    var tok = this.peekToken(); // create new variables for our cases and default case.
+
+    var cases = [];
+    var defaultCase; // while we're dealing with new cases nodes...
+
+    do {
+      // skip the start symbol and get the case expression
+      this.skipSymbol(caseStart);
+      var cond = this.parseExpression();
+      this.advanceAfterBlockEnd(switchStart); // get the body of the case node and add it to the array of cases.
+
+      var body = this.parseUntilBlocks(caseStart, caseDefault, switchEnd);
+      cases.push(new nodes$3.Case(tok.line, tok.col, cond, body)); // get our next case
+
+      tok = this.peekToken();
+    } while (tok && tok.value === caseStart); // we either have a default case or a switch end.
+
+
+    switch (tok.value) {
+      case caseDefault:
+        this.advanceAfterBlockEnd();
+        defaultCase = this.parseUntilBlocks(switchEnd);
+        this.advanceAfterBlockEnd();
+        break;
+
+      case switchEnd:
+        this.advanceAfterBlockEnd();
+        break;
+
+      default:
+        // otherwise bail because EOF
+        this.fail('parseSwitch: expected "case," "default" or "endswitch," got EOF.');
+    } // and return the switch node.
+
+
+    return new nodes$3.Switch(tag.lineno, tag.colno, expr, cases, defaultCase);
+  };
+
+  _proto.parseStatement = function parseStatement() {
+    var tok = this.peekToken();
+    var node;
+
+    if (tok.type !== lexer$1.TOKEN_SYMBOL) {
+      this.fail('tag name expected', tok.lineno, tok.colno);
+    }
+
+    if (this.breakOnBlocks && lib$6.indexOf(this.breakOnBlocks, tok.value) !== -1) {
+      return null;
+    }
+
+    switch (tok.value) {
+      case 'raw':
+        return this.parseRaw();
+
+      case 'verbatim':
+        return this.parseRaw('verbatim');
+
+      case 'if':
+      case 'ifAsync':
+        return this.parseIf();
+
+      case 'for':
+      case 'asyncEach':
+      case 'asyncAll':
+        return this.parseFor();
+
+      case 'block':
+        return this.parseBlock();
+
+      case 'extends':
+        return this.parseExtends();
+
+      case 'include':
+        return this.parseInclude();
+
+      case 'set':
+        return this.parseSet();
+
+      case 'macro':
+        return this.parseMacro();
+
+      case 'call':
+        return this.parseCall();
+
+      case 'import':
+        return this.parseImport();
+
+      case 'from':
+        return this.parseFrom();
+
+      case 'filter':
+        return this.parseFilterStatement();
+
+      case 'switch':
+        return this.parseSwitch();
+
+      default:
+        if (this.extensions.length) {
+          for (var i = 0; i < this.extensions.length; i++) {
+            var ext = this.extensions[i];
+
+            if (lib$6.indexOf(ext.tags || [], tok.value) !== -1) {
+              return ext.parse(this, nodes$3, lexer$1);
+            }
+          }
+        }
+
+        this.fail('unknown block tag: ' + tok.value, tok.lineno, tok.colno);
+    }
+
+    return node;
+  };
+
+  _proto.parseRaw = function parseRaw(tagName) {
+    tagName = tagName || 'raw';
+    var endTagName = 'end' + tagName; // Look for upcoming raw blocks (ignore all other kinds of blocks)
+
+    var rawBlockRegex = new RegExp('([\\s\\S]*?){%\\s*(' + tagName + '|' + endTagName + ')\\s*(?=%})%}');
+    var rawLevel = 1;
+    var str = '';
+    var matches = null; // Skip opening raw token
+    // Keep this token to track line and column numbers
+
+    var begun = this.advanceAfterBlockEnd(); // Exit when there's nothing to match
+    // or when we've found the matching "endraw" block
+
+    while ((matches = this.tokens._extractRegex(rawBlockRegex)) && rawLevel > 0) {
+      var all = matches[0];
+      var pre = matches[1];
+      var blockName = matches[2]; // Adjust rawlevel
+
+      if (blockName === tagName) {
+        rawLevel += 1;
+      } else if (blockName === endTagName) {
+        rawLevel -= 1;
+      } // Add to str
+
+
+      if (rawLevel === 0) {
+        // We want to exclude the last "endraw"
+        str += pre; // Move tokenizer to beginning of endraw block
+
+        this.tokens.backN(all.length - pre.length);
+      } else {
+        str += all;
+      }
+    }
+
+    return new nodes$3.Output(begun.lineno, begun.colno, [new nodes$3.TemplateData(begun.lineno, begun.colno, str)]);
+  };
+
+  _proto.parsePostfix = function parsePostfix(node) {
+    var lookup;
+    var tok = this.peekToken();
+
+    while (tok) {
+      if (tok.type === lexer$1.TOKEN_LEFT_PAREN) {
+        // Function call
+        node = new nodes$3.FunCall(tok.lineno, tok.colno, node, this.parseSignature());
+      } else if (tok.type === lexer$1.TOKEN_LEFT_BRACKET) {
+        // Reference
+        lookup = this.parseAggregate();
+
+        if (lookup.children.length > 1) {
+          this.fail('invalid index');
+        }
+
+        node = new nodes$3.LookupVal(tok.lineno, tok.colno, node, lookup.children[0]);
+      } else if (tok.type === lexer$1.TOKEN_OPERATOR && tok.value === '.') {
+        // Reference
+        this.nextToken();
+        var val = this.nextToken();
+
+        if (val.type !== lexer$1.TOKEN_SYMBOL) {
+          this.fail('expected name as lookup value, got ' + val.value, val.lineno, val.colno);
+        } // Make a literal string because it's not a variable
+        // reference
+
+
+        lookup = new nodes$3.Literal(val.lineno, val.colno, val.value);
+        node = new nodes$3.LookupVal(tok.lineno, tok.colno, node, lookup);
+      } else {
+        break;
+      }
+
+      tok = this.peekToken();
+    }
+
+    return node;
+  };
+
+  _proto.parseExpression = function parseExpression() {
+    var node = this.parseInlineIf();
+    return node;
+  };
+
+  _proto.parseInlineIf = function parseInlineIf() {
+    var node = this.parseOr();
+
+    if (this.skipSymbol('if')) {
+      var condNode = this.parseOr();
+      var bodyNode = node;
+      node = new nodes$3.InlineIf(node.lineno, node.colno);
+      node.body = bodyNode;
+      node.cond = condNode;
+
+      if (this.skipSymbol('else')) {
+        node.else_ = this.parseOr();
+      } else {
+        node.else_ = null;
+      }
+    }
+
+    return node;
+  };
+
+  _proto.parseOr = function parseOr() {
+    var node = this.parseAnd();
+
+    while (this.skipSymbol('or')) {
+      var node2 = this.parseAnd();
+      node = new nodes$3.Or(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseAnd = function parseAnd() {
+    var node = this.parseNot();
+
+    while (this.skipSymbol('and')) {
+      var node2 = this.parseNot();
+      node = new nodes$3.And(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseNot = function parseNot() {
+    var tok = this.peekToken();
+
+    if (this.skipSymbol('not')) {
+      return new nodes$3.Not(tok.lineno, tok.colno, this.parseNot());
+    }
+
+    return this.parseIn();
+  };
+
+  _proto.parseIn = function parseIn() {
+    var node = this.parseIs();
+
+    while (1) {
+      // eslint-disable-line no-constant-condition
+      // check if the next token is 'not'
+      var tok = this.nextToken();
+
+      if (!tok) {
+        break;
+      }
+
+      var invert = tok.type === lexer$1.TOKEN_SYMBOL && tok.value === 'not'; // if it wasn't 'not', put it back
+
+      if (!invert) {
+        this.pushToken(tok);
+      }
+
+      if (this.skipSymbol('in')) {
+        var node2 = this.parseIs();
+        node = new nodes$3.In(node.lineno, node.colno, node, node2);
+
+        if (invert) {
+          node = new nodes$3.Not(node.lineno, node.colno, node);
+        }
+      } else {
+        // if we'd found a 'not' but this wasn't an 'in', put back the 'not'
+        if (invert) {
+          this.pushToken(tok);
+        }
+
+        break;
+      }
+    }
+
+    return node;
+  } // I put this right after "in" in the operator precedence stack. That can
+  // obviously be changed to be closer to Jinja.
+  ;
+
+  _proto.parseIs = function parseIs() {
+    var node = this.parseCompare(); // look for an is
+
+    if (this.skipSymbol('is')) {
+      // look for a not
+      var not = this.skipSymbol('not'); // get the next node
+
+      var node2 = this.parseCompare(); // create an Is node using the next node and the info from our Is node.
+
+      node = new nodes$3.Is(node.lineno, node.colno, node, node2); // if we have a Not, create a Not node from our Is node.
+
+      if (not) {
+        node = new nodes$3.Not(node.lineno, node.colno, node);
+      }
+    } // return the node.
+
+
+    return node;
+  };
+
+  _proto.parseCompare = function parseCompare() {
+    var compareOps = ['==', '===', '!=', '!==', '<', '>', '<=', '>='];
+    var expr = this.parseConcat();
+    var ops = [];
+
+    while (1) {
+      // eslint-disable-line no-constant-condition
+      var tok = this.nextToken();
+
+      if (!tok) {
+        break;
+      } else if (compareOps.indexOf(tok.value) !== -1) {
+        ops.push(new nodes$3.CompareOperand(tok.lineno, tok.colno, this.parseConcat(), tok.value));
+      } else {
+        this.pushToken(tok);
+        break;
+      }
+    }
+
+    if (ops.length) {
+      return new nodes$3.Compare(ops[0].lineno, ops[0].colno, expr, ops);
+    } else {
+      return expr;
+    }
+  } // finds the '~' for string concatenation
+  ;
+
+  _proto.parseConcat = function parseConcat() {
+    var node = this.parseAdd();
+
+    while (this.skipValue(lexer$1.TOKEN_TILDE, '~')) {
+      var node2 = this.parseAdd();
+      node = new nodes$3.Concat(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseAdd = function parseAdd() {
+    var node = this.parseSub();
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '+')) {
+      var node2 = this.parseSub();
+      node = new nodes$3.Add(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseSub = function parseSub() {
+    var node = this.parseMul();
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '-')) {
+      var node2 = this.parseMul();
+      node = new nodes$3.Sub(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseMul = function parseMul() {
+    var node = this.parseDiv();
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '*')) {
+      var node2 = this.parseDiv();
+      node = new nodes$3.Mul(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseDiv = function parseDiv() {
+    var node = this.parseFloorDiv();
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '/')) {
+      var node2 = this.parseFloorDiv();
+      node = new nodes$3.Div(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseFloorDiv = function parseFloorDiv() {
+    var node = this.parseMod();
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '//')) {
+      var node2 = this.parseMod();
+      node = new nodes$3.FloorDiv(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseMod = function parseMod() {
+    var node = this.parsePow();
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '%')) {
+      var node2 = this.parsePow();
+      node = new nodes$3.Mod(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parsePow = function parsePow() {
+    var node = this.parseUnary();
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '**')) {
+      var node2 = this.parseUnary();
+      node = new nodes$3.Pow(node.lineno, node.colno, node, node2);
+    }
+
+    return node;
+  };
+
+  _proto.parseUnary = function parseUnary(noFilters) {
+    var tok = this.peekToken();
+    var node;
+
+    if (this.skipValue(lexer$1.TOKEN_OPERATOR, '-')) {
+      node = new nodes$3.Neg(tok.lineno, tok.colno, this.parseUnary(true));
+    } else if (this.skipValue(lexer$1.TOKEN_OPERATOR, '+')) {
+      node = new nodes$3.Pos(tok.lineno, tok.colno, this.parseUnary(true));
+    } else {
+      node = this.parsePrimary();
+    }
+
+    if (!noFilters) {
+      node = this.parseFilter(node);
+    }
+
+    return node;
+  };
+
+  _proto.parsePrimary = function parsePrimary(noPostfix) {
+    var tok = this.nextToken();
+    var val;
+    var node = null;
+
+    if (!tok) {
+      this.fail('expected expression, got end of file');
+    } else if (tok.type === lexer$1.TOKEN_STRING) {
+      val = tok.value;
+    } else if (tok.type === lexer$1.TOKEN_INT) {
+      val = parseInt(tok.value, 10);
+    } else if (tok.type === lexer$1.TOKEN_FLOAT) {
+      val = parseFloat(tok.value);
+    } else if (tok.type === lexer$1.TOKEN_BOOLEAN) {
+      if (tok.value === 'true') {
+        val = true;
+      } else if (tok.value === 'false') {
+        val = false;
+      } else {
+        this.fail('invalid boolean: ' + tok.value, tok.lineno, tok.colno);
+      }
+    } else if (tok.type === lexer$1.TOKEN_NONE) {
+      val = null;
+    } else if (tok.type === lexer$1.TOKEN_REGEX) {
+      val = new RegExp(tok.value.body, tok.value.flags);
+    }
+
+    if (val !== undefined) {
+      node = new nodes$3.Literal(tok.lineno, tok.colno, val);
+    } else if (tok.type === lexer$1.TOKEN_SYMBOL) {
+      node = new nodes$3.Symbol(tok.lineno, tok.colno, tok.value);
+    } else {
+      // See if it's an aggregate type, we need to push the
+      // current delimiter token back on
+      this.pushToken(tok);
+      node = this.parseAggregate();
+    }
+
+    if (!noPostfix) {
+      node = this.parsePostfix(node);
+    }
+
+    if (node) {
+      return node;
+    } else {
+      throw this.error("unexpected token: " + tok.value, tok.lineno, tok.colno);
+    }
+  };
+
+  _proto.parseFilterName = function parseFilterName() {
+    var tok = this.expect(lexer$1.TOKEN_SYMBOL);
+    var name = tok.value;
+
+    while (this.skipValue(lexer$1.TOKEN_OPERATOR, '.')) {
+      name += '.' + this.expect(lexer$1.TOKEN_SYMBOL).value;
+    }
+
+    return new nodes$3.Symbol(tok.lineno, tok.colno, name);
+  };
+
+  _proto.parseFilterArgs = function parseFilterArgs(node) {
+    if (this.peekToken().type === lexer$1.TOKEN_LEFT_PAREN) {
+      // Get a FunCall node and add the parameters to the
+      // filter
+      var call = this.parsePostfix(node);
+      return call.args.children;
+    }
+
+    return [];
+  };
+
+  _proto.parseFilter = function parseFilter(node) {
+    while (this.skip(lexer$1.TOKEN_PIPE)) {
+      var name = this.parseFilterName();
+      node = new nodes$3.Filter(name.lineno, name.colno, name, new nodes$3.NodeList(name.lineno, name.colno, [node].concat(this.parseFilterArgs(node))));
+    }
+
+    return node;
+  };
+
+  _proto.parseFilterStatement = function parseFilterStatement() {
+    var filterTok = this.peekToken();
+
+    if (!this.skipSymbol('filter')) {
+      this.fail('parseFilterStatement: expected filter');
+    }
+
+    var name = this.parseFilterName();
+    var args = this.parseFilterArgs(name);
+    this.advanceAfterBlockEnd(filterTok.value);
+    var body = new nodes$3.Capture(name.lineno, name.colno, this.parseUntilBlocks('endfilter'));
+    this.advanceAfterBlockEnd();
+    var node = new nodes$3.Filter(name.lineno, name.colno, name, new nodes$3.NodeList(name.lineno, name.colno, [body].concat(args)));
+    return new nodes$3.Output(name.lineno, name.colno, [node]);
+  };
+
+  _proto.parseAggregate = function parseAggregate() {
+    var tok = this.nextToken();
+    var node;
+
+    switch (tok.type) {
+      case lexer$1.TOKEN_LEFT_PAREN:
+        node = new nodes$3.Group(tok.lineno, tok.colno);
+        break;
+
+      case lexer$1.TOKEN_LEFT_BRACKET:
+        node = new nodes$3.Array(tok.lineno, tok.colno);
+        break;
+
+      case lexer$1.TOKEN_LEFT_CURLY:
+        node = new nodes$3.Dict(tok.lineno, tok.colno);
+        break;
+
+      default:
+        return null;
+    }
+
+    while (1) {
+      // eslint-disable-line no-constant-condition
+      var type = this.peekToken().type;
+
+      if (type === lexer$1.TOKEN_RIGHT_PAREN || type === lexer$1.TOKEN_RIGHT_BRACKET || type === lexer$1.TOKEN_RIGHT_CURLY) {
+        this.nextToken();
+        break;
+      }
+
+      if (node.children.length > 0) {
+        if (!this.skip(lexer$1.TOKEN_COMMA)) {
+          this.fail('parseAggregate: expected comma after expression', tok.lineno, tok.colno);
+        }
+      }
+
+      if (node instanceof nodes$3.Dict) {
+        // TODO: check for errors
+        var key = this.parsePrimary(); // We expect a key/value pair for dicts, separated by a
+        // colon
+
+        if (!this.skip(lexer$1.TOKEN_COLON)) {
+          this.fail('parseAggregate: expected colon after dict key', tok.lineno, tok.colno);
+        } // TODO: check for errors
+
+
+        var value = this.parseExpression();
+        node.addChild(new nodes$3.Pair(key.lineno, key.colno, key, value));
+      } else {
+        // TODO: check for errors
+        var expr = this.parseExpression();
+        node.addChild(expr);
+      }
+    }
+
+    return node;
+  };
+
+  _proto.parseSignature = function parseSignature(tolerant, noParens) {
+    var tok = this.peekToken();
+
+    if (!noParens && tok.type !== lexer$1.TOKEN_LEFT_PAREN) {
+      if (tolerant) {
+        return null;
+      } else {
+        this.fail('expected arguments', tok.lineno, tok.colno);
+      }
+    }
+
+    if (tok.type === lexer$1.TOKEN_LEFT_PAREN) {
+      tok = this.nextToken();
+    }
+
+    var args = new nodes$3.NodeList(tok.lineno, tok.colno);
+    var kwargs = new nodes$3.KeywordArgs(tok.lineno, tok.colno);
+    var checkComma = false;
+
+    while (1) {
+      // eslint-disable-line no-constant-condition
+      tok = this.peekToken();
+
+      if (!noParens && tok.type === lexer$1.TOKEN_RIGHT_PAREN) {
+        this.nextToken();
+        break;
+      } else if (noParens && tok.type === lexer$1.TOKEN_BLOCK_END) {
+        break;
+      }
+
+      if (checkComma && !this.skip(lexer$1.TOKEN_COMMA)) {
+        this.fail('parseSignature: expected comma after expression', tok.lineno, tok.colno);
+      } else {
+        var arg = this.parseExpression();
+
+        if (this.skipValue(lexer$1.TOKEN_OPERATOR, '=')) {
+          kwargs.addChild(new nodes$3.Pair(arg.lineno, arg.colno, arg, this.parseExpression()));
+        } else {
+          args.addChild(arg);
+        }
+      }
+
+      checkComma = true;
+    }
+
+    if (kwargs.children.length) {
+      args.addChild(kwargs);
+    }
+
+    return args;
+  };
+
+  _proto.parseUntilBlocks = function parseUntilBlocks() {
+    var prev = this.breakOnBlocks;
+
+    for (var _len = arguments.length, blockNames = new Array(_len), _key = 0; _key < _len; _key++) {
+      blockNames[_key] = arguments[_key];
+    }
+
+    this.breakOnBlocks = blockNames;
+    var ret = this.parse();
+    this.breakOnBlocks = prev;
+    return ret;
+  };
+
+  _proto.parseNodes = function parseNodes() {
+    var tok;
+    var buf = [];
+
+    while (tok = this.nextToken()) {
+      if (tok.type === lexer$1.TOKEN_DATA) {
+        var data = tok.value;
+        var nextToken = this.peekToken();
+        var nextVal = nextToken && nextToken.value; // If the last token has "-" we need to trim the
+        // leading whitespace of the data. This is marked with
+        // the `dropLeadingWhitespace` variable.
+
+        if (this.dropLeadingWhitespace) {
+          // TODO: this could be optimized (don't use regex)
+          data = data.replace(/^\s*/, '');
+          this.dropLeadingWhitespace = false;
+        } // Same for the succeeding block start token
+
+
+        if (nextToken && (nextToken.type === lexer$1.TOKEN_BLOCK_START && nextVal.charAt(nextVal.length - 1) === '-' || nextToken.type === lexer$1.TOKEN_VARIABLE_START && nextVal.charAt(this.tokens.tags.VARIABLE_START.length) === '-' || nextToken.type === lexer$1.TOKEN_COMMENT && nextVal.charAt(this.tokens.tags.COMMENT_START.length) === '-')) {
+          // TODO: this could be optimized (don't use regex)
+          data = data.replace(/\s*$/, '');
+        }
+
+        buf.push(new nodes$3.Output(tok.lineno, tok.colno, [new nodes$3.TemplateData(tok.lineno, tok.colno, data)]));
+      } else if (tok.type === lexer$1.TOKEN_BLOCK_START) {
+        this.dropLeadingWhitespace = false;
+        var n = this.parseStatement();
+
+        if (!n) {
+          break;
+        }
+
+        buf.push(n);
+      } else if (tok.type === lexer$1.TOKEN_VARIABLE_START) {
+        var e = this.parseExpression();
+        this.dropLeadingWhitespace = false;
+        this.advanceAfterVariableEnd();
+        buf.push(new nodes$3.Output(tok.lineno, tok.colno, [e]));
+      } else if (tok.type === lexer$1.TOKEN_COMMENT) {
+        this.dropLeadingWhitespace = tok.value.charAt(tok.value.length - this.tokens.tags.COMMENT_END.length - 1) === '-';
+      } else {
+        // Ignore comments, otherwise this should be an error
+        this.fail('Unexpected token at top-level: ' + tok.type, tok.lineno, tok.colno);
+      }
+    }
+
+    return buf;
+  };
+
+  _proto.parse = function parse() {
+    return new nodes$3.NodeList(0, 0, this.parseNodes());
+  };
+
+  _proto.parseAsRoot = function parseAsRoot() {
+    return new nodes$3.Root(0, 0, this.parseNodes());
+  };
+
+  return Parser;
+}(Obj$2); // var util = require('util');
+// var l = lexer.lex('{%- if x -%}\n hello {% endif %}');
+// var t;
+// while((t = l.nextToken())) {
+//     console.log(util.inspect(t));
+// }
+// var p = new Parser(lexer.lex('hello {% filter title %}' +
+//                              'Hello madam how are you' +
+//                              '{% endfilter %}'));
+// var n = p.parseAsRoot();
+// nodes.printNodes(n);
+
+
+var parser$2 = {
+  parse: function parse(src, extensions, opts) {
+    var p = new Parser(lexer$1.lex(src, opts));
+
+    if (extensions !== undefined) {
+      p.extensions = extensions;
+    }
+
+    return p.parseAsRoot();
+  },
+  Parser: Parser
+};
+
+var nodes$2 = nodes$4;
+
+var lib$5 = lib$9.exports;
+
+var sym = 0;
+
+function gensym() {
+  return 'hole_' + sym++;
+} // copy-on-write version of map
+
+
+function mapCOW(arr, func) {
+  var res = null;
+
+  for (var i = 0; i < arr.length; i++) {
+    var item = func(arr[i]);
+
+    if (item !== arr[i]) {
+      if (!res) {
+        res = arr.slice();
+      }
+
+      res[i] = item;
+    }
+  }
+
+  return res || arr;
+}
+
+function walk(ast, func, depthFirst) {
+  if (!(ast instanceof nodes$2.Node)) {
+    return ast;
+  }
+
+  if (!depthFirst) {
+    var astT = func(ast);
+
+    if (astT && astT !== ast) {
+      return astT;
+    }
+  }
+
+  if (ast instanceof nodes$2.NodeList) {
+    var children = mapCOW(ast.children, function (node) {
+      return walk(node, func, depthFirst);
+    });
+
+    if (children !== ast.children) {
+      ast = new nodes$2[ast.typename](ast.lineno, ast.colno, children);
+    }
+  } else if (ast instanceof nodes$2.CallExtension) {
+    var args = walk(ast.args, func, depthFirst);
+    var contentArgs = mapCOW(ast.contentArgs, function (node) {
+      return walk(node, func, depthFirst);
+    });
+
+    if (args !== ast.args || contentArgs !== ast.contentArgs) {
+      ast = new nodes$2[ast.typename](ast.extName, ast.prop, args, contentArgs);
+    }
+  } else {
+    var props = ast.fields.map(function (field) {
+      return ast[field];
+    });
+    var propsT = mapCOW(props, function (prop) {
+      return walk(prop, func, depthFirst);
+    });
+
+    if (propsT !== props) {
+      ast = new nodes$2[ast.typename](ast.lineno, ast.colno);
+      propsT.forEach(function (prop, i) {
+        ast[ast.fields[i]] = prop;
+      });
+    }
+  }
+
+  return depthFirst ? func(ast) || ast : ast;
+}
+
+function depthWalk(ast, func) {
+  return walk(ast, func, true);
+}
+
+function _liftFilters(node, asyncFilters, prop) {
+  var children = [];
+  var walked = depthWalk(prop ? node[prop] : node, function (descNode) {
+    var symbol;
+
+    if (descNode instanceof nodes$2.Block) {
+      return descNode;
+    } else if (descNode instanceof nodes$2.Filter && lib$5.indexOf(asyncFilters, descNode.name.value) !== -1 || descNode instanceof nodes$2.CallExtensionAsync) {
+      symbol = new nodes$2.Symbol(descNode.lineno, descNode.colno, gensym());
+      children.push(new nodes$2.FilterAsync(descNode.lineno, descNode.colno, descNode.name, descNode.args, symbol));
+    }
+
+    return symbol;
+  });
+
+  if (prop) {
+    node[prop] = walked;
+  } else {
+    node = walked;
+  }
+
+  if (children.length) {
+    children.push(node);
+    return new nodes$2.NodeList(node.lineno, node.colno, children);
+  } else {
+    return node;
+  }
+}
+
+function liftFilters(ast, asyncFilters) {
+  return depthWalk(ast, function (node) {
+    if (node instanceof nodes$2.Output) {
+      return _liftFilters(node, asyncFilters);
+    } else if (node instanceof nodes$2.Set) {
+      return _liftFilters(node, asyncFilters, 'value');
+    } else if (node instanceof nodes$2.For) {
+      return _liftFilters(node, asyncFilters, 'arr');
+    } else if (node instanceof nodes$2.If) {
+      return _liftFilters(node, asyncFilters, 'cond');
+    } else if (node instanceof nodes$2.CallExtension) {
+      return _liftFilters(node, asyncFilters, 'args');
+    } else {
+      return undefined;
+    }
+  });
+}
+
+function liftSuper(ast) {
+  return walk(ast, function (blockNode) {
+    if (!(blockNode instanceof nodes$2.Block)) {
+      return;
+    }
+
+    var hasSuper = false;
+    var symbol = gensym();
+    blockNode.body = walk(blockNode.body, function (node) {
+      // eslint-disable-line consistent-return
+      if (node instanceof nodes$2.FunCall && node.name.value === 'super') {
+        hasSuper = true;
+        return new nodes$2.Symbol(node.lineno, node.colno, symbol);
+      }
+    });
+
+    if (hasSuper) {
+      blockNode.body.children.unshift(new nodes$2.Super(0, 0, blockNode.name, new nodes$2.Symbol(0, 0, symbol)));
+    }
+  });
+}
+
+function convertStatements(ast) {
+  return depthWalk(ast, function (node) {
+    if (!(node instanceof nodes$2.If) && !(node instanceof nodes$2.For)) {
+      return undefined;
+    }
+
+    var async = false;
+    walk(node, function (child) {
+      if (child instanceof nodes$2.FilterAsync || child instanceof nodes$2.IfAsync || child instanceof nodes$2.AsyncEach || child instanceof nodes$2.AsyncAll || child instanceof nodes$2.CallExtensionAsync) {
+        async = true; // Stop iterating by returning the node
+
+        return child;
+      }
+
+      return undefined;
+    });
+
+    if (async) {
+      if (node instanceof nodes$2.If) {
+        return new nodes$2.IfAsync(node.lineno, node.colno, node.cond, node.body, node.else_);
+      } else if (node instanceof nodes$2.For && !(node instanceof nodes$2.AsyncAll)) {
+        return new nodes$2.AsyncEach(node.lineno, node.colno, node.arr, node.name, node.body, node.else_);
+      }
+    }
+
+    return undefined;
+  });
+}
+
+function cps(ast, asyncFilters) {
+  return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
+}
+
+function transform(ast, asyncFilters) {
+  return cps(ast, asyncFilters || []);
+} // var parser = require('./parser');
+// var src = 'hello {% foo %}{% endfoo %} end';
+// var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
+// nodes.printNodes(ast);
+
+
+var transformer$1 = {
+  transform: transform
+};
+
+var lib$4 = lib$9.exports;
+
+var arrayFrom = Array.from;
+var supportsIterators = typeof Symbol === 'function' && Symbol.iterator && typeof arrayFrom === 'function'; // Frames keep track of scoping both at compile-time and run-time so
+// we know how to access variables. Block tags can introduce special
+// variables, for example.
+
+var Frame$2 = /*#__PURE__*/function () {
+  function Frame(parent, isolateWrites) {
+    this.variables = Object.create(null);
+    this.parent = parent;
+    this.topLevel = false; // if this is true, writes (set) should never propagate upwards past
+    // this frame to its parent (though reads may).
+
+    this.isolateWrites = isolateWrites;
+  }
+
+  var _proto = Frame.prototype;
+
+  _proto.set = function set(name, val, resolveUp) {
+    // Allow variables with dots by automatically creating the
+    // nested structure
+    var parts = name.split('.');
+    var obj = this.variables;
+    var frame = this;
+
+    if (resolveUp) {
+      if (frame = this.resolve(parts[0], true)) {
+        frame.set(name, val);
+        return;
+      }
+    }
+
+    for (var i = 0; i < parts.length - 1; i++) {
+      var id = parts[i];
+
+      if (!obj[id]) {
+        obj[id] = {};
+      }
+
+      obj = obj[id];
+    }
+
+    obj[parts[parts.length - 1]] = val;
+  };
+
+  _proto.get = function get(name) {
+    var val = this.variables[name];
+
+    if (val !== undefined) {
+      return val;
+    }
+
+    return null;
+  };
+
+  _proto.lookup = function lookup(name) {
+    var p = this.parent;
+    var val = this.variables[name];
+
+    if (val !== undefined) {
+      return val;
+    }
+
+    return p && p.lookup(name);
+  };
+
+  _proto.resolve = function resolve(name, forWrite) {
+    var p = forWrite && this.isolateWrites ? undefined : this.parent;
+    var val = this.variables[name];
+
+    if (val !== undefined) {
+      return this;
+    }
+
+    return p && p.resolve(name);
+  };
+
+  _proto.push = function push(isolateWrites) {
+    return new Frame(this, isolateWrites);
+  };
+
+  _proto.pop = function pop() {
+    return this.parent;
+  };
+
+  return Frame;
+}();
+
+function makeMacro(argNames, kwargNames, func) {
+  return function macro() {
+    for (var _len = arguments.length, macroArgs = new Array(_len), _key = 0; _key < _len; _key++) {
+      macroArgs[_key] = arguments[_key];
+    }
+
+    var argCount = numArgs(macroArgs);
+    var args;
+    var kwargs = getKeywordArgs(macroArgs);
+
+    if (argCount > argNames.length) {
+      args = macroArgs.slice(0, argNames.length); // Positional arguments that should be passed in as
+      // keyword arguments (essentially default values)
+
+      macroArgs.slice(args.length, argCount).forEach(function (val, i) {
+        if (i < kwargNames.length) {
+          kwargs[kwargNames[i]] = val;
+        }
+      });
+      args.push(kwargs);
+    } else if (argCount < argNames.length) {
+      args = macroArgs.slice(0, argCount);
+
+      for (var i = argCount; i < argNames.length; i++) {
+        var arg = argNames[i]; // Keyword arguments that should be passed as
+        // positional arguments, i.e. the caller explicitly
+        // used the name of a positional arg
+
+        args.push(kwargs[arg]);
+        delete kwargs[arg];
+      }
+
+      args.push(kwargs);
+    } else {
+      args = macroArgs;
+    }
+
+    return func.apply(this, args);
+  };
+}
+
+function makeKeywordArgs(obj) {
+  obj.__keywords = true;
+  return obj;
+}
+
+function isKeywordArgs(obj) {
+  return obj && Object.prototype.hasOwnProperty.call(obj, '__keywords');
+}
+
+function getKeywordArgs(args) {
+  var len = args.length;
+
+  if (len) {
+    var lastArg = args[len - 1];
+
+    if (isKeywordArgs(lastArg)) {
+      return lastArg;
+    }
+  }
+
+  return {};
+}
+
+function numArgs(args) {
+  var len = args.length;
+
+  if (len === 0) {
+    return 0;
+  }
+
+  var lastArg = args[len - 1];
+
+  if (isKeywordArgs(lastArg)) {
+    return len - 1;
+  } else {
+    return len;
+  }
+} // A SafeString object indicates that the string should not be
+// autoescaped. This happens magically because autoescaping only
+// occurs on primitive string objects.
+
+
+function SafeString(val) {
+  if (typeof val !== 'string') {
+    return val;
+  }
+
+  this.val = val;
+  this.length = val.length;
+}
+
+SafeString.prototype = Object.create(String.prototype, {
+  length: {
+    writable: true,
+    configurable: true,
+    value: 0
+  }
+});
+
+SafeString.prototype.valueOf = function valueOf() {
+  return this.val;
+};
+
+SafeString.prototype.toString = function toString() {
+  return this.val;
+};
+
+function copySafeness(dest, target) {
+  if (dest instanceof SafeString) {
+    return new SafeString(target);
+  }
+
+  return target.toString();
+}
+
+function markSafe(val) {
+  var type = typeof val;
+
+  if (type === 'string') {
+    return new SafeString(val);
+  } else if (type !== 'function') {
+    return val;
+  } else {
+    return function wrapSafe(args) {
+      var ret = val.apply(this, arguments);
+
+      if (typeof ret === 'string') {
+        return new SafeString(ret);
+      }
+
+      return ret;
+    };
+  }
+}
+
+function suppressValue(val, autoescape) {
+  val = val !== undefined && val !== null ? val : '';
+
+  if (autoescape && !(val instanceof SafeString)) {
+    val = lib$4.escape(val.toString());
+  }
+
+  return val;
+}
+
+function ensureDefined(val, lineno, colno) {
+  if (val === null || val === undefined) {
+    throw new lib$4.TemplateError('attempted to output null or undefined value', lineno + 1, colno + 1);
+  }
+
+  return val;
+}
+
+function memberLookup(obj, val) {
+  if (obj === undefined || obj === null) {
+    return undefined;
+  }
+
+  if (typeof obj[val] === 'function') {
+    return function () {
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      return obj[val].apply(obj, args);
+    };
+  }
+
+  return obj[val];
+}
+
+function callWrap(obj, name, context, args) {
+  if (!obj) {
+    throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
+  } else if (typeof obj !== 'function') {
+    throw new Error('Unable to call `' + name + '`, which is not a function');
+  }
+
+  return obj.apply(context, args);
+}
+
+function contextOrFrameLookup(context, frame, name) {
+  var val = frame.lookup(name);
+  return val !== undefined ? val : context.lookup(name);
+}
+
+function handleError$1(error, lineno, colno) {
+  if (error.lineno) {
+    return error;
+  } else {
+    return new lib$4.TemplateError(error, lineno, colno);
+  }
+}
+
+function asyncEach(arr, dimen, iter, cb) {
+  if (lib$4.isArray(arr)) {
+    var len = arr.length;
+    lib$4.asyncIter(arr, function iterCallback(item, i, next) {
+      switch (dimen) {
+        case 1:
+          iter(item, i, len, next);
+          break;
+
+        case 2:
+          iter(item[0], item[1], i, len, next);
+          break;
+
+        case 3:
+          iter(item[0], item[1], item[2], i, len, next);
+          break;
+
+        default:
+          item.push(i, len, next);
+          iter.apply(this, item);
+      }
+    }, cb);
+  } else {
+    lib$4.asyncFor(arr, function iterCallback(key, val, i, len, next) {
+      iter(key, val, i, len, next);
+    }, cb);
+  }
+}
+
+function asyncAll(arr, dimen, func, cb) {
+  var finished = 0;
+  var len;
+  var outputArr;
+
+  function done(i, output) {
+    finished++;
+    outputArr[i] = output;
+
+    if (finished === len) {
+      cb(null, outputArr.join(''));
+    }
+  }
+
+  if (lib$4.isArray(arr)) {
+    len = arr.length;
+    outputArr = new Array(len);
+
+    if (len === 0) {
+      cb(null, '');
+    } else {
+      for (var i = 0; i < arr.length; i++) {
+        var item = arr[i];
+
+        switch (dimen) {
+          case 1:
+            func(item, i, len, done);
+            break;
+
+          case 2:
+            func(item[0], item[1], i, len, done);
+            break;
+
+          case 3:
+            func(item[0], item[1], item[2], i, len, done);
+            break;
+
+          default:
+            item.push(i, len, done);
+            func.apply(this, item);
+        }
+      }
+    }
+  } else {
+    var keys = lib$4.keys(arr || {});
+    len = keys.length;
+    outputArr = new Array(len);
+
+    if (len === 0) {
+      cb(null, '');
+    } else {
+      for (var _i = 0; _i < keys.length; _i++) {
+        var k = keys[_i];
+        func(k, arr[k], _i, len, done);
+      }
+    }
+  }
+}
+
+function fromIterator(arr) {
+  if (typeof arr !== 'object' || arr === null || lib$4.isArray(arr)) {
+    return arr;
+  } else if (supportsIterators && Symbol.iterator in arr) {
+    return arrayFrom(arr);
+  } else {
+    return arr;
+  }
+}
+
+var runtime$1 = {
+  Frame: Frame$2,
+  makeMacro: makeMacro,
+  makeKeywordArgs: makeKeywordArgs,
+  numArgs: numArgs,
+  suppressValue: suppressValue,
+  ensureDefined: ensureDefined,
+  memberLookup: memberLookup,
+  contextOrFrameLookup: contextOrFrameLookup,
+  callWrap: callWrap,
+  handleError: handleError$1,
+  isArray: lib$4.isArray,
+  keys: lib$4.keys,
+  SafeString: SafeString,
+  copySafeness: copySafeness,
+  markSafe: markSafe,
+  asyncEach: asyncEach,
+  asyncAll: asyncAll,
+  inOperator: lib$4.inOperator,
+  fromIterator: fromIterator
+};
+
+function _inheritsLoose$4(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf$4(subClass, superClass); }
+
+function _setPrototypeOf$4(o, p) { _setPrototypeOf$4 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$4(o, p); }
+
+var parser$1 = parser$2;
+
+var transformer = transformer$1;
+
+var nodes$1 = nodes$4;
+
+var _require$5 = lib$9.exports,
+    TemplateError = _require$5.TemplateError;
+
+var _require2$2 = runtime$1,
+    Frame$1 = _require2$2.Frame;
+
+var _require3 = object,
+    Obj$1 = _require3.Obj; // These are all the same for now, but shouldn't be passed straight
+// through
+
+
+var compareOps = {
+  '==': '==',
+  '===': '===',
+  '!=': '!=',
+  '!==': '!==',
+  '<': '<',
+  '>': '>',
+  '<=': '<=',
+  '>=': '>='
+};
+
+var Compiler = /*#__PURE__*/function (_Obj) {
+  _inheritsLoose$4(Compiler, _Obj);
+
+  function Compiler() {
+    return _Obj.apply(this, arguments) || this;
+  }
+
+  var _proto = Compiler.prototype;
+
+  _proto.init = function init(templateName, throwOnUndefined) {
+    this.templateName = templateName;
+    this.codebuf = [];
+    this.lastId = 0;
+    this.buffer = null;
+    this.bufferStack = [];
+    this._scopeClosers = '';
+    this.inBlock = false;
+    this.throwOnUndefined = throwOnUndefined;
+  };
+
+  _proto.fail = function fail(msg, lineno, colno) {
+    if (lineno !== undefined) {
+      lineno += 1;
+    }
+
+    if (colno !== undefined) {
+      colno += 1;
+    }
+
+    throw new TemplateError(msg, lineno, colno);
+  };
+
+  _proto._pushBuffer = function _pushBuffer() {
+    var id = this._tmpid();
+
+    this.bufferStack.push(this.buffer);
+    this.buffer = id;
+
+    this._emit("var " + this.buffer + " = \"\";");
+
+    return id;
+  };
+
+  _proto._popBuffer = function _popBuffer() {
+    this.buffer = this.bufferStack.pop();
+  };
+
+  _proto._emit = function _emit(code) {
+    this.codebuf.push(code);
+  };
+
+  _proto._emitLine = function _emitLine(code) {
+    this._emit(code + '\n');
+  };
+
+  _proto._emitLines = function _emitLines() {
+    var _this = this;
+
+    for (var _len = arguments.length, lines = new Array(_len), _key = 0; _key < _len; _key++) {
+      lines[_key] = arguments[_key];
+    }
+
+    lines.forEach(function (line) {
+      return _this._emitLine(line);
+    });
+  };
+
+  _proto._emitFuncBegin = function _emitFuncBegin(node, name) {
+    this.buffer = 'output';
+    this._scopeClosers = '';
+
+    this._emitLine("function " + name + "(env, context, frame, runtime, cb) {");
+
+    this._emitLine("var lineno = " + node.lineno + ";");
+
+    this._emitLine("var colno = " + node.colno + ";");
+
+    this._emitLine("var " + this.buffer + " = \"\";");
+
+    this._emitLine('try {');
+  };
+
+  _proto._emitFuncEnd = function _emitFuncEnd(noReturn) {
+    if (!noReturn) {
+      this._emitLine('cb(null, ' + this.buffer + ');');
+    }
+
+    this._closeScopeLevels();
+
+    this._emitLine('} catch (e) {');
+
+    this._emitLine('  cb(runtime.handleError(e, lineno, colno));');
+
+    this._emitLine('}');
+
+    this._emitLine('}');
+
+    this.buffer = null;
+  };
+
+  _proto._addScopeLevel = function _addScopeLevel() {
+    this._scopeClosers += '})';
+  };
+
+  _proto._closeScopeLevels = function _closeScopeLevels() {
+    this._emitLine(this._scopeClosers + ';');
+
+    this._scopeClosers = '';
+  };
+
+  _proto._withScopedSyntax = function _withScopedSyntax(func) {
+    var _scopeClosers = this._scopeClosers;
+    this._scopeClosers = '';
+    func.call(this);
+
+    this._closeScopeLevels();
+
+    this._scopeClosers = _scopeClosers;
+  };
+
+  _proto._makeCallback = function _makeCallback(res) {
+    var err = this._tmpid();
+
+    return 'function(' + err + (res ? ',' + res : '') + ') {\n' + 'if(' + err + ') { cb(' + err + '); return; }';
+  };
+
+  _proto._tmpid = function _tmpid() {
+    this.lastId++;
+    return 't_' + this.lastId;
+  };
+
+  _proto._templateName = function _templateName() {
+    return this.templateName == null ? 'undefined' : JSON.stringify(this.templateName);
+  };
+
+  _proto._compileChildren = function _compileChildren(node, frame) {
+    var _this2 = this;
+
+    node.children.forEach(function (child) {
+      _this2.compile(child, frame);
+    });
+  };
+
+  _proto._compileAggregate = function _compileAggregate(node, frame, startChar, endChar) {
+    var _this3 = this;
+
+    if (startChar) {
+      this._emit(startChar);
+    }
+
+    node.children.forEach(function (child, i) {
+      if (i > 0) {
+        _this3._emit(',');
+      }
+
+      _this3.compile(child, frame);
+    });
+
+    if (endChar) {
+      this._emit(endChar);
+    }
+  };
+
+  _proto._compileExpression = function _compileExpression(node, frame) {
+    // TODO: I'm not really sure if this type check is worth it or
+    // not.
+    this.assertType(node, nodes$1.Literal, nodes$1.Symbol, nodes$1.Group, nodes$1.Array, nodes$1.Dict, nodes$1.FunCall, nodes$1.Caller, nodes$1.Filter, nodes$1.LookupVal, nodes$1.Compare, nodes$1.InlineIf, nodes$1.In, nodes$1.Is, nodes$1.And, nodes$1.Or, nodes$1.Not, nodes$1.Add, nodes$1.Concat, nodes$1.Sub, nodes$1.Mul, nodes$1.Div, nodes$1.FloorDiv, nodes$1.Mod, nodes$1.Pow, nodes$1.Neg, nodes$1.Pos, nodes$1.Compare, nodes$1.NodeList);
+    this.compile(node, frame);
+  };
+
+  _proto.assertType = function assertType(node) {
+    for (var _len2 = arguments.length, types = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+      types[_key2 - 1] = arguments[_key2];
+    }
+
+    if (!types.some(function (t) {
+      return node instanceof t;
+    })) {
+      this.fail("assertType: invalid type: " + node.typename, node.lineno, node.colno);
+    }
+  };
+
+  _proto.compileCallExtension = function compileCallExtension(node, frame, async) {
+    var _this4 = this;
+
+    var args = node.args;
+    var contentArgs = node.contentArgs;
+    var autoescape = typeof node.autoescape === 'boolean' ? node.autoescape : true;
+
+    if (!async) {
+      this._emit(this.buffer + " += runtime.suppressValue(");
+    }
+
+    this._emit("env.getExtension(\"" + node.extName + "\")[\"" + node.prop + "\"](");
+
+    this._emit('context');
+
+    if (args || contentArgs) {
+      this._emit(',');
+    }
+
+    if (args) {
+      if (!(args instanceof nodes$1.NodeList)) {
+        this.fail('compileCallExtension: arguments must be a NodeList, ' + 'use `parser.parseSignature`');
+      }
+
+      args.children.forEach(function (arg, i) {
+        // Tag arguments are passed normally to the call. Note
+        // that keyword arguments are turned into a single js
+        // object as the last argument, if they exist.
+        _this4._compileExpression(arg, frame);
+
+        if (i !== args.children.length - 1 || contentArgs.length) {
+          _this4._emit(',');
+        }
+      });
+    }
+
+    if (contentArgs.length) {
+      contentArgs.forEach(function (arg, i) {
+        if (i > 0) {
+          _this4._emit(',');
+        }
+
+        if (arg) {
+          _this4._emitLine('function(cb) {');
+
+          _this4._emitLine('if(!cb) { cb = function(err) { if(err) { throw err; }}}');
+
+          var id = _this4._pushBuffer();
+
+          _this4._withScopedSyntax(function () {
+            _this4.compile(arg, frame);
+
+            _this4._emitLine("cb(null, " + id + ");");
+          });
+
+          _this4._popBuffer();
+
+          _this4._emitLine("return " + id + ";");
+
+          _this4._emitLine('}');
+        } else {
+          _this4._emit('null');
+        }
+      });
+    }
+
+    if (async) {
+      var res = this._tmpid();
+
+      this._emitLine(', ' + this._makeCallback(res));
+
+      this._emitLine(this.buffer + " += runtime.suppressValue(" + res + ", " + autoescape + " && env.opts.autoescape);");
+
+      this._addScopeLevel();
+    } else {
+      this._emit(')');
+
+      this._emit(", " + autoescape + " && env.opts.autoescape);\n");
+    }
+  };
+
+  _proto.compileCallExtensionAsync = function compileCallExtensionAsync(node, frame) {
+    this.compileCallExtension(node, frame, true);
+  };
+
+  _proto.compileNodeList = function compileNodeList(node, frame) {
+    this._compileChildren(node, frame);
+  };
+
+  _proto.compileLiteral = function compileLiteral(node) {
+    if (typeof node.value === 'string') {
+      var val = node.value.replace(/\\/g, '\\\\');
+      val = val.replace(/"/g, '\\"');
+      val = val.replace(/\n/g, '\\n');
+      val = val.replace(/\r/g, '\\r');
+      val = val.replace(/\t/g, '\\t');
+      val = val.replace(/\u2028/g, "\\u2028");
+
+      this._emit("\"" + val + "\"");
+    } else if (node.value === null) {
+      this._emit('null');
+    } else {
+      this._emit(node.value.toString());
+    }
+  };
+
+  _proto.compileSymbol = function compileSymbol(node, frame) {
+    var name = node.value;
+    var v = frame.lookup(name);
+
+    if (v) {
+      this._emit(v);
+    } else {
+      this._emit('runtime.contextOrFrameLookup(' + 'context, frame, "' + name + '")');
+    }
+  };
+
+  _proto.compileGroup = function compileGroup(node, frame) {
+    this._compileAggregate(node, frame, '(', ')');
+  };
+
+  _proto.compileArray = function compileArray(node, frame) {
+    this._compileAggregate(node, frame, '[', ']');
+  };
+
+  _proto.compileDict = function compileDict(node, frame) {
+    this._compileAggregate(node, frame, '{', '}');
+  };
+
+  _proto.compilePair = function compilePair(node, frame) {
+    var key = node.key;
+    var val = node.value;
+
+    if (key instanceof nodes$1.Symbol) {
+      key = new nodes$1.Literal(key.lineno, key.colno, key.value);
+    } else if (!(key instanceof nodes$1.Literal && typeof key.value === 'string')) {
+      this.fail('compilePair: Dict keys must be strings or names', key.lineno, key.colno);
+    }
+
+    this.compile(key, frame);
+
+    this._emit(': ');
+
+    this._compileExpression(val, frame);
+  };
+
+  _proto.compileInlineIf = function compileInlineIf(node, frame) {
+    this._emit('(');
+
+    this.compile(node.cond, frame);
+
+    this._emit('?');
+
+    this.compile(node.body, frame);
+
+    this._emit(':');
+
+    if (node.else_ !== null) {
+      this.compile(node.else_, frame);
+    } else {
+      this._emit('""');
+    }
+
+    this._emit(')');
+  };
+
+  _proto.compileIn = function compileIn(node, frame) {
+    this._emit('runtime.inOperator(');
+
+    this.compile(node.left, frame);
+
+    this._emit(',');
+
+    this.compile(node.right, frame);
+
+    this._emit(')');
+  };
+
+  _proto.compileIs = function compileIs(node, frame) {
+    // first, we need to try to get the name of the test function, if it's a
+    // callable (i.e., has args) and not a symbol.
+    var right = node.right.name ? node.right.name.value // otherwise go with the symbol value
+    : node.right.value;
+
+    this._emit('env.getTest("' + right + '").call(context, ');
+
+    this.compile(node.left, frame); // compile the arguments for the callable if they exist
+
+    if (node.right.args) {
+      this._emit(',');
+
+      this.compile(node.right.args, frame);
+    }
+
+    this._emit(') === true');
+  };
+
+  _proto._binOpEmitter = function _binOpEmitter(node, frame, str) {
+    this.compile(node.left, frame);
+
+    this._emit(str);
+
+    this.compile(node.right, frame);
+  } // ensure concatenation instead of addition
+  // by adding empty string in between
+  ;
+
+  _proto.compileOr = function compileOr(node, frame) {
+    return this._binOpEmitter(node, frame, ' || ');
+  };
+
+  _proto.compileAnd = function compileAnd(node, frame) {
+    return this._binOpEmitter(node, frame, ' && ');
+  };
+
+  _proto.compileAdd = function compileAdd(node, frame) {
+    return this._binOpEmitter(node, frame, ' + ');
+  };
+
+  _proto.compileConcat = function compileConcat(node, frame) {
+    return this._binOpEmitter(node, frame, ' + "" + ');
+  };
+
+  _proto.compileSub = function compileSub(node, frame) {
+    return this._binOpEmitter(node, frame, ' - ');
+  };
+
+  _proto.compileMul = function compileMul(node, frame) {
+    return this._binOpEmitter(node, frame, ' * ');
+  };
+
+  _proto.compileDiv = function compileDiv(node, frame) {
+    return this._binOpEmitter(node, frame, ' / ');
+  };
+
+  _proto.compileMod = function compileMod(node, frame) {
+    return this._binOpEmitter(node, frame, ' % ');
+  };
+
+  _proto.compileNot = function compileNot(node, frame) {
+    this._emit('!');
+
+    this.compile(node.target, frame);
+  };
+
+  _proto.compileFloorDiv = function compileFloorDiv(node, frame) {
+    this._emit('Math.floor(');
+
+    this.compile(node.left, frame);
+
+    this._emit(' / ');
+
+    this.compile(node.right, frame);
+
+    this._emit(')');
+  };
+
+  _proto.compilePow = function compilePow(node, frame) {
+    this._emit('Math.pow(');
+
+    this.compile(node.left, frame);
+
+    this._emit(', ');
+
+    this.compile(node.right, frame);
+
+    this._emit(')');
+  };
+
+  _proto.compileNeg = function compileNeg(node, frame) {
+    this._emit('-');
+
+    this.compile(node.target, frame);
+  };
+
+  _proto.compilePos = function compilePos(node, frame) {
+    this._emit('+');
+
+    this.compile(node.target, frame);
+  };
+
+  _proto.compileCompare = function compileCompare(node, frame) {
+    var _this5 = this;
+
+    this.compile(node.expr, frame);
+    node.ops.forEach(function (op) {
+      _this5._emit(" " + compareOps[op.type] + " ");
+
+      _this5.compile(op.expr, frame);
+    });
+  };
+
+  _proto.compileLookupVal = function compileLookupVal(node, frame) {
+    this._emit('runtime.memberLookup((');
+
+    this._compileExpression(node.target, frame);
+
+    this._emit('),');
+
+    this._compileExpression(node.val, frame);
+
+    this._emit(')');
+  };
+
+  _proto._getNodeName = function _getNodeName(node) {
+    switch (node.typename) {
+      case 'Symbol':
+        return node.value;
+
+      case 'FunCall':
+        return 'the return value of (' + this._getNodeName(node.name) + ')';
+
+      case 'LookupVal':
+        return this._getNodeName(node.target) + '["' + this._getNodeName(node.val) + '"]';
+
+      case 'Literal':
+        return node.value.toString();
+
+      default:
+        return '--expression--';
+    }
+  };
+
+  _proto.compileFunCall = function compileFunCall(node, frame) {
+    // Keep track of line/col info at runtime by settings
+    // variables within an expression. An expression in javascript
+    // like (x, y, z) returns the last value, and x and y can be
+    // anything
+    this._emit('(lineno = ' + node.lineno + ', colno = ' + node.colno + ', ');
+
+    this._emit('runtime.callWrap('); // Compile it as normal.
+
+
+    this._compileExpression(node.name, frame); // Output the name of what we're calling so we can get friendly errors
+    // if the lookup fails.
+
+
+    this._emit(', "' + this._getNodeName(node.name).replace(/"/g, '\\"') + '", context, ');
+
+    this._compileAggregate(node.args, frame, '[', '])');
+
+    this._emit(')');
+  };
+
+  _proto.compileFilter = function compileFilter(node, frame) {
+    var name = node.name;
+    this.assertType(name, nodes$1.Symbol);
+
+    this._emit('env.getFilter("' + name.value + '").call(context, ');
+
+    this._compileAggregate(node.args, frame);
+
+    this._emit(')');
+  };
+
+  _proto.compileFilterAsync = function compileFilterAsync(node, frame) {
+    var name = node.name;
+    var symbol = node.symbol.value;
+    this.assertType(name, nodes$1.Symbol);
+    frame.set(symbol, symbol);
+
+    this._emit('env.getFilter("' + name.value + '").call(context, ');
+
+    this._compileAggregate(node.args, frame);
+
+    this._emitLine(', ' + this._makeCallback(symbol));
+
+    this._addScopeLevel();
+  };
+
+  _proto.compileKeywordArgs = function compileKeywordArgs(node, frame) {
+    this._emit('runtime.makeKeywordArgs(');
+
+    this.compileDict(node, frame);
+
+    this._emit(')');
+  };
+
+  _proto.compileSet = function compileSet(node, frame) {
+    var _this6 = this;
+
+    var ids = []; // Lookup the variable names for each identifier and create
+    // new ones if necessary
+
+    node.targets.forEach(function (target) {
+      var name = target.value;
+      var id = frame.lookup(name);
+
+      if (id === null || id === undefined) {
+        id = _this6._tmpid(); // Note: This relies on js allowing scope across
+        // blocks, in case this is created inside an `if`
+
+        _this6._emitLine('var ' + id + ';');
+      }
+
+      ids.push(id);
+    });
+
+    if (node.value) {
+      this._emit(ids.join(' = ') + ' = ');
+
+      this._compileExpression(node.value, frame);
+
+      this._emitLine(';');
+    } else {
+      this._emit(ids.join(' = ') + ' = ');
+
+      this.compile(node.body, frame);
+
+      this._emitLine(';');
+    }
+
+    node.targets.forEach(function (target, i) {
+      var id = ids[i];
+      var name = target.value; // We are running this for every var, but it's very
+      // uncommon to assign to multiple vars anyway
+
+      _this6._emitLine("frame.set(\"" + name + "\", " + id + ", true);");
+
+      _this6._emitLine('if(frame.topLevel) {');
+
+      _this6._emitLine("context.setVariable(\"" + name + "\", " + id + ");");
+
+      _this6._emitLine('}');
+
+      if (name.charAt(0) !== '_') {
+        _this6._emitLine('if(frame.topLevel) {');
+
+        _this6._emitLine("context.addExport(\"" + name + "\", " + id + ");");
+
+        _this6._emitLine('}');
+      }
+    });
+  };
+
+  _proto.compileSwitch = function compileSwitch(node, frame) {
+    var _this7 = this;
+
+    this._emit('switch (');
+
+    this.compile(node.expr, frame);
+
+    this._emit(') {');
+
+    node.cases.forEach(function (c, i) {
+      _this7._emit('case ');
+
+      _this7.compile(c.cond, frame);
+
+      _this7._emit(': ');
+
+      _this7.compile(c.body, frame); // preserve fall-throughs
+
+
+      if (c.body.children.length) {
+        _this7._emitLine('break;');
+      }
+    });
+
+    if (node.default) {
+      this._emit('default:');
+
+      this.compile(node.default, frame);
+    }
+
+    this._emit('}');
+  };
+
+  _proto.compileIf = function compileIf(node, frame, async) {
+    var _this8 = this;
+
+    this._emit('if(');
+
+    this._compileExpression(node.cond, frame);
+
+    this._emitLine(') {');
+
+    this._withScopedSyntax(function () {
+      _this8.compile(node.body, frame);
+
+      if (async) {
+        _this8._emit('cb()');
+      }
+    });
+
+    if (node.else_) {
+      this._emitLine('}\nelse {');
+
+      this._withScopedSyntax(function () {
+        _this8.compile(node.else_, frame);
+
+        if (async) {
+          _this8._emit('cb()');
+        }
+      });
+    } else if (async) {
+      this._emitLine('}\nelse {');
+
+      this._emit('cb()');
+    }
+
+    this._emitLine('}');
+  };
+
+  _proto.compileIfAsync = function compileIfAsync(node, frame) {
+    this._emit('(function(cb) {');
+
+    this.compileIf(node, frame, true);
+
+    this._emit('})(' + this._makeCallback());
+
+    this._addScopeLevel();
+  };
+
+  _proto._emitLoopBindings = function _emitLoopBindings(node, arr, i, len) {
+    var _this9 = this;
+
+    var bindings = [{
+      name: 'index',
+      val: i + " + 1"
+    }, {
+      name: 'index0',
+      val: i
+    }, {
+      name: 'revindex',
+      val: len + " - " + i
+    }, {
+      name: 'revindex0',
+      val: len + " - " + i + " - 1"
+    }, {
+      name: 'first',
+      val: i + " === 0"
+    }, {
+      name: 'last',
+      val: i + " === " + len + " - 1"
+    }, {
+      name: 'length',
+      val: len
+    }];
+    bindings.forEach(function (b) {
+      _this9._emitLine("frame.set(\"loop." + b.name + "\", " + b.val + ");");
+    });
+  };
+
+  _proto.compileFor = function compileFor(node, frame) {
+    var _this10 = this;
+
+    // Some of this code is ugly, but it keeps the generated code
+    // as fast as possible. ForAsync also shares some of this, but
+    // not much.
+    var i = this._tmpid();
+
+    var len = this._tmpid();
+
+    var arr = this._tmpid();
+
+    frame = frame.push();
+
+    this._emitLine('frame = frame.push();');
+
+    this._emit("var " + arr + " = ");
+
+    this._compileExpression(node.arr, frame);
+
+    this._emitLine(';');
+
+    this._emit("if(" + arr + ") {");
+
+    this._emitLine(arr + ' = runtime.fromIterator(' + arr + ');'); // If multiple names are passed, we need to bind them
+    // appropriately
+
+
+    if (node.name instanceof nodes$1.Array) {
+      this._emitLine("var " + i + ";"); // The object could be an arroy or object. Note that the
+      // body of the loop is duplicated for each condition, but
+      // we are optimizing for speed over size.
+
+
+      this._emitLine("if(runtime.isArray(" + arr + ")) {");
+
+      this._emitLine("var " + len + " = " + arr + ".length;");
+
+      this._emitLine("for(" + i + "=0; " + i + " < " + arr + ".length; " + i + "++) {"); // Bind each declared var
+
+
+      node.name.children.forEach(function (child, u) {
+        var tid = _this10._tmpid();
+
+        _this10._emitLine("var " + tid + " = " + arr + "[" + i + "][" + u + "];");
+
+        _this10._emitLine("frame.set(\"" + child + "\", " + arr + "[" + i + "][" + u + "]);");
+
+        frame.set(node.name.children[u].value, tid);
+      });
+
+      this._emitLoopBindings(node, arr, i, len);
+
+      this._withScopedSyntax(function () {
+        _this10.compile(node.body, frame);
+      });
+
+      this._emitLine('}');
+
+      this._emitLine('} else {'); // Iterate over the key/values of an object
+
+
+      var _node$name$children = node.name.children,
+          key = _node$name$children[0],
+          val = _node$name$children[1];
+
+      var k = this._tmpid();
+
+      var v = this._tmpid();
+
+      frame.set(key.value, k);
+      frame.set(val.value, v);
+
+      this._emitLine(i + " = -1;");
+
+      this._emitLine("var " + len + " = runtime.keys(" + arr + ").length;");
+
+      this._emitLine("for(var " + k + " in " + arr + ") {");
+
+      this._emitLine(i + "++;");
+
+      this._emitLine("var " + v + " = " + arr + "[" + k + "];");
+
+      this._emitLine("frame.set(\"" + key.value + "\", " + k + ");");
+
+      this._emitLine("frame.set(\"" + val.value + "\", " + v + ");");
+
+      this._emitLoopBindings(node, arr, i, len);
+
+      this._withScopedSyntax(function () {
+        _this10.compile(node.body, frame);
+      });
+
+      this._emitLine('}');
+
+      this._emitLine('}');
+    } else {
+      // Generate a typical array iteration
+      var _v = this._tmpid();
+
+      frame.set(node.name.value, _v);
+
+      this._emitLine("var " + len + " = " + arr + ".length;");
+
+      this._emitLine("for(var " + i + "=0; " + i + " < " + arr + ".length; " + i + "++) {");
+
+      this._emitLine("var " + _v + " = " + arr + "[" + i + "];");
+
+      this._emitLine("frame.set(\"" + node.name.value + "\", " + _v + ");");
+
+      this._emitLoopBindings(node, arr, i, len);
+
+      this._withScopedSyntax(function () {
+        _this10.compile(node.body, frame);
+      });
+
+      this._emitLine('}');
+    }
+
+    this._emitLine('}');
+
+    if (node.else_) {
+      this._emitLine('if (!' + len + ') {');
+
+      this.compile(node.else_, frame);
+
+      this._emitLine('}');
+    }
+
+    this._emitLine('frame = frame.pop();');
+  };
+
+  _proto._compileAsyncLoop = function _compileAsyncLoop(node, frame, parallel) {
+    var _this11 = this;
+
+    // This shares some code with the For tag, but not enough to
+    // worry about. This iterates across an object asynchronously,
+    // but not in parallel.
+    var i = this._tmpid();
+
+    var len = this._tmpid();
+
+    var arr = this._tmpid();
+
+    var asyncMethod = parallel ? 'asyncAll' : 'asyncEach';
+    frame = frame.push();
+
+    this._emitLine('frame = frame.push();');
+
+    this._emit('var ' + arr + ' = runtime.fromIterator(');
+
+    this._compileExpression(node.arr, frame);
+
+    this._emitLine(');');
+
+    if (node.name instanceof nodes$1.Array) {
+      var arrayLen = node.name.children.length;
+
+      this._emit("runtime." + asyncMethod + "(" + arr + ", " + arrayLen + ", function(");
+
+      node.name.children.forEach(function (name) {
+        _this11._emit(name.value + ",");
+      });
+
+      this._emit(i + ',' + len + ',next) {');
+
+      node.name.children.forEach(function (name) {
+        var id = name.value;
+        frame.set(id, id);
+
+        _this11._emitLine("frame.set(\"" + id + "\", " + id + ");");
+      });
+    } else {
+      var id = node.name.value;
+
+      this._emitLine("runtime." + asyncMethod + "(" + arr + ", 1, function(" + id + ", " + i + ", " + len + ",next) {");
+
+      this._emitLine('frame.set("' + id + '", ' + id + ');');
+
+      frame.set(id, id);
+    }
+
+    this._emitLoopBindings(node, arr, i, len);
+
+    this._withScopedSyntax(function () {
+      var buf;
+
+      if (parallel) {
+        buf = _this11._pushBuffer();
+      }
+
+      _this11.compile(node.body, frame);
+
+      _this11._emitLine('next(' + i + (buf ? ',' + buf : '') + ');');
+
+      if (parallel) {
+        _this11._popBuffer();
+      }
+    });
+
+    var output = this._tmpid();
+
+    this._emitLine('}, ' + this._makeCallback(output));
+
+    this._addScopeLevel();
+
+    if (parallel) {
+      this._emitLine(this.buffer + ' += ' + output + ';');
+    }
+
+    if (node.else_) {
+      this._emitLine('if (!' + arr + '.length) {');
+
+      this.compile(node.else_, frame);
+
+      this._emitLine('}');
+    }
+
+    this._emitLine('frame = frame.pop();');
+  };
+
+  _proto.compileAsyncEach = function compileAsyncEach(node, frame) {
+    this._compileAsyncLoop(node, frame);
+  };
+
+  _proto.compileAsyncAll = function compileAsyncAll(node, frame) {
+    this._compileAsyncLoop(node, frame, true);
+  };
+
+  _proto._compileMacro = function _compileMacro(node, frame) {
+    var _this12 = this;
+
+    var args = [];
+    var kwargs = null;
+
+    var funcId = 'macro_' + this._tmpid();
+
+    var keepFrame = frame !== undefined; // Type check the definition of the args
+
+    node.args.children.forEach(function (arg, i) {
+      if (i === node.args.children.length - 1 && arg instanceof nodes$1.Dict) {
+        kwargs = arg;
+      } else {
+        _this12.assertType(arg, nodes$1.Symbol);
+
+        args.push(arg);
+      }
+    });
+    var realNames = [].concat(args.map(function (n) {
+      return "l_" + n.value;
+    }), ['kwargs']); // Quoted argument names
+
+    var argNames = args.map(function (n) {
+      return "\"" + n.value + "\"";
+    });
+    var kwargNames = (kwargs && kwargs.children || []).map(function (n) {
+      return "\"" + n.key.value + "\"";
+    }); // We pass a function to makeMacro which destructures the
+    // arguments so support setting positional args with keywords
+    // args and passing keyword args as positional args
+    // (essentially default values). See runtime.js.
+
+    var currFrame;
+
+    if (keepFrame) {
+      currFrame = frame.push(true);
+    } else {
+      currFrame = new Frame$1();
+    }
+
+    this._emitLines("var " + funcId + " = runtime.makeMacro(", "[" + argNames.join(', ') + "], ", "[" + kwargNames.join(', ') + "], ", "function (" + realNames.join(', ') + ") {", 'var callerFrame = frame;', 'frame = ' + (keepFrame ? 'frame.push(true);' : 'new runtime.Frame();'), 'kwargs = kwargs || {};', 'if (Object.prototype.hasOwnProperty.call(kwargs, "caller")) {', 'frame.set("caller", kwargs.caller); }'); // Expose the arguments to the template. Don't need to use
+    // random names because the function
+    // will create a new run-time scope for us
+
+
+    args.forEach(function (arg) {
+      _this12._emitLine("frame.set(\"" + arg.value + "\", l_" + arg.value + ");");
+
+      currFrame.set(arg.value, "l_" + arg.value);
+    }); // Expose the keyword arguments
+
+    if (kwargs) {
+      kwargs.children.forEach(function (pair) {
+        var name = pair.key.value;
+
+        _this12._emit("frame.set(\"" + name + "\", ");
+
+        _this12._emit("Object.prototype.hasOwnProperty.call(kwargs, \"" + name + "\")");
+
+        _this12._emit(" ? kwargs[\"" + name + "\"] : ");
+
+        _this12._compileExpression(pair.value, currFrame);
+
+        _this12._emit(');');
+      });
+    }
+
+    var bufferId = this._pushBuffer();
+
+    this._withScopedSyntax(function () {
+      _this12.compile(node.body, currFrame);
+    });
+
+    this._emitLine('frame = ' + (keepFrame ? 'frame.pop();' : 'callerFrame;'));
+
+    this._emitLine("return new runtime.SafeString(" + bufferId + ");");
+
+    this._emitLine('});');
+
+    this._popBuffer();
+
+    return funcId;
+  };
+
+  _proto.compileMacro = function compileMacro(node, frame) {
+    var funcId = this._compileMacro(node); // Expose the macro to the templates
+
+
+    var name = node.name.value;
+    frame.set(name, funcId);
+
+    if (frame.parent) {
+      this._emitLine("frame.set(\"" + name + "\", " + funcId + ");");
+    } else {
+      if (node.name.value.charAt(0) !== '_') {
+        this._emitLine("context.addExport(\"" + name + "\");");
+      }
+
+      this._emitLine("context.setVariable(\"" + name + "\", " + funcId + ");");
+    }
+  };
+
+  _proto.compileCaller = function compileCaller(node, frame) {
+    // basically an anonymous "macro expression"
+    this._emit('(function (){');
+
+    var funcId = this._compileMacro(node, frame);
+
+    this._emit("return " + funcId + ";})()");
+  };
+
+  _proto._compileGetTemplate = function _compileGetTemplate(node, frame, eagerCompile, ignoreMissing) {
+    var parentTemplateId = this._tmpid();
+
+    var parentName = this._templateName();
+
+    var cb = this._makeCallback(parentTemplateId);
+
+    var eagerCompileArg = eagerCompile ? 'true' : 'false';
+    var ignoreMissingArg = ignoreMissing ? 'true' : 'false';
+
+    this._emit('env.getTemplate(');
+
+    this._compileExpression(node.template, frame);
+
+    this._emitLine(", " + eagerCompileArg + ", " + parentName + ", " + ignoreMissingArg + ", " + cb);
+
+    return parentTemplateId;
+  };
+
+  _proto.compileImport = function compileImport(node, frame) {
+    var target = node.target.value;
+
+    var id = this._compileGetTemplate(node, frame, false, false);
+
+    this._addScopeLevel();
+
+    this._emitLine(id + '.getExported(' + (node.withContext ? 'context.getVariables(), frame, ' : '') + this._makeCallback(id));
+
+    this._addScopeLevel();
+
+    frame.set(target, id);
+
+    if (frame.parent) {
+      this._emitLine("frame.set(\"" + target + "\", " + id + ");");
+    } else {
+      this._emitLine("context.setVariable(\"" + target + "\", " + id + ");");
+    }
+  };
+
+  _proto.compileFromImport = function compileFromImport(node, frame) {
+    var _this13 = this;
+
+    var importedId = this._compileGetTemplate(node, frame, false, false);
+
+    this._addScopeLevel();
+
+    this._emitLine(importedId + '.getExported(' + (node.withContext ? 'context.getVariables(), frame, ' : '') + this._makeCallback(importedId));
+
+    this._addScopeLevel();
+
+    node.names.children.forEach(function (nameNode) {
+      var name;
+      var alias;
+
+      var id = _this13._tmpid();
+
+      if (nameNode instanceof nodes$1.Pair) {
+        name = nameNode.key.value;
+        alias = nameNode.value.value;
+      } else {
+        name = nameNode.value;
+        alias = name;
+      }
+
+      _this13._emitLine("if(Object.prototype.hasOwnProperty.call(" + importedId + ", \"" + name + "\")) {");
+
+      _this13._emitLine("var " + id + " = " + importedId + "." + name + ";");
+
+      _this13._emitLine('} else {');
+
+      _this13._emitLine("cb(new Error(\"cannot import '" + name + "'\")); return;");
+
+      _this13._emitLine('}');
+
+      frame.set(alias, id);
+
+      if (frame.parent) {
+        _this13._emitLine("frame.set(\"" + alias + "\", " + id + ");");
+      } else {
+        _this13._emitLine("context.setVariable(\"" + alias + "\", " + id + ");");
+      }
+    });
+  };
+
+  _proto.compileBlock = function compileBlock(node) {
+    var id = this._tmpid(); // If we are executing outside a block (creating a top-level
+    // block), we really don't want to execute its code because it
+    // will execute twice: once when the child template runs and
+    // again when the parent template runs. Note that blocks
+    // within blocks will *always* execute immediately *and*
+    // wherever else they are invoked (like used in a parent
+    // template). This may have behavioral differences from jinja
+    // because blocks can have side effects, but it seems like a
+    // waste of performance to always execute huge top-level
+    // blocks twice
+
+
+    if (!this.inBlock) {
+      this._emit('(parentTemplate ? function(e, c, f, r, cb) { cb(""); } : ');
+    }
+
+    this._emit("context.getBlock(\"" + node.name.value + "\")");
+
+    if (!this.inBlock) {
+      this._emit(')');
+    }
+
+    this._emitLine('(env, context, frame, runtime, ' + this._makeCallback(id));
+
+    this._emitLine(this.buffer + " += " + id + ";");
+
+    this._addScopeLevel();
+  };
+
+  _proto.compileSuper = function compileSuper(node, frame) {
+    var name = node.blockName.value;
+    var id = node.symbol.value;
+
+    var cb = this._makeCallback(id);
+
+    this._emitLine("context.getSuper(env, \"" + name + "\", b_" + name + ", frame, runtime, " + cb);
+
+    this._emitLine(id + " = runtime.markSafe(" + id + ");");
+
+    this._addScopeLevel();
+
+    frame.set(id, id);
+  };
+
+  _proto.compileExtends = function compileExtends(node, frame) {
+    var k = this._tmpid();
+
+    var parentTemplateId = this._compileGetTemplate(node, frame, true, false); // extends is a dynamic tag and can occur within a block like
+    // `if`, so if this happens we need to capture the parent
+    // template in the top-level scope
+
+
+    this._emitLine("parentTemplate = " + parentTemplateId);
+
+    this._emitLine("for(var " + k + " in parentTemplate.blocks) {");
+
+    this._emitLine("context.addBlock(" + k + ", parentTemplate.blocks[" + k + "]);");
+
+    this._emitLine('}');
+
+    this._addScopeLevel();
+  };
+
+  _proto.compileInclude = function compileInclude(node, frame) {
+    this._emitLine('var tasks = [];');
+
+    this._emitLine('tasks.push(');
+
+    this._emitLine('function(callback) {');
+
+    var id = this._compileGetTemplate(node, frame, false, node.ignoreMissing);
+
+    this._emitLine("callback(null," + id + ");});");
+
+    this._emitLine('});');
+
+    var id2 = this._tmpid();
+
+    this._emitLine('tasks.push(');
+
+    this._emitLine('function(template, callback){');
+
+    this._emitLine('template.render(context.getVariables(), frame, ' + this._makeCallback(id2));
+
+    this._emitLine('callback(null,' + id2 + ');});');
+
+    this._emitLine('});');
+
+    this._emitLine('tasks.push(');
+
+    this._emitLine('function(result, callback){');
+
+    this._emitLine(this.buffer + " += result;");
+
+    this._emitLine('callback(null);');
+
+    this._emitLine('});');
+
+    this._emitLine('env.waterfall(tasks, function(){');
+
+    this._addScopeLevel();
+  };
+
+  _proto.compileTemplateData = function compileTemplateData(node, frame) {
+    this.compileLiteral(node, frame);
+  };
+
+  _proto.compileCapture = function compileCapture(node, frame) {
+    var _this14 = this;
+
+    // we need to temporarily override the current buffer id as 'output'
+    // so the set block writes to the capture output instead of the buffer
+    var buffer = this.buffer;
+    this.buffer = 'output';
+
+    this._emitLine('(function() {');
+
+    this._emitLine('var output = "";');
+
+    this._withScopedSyntax(function () {
+      _this14.compile(node.body, frame);
+    });
+
+    this._emitLine('return output;');
+
+    this._emitLine('})()'); // and of course, revert back to the old buffer id
+
+
+    this.buffer = buffer;
+  };
+
+  _proto.compileOutput = function compileOutput(node, frame) {
+    var _this15 = this;
+
+    var children = node.children;
+    children.forEach(function (child) {
+      // TemplateData is a special case because it is never
+      // autoescaped, so simply output it for optimization
+      if (child instanceof nodes$1.TemplateData) {
+        if (child.value) {
+          _this15._emit(_this15.buffer + " += ");
+
+          _this15.compileLiteral(child, frame);
+
+          _this15._emitLine(';');
+        }
+      } else {
+        _this15._emit(_this15.buffer + " += runtime.suppressValue(");
+
+        if (_this15.throwOnUndefined) {
+          _this15._emit('runtime.ensureDefined(');
+        }
+
+        _this15.compile(child, frame);
+
+        if (_this15.throwOnUndefined) {
+          _this15._emit("," + node.lineno + "," + node.colno + ")");
+        }
+
+        _this15._emit(', env.opts.autoescape);\n');
+      }
+    });
+  };
+
+  _proto.compileRoot = function compileRoot(node, frame) {
+    var _this16 = this;
+
+    if (frame) {
+      this.fail('compileRoot: root node can\'t have frame');
+    }
+
+    frame = new Frame$1();
+
+    this._emitFuncBegin(node, 'root');
+
+    this._emitLine('var parentTemplate = null;');
+
+    this._compileChildren(node, frame);
+
+    this._emitLine('if(parentTemplate) {');
+
+    this._emitLine('parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
+
+    this._emitLine('} else {');
+
+    this._emitLine("cb(null, " + this.buffer + ");");
+
+    this._emitLine('}');
+
+    this._emitFuncEnd(true);
+
+    this.inBlock = true;
+    var blockNames = [];
+    var blocks = node.findAll(nodes$1.Block);
+    blocks.forEach(function (block, i) {
+      var name = block.name.value;
+
+      if (blockNames.indexOf(name) !== -1) {
+        throw new Error("Block \"" + name + "\" defined more than once.");
+      }
+
+      blockNames.push(name);
+
+      _this16._emitFuncBegin(block, "b_" + name);
+
+      var tmpFrame = new Frame$1();
+
+      _this16._emitLine('var frame = frame.push(true);');
+
+      _this16.compile(block.body, tmpFrame);
+
+      _this16._emitFuncEnd();
+    });
+
+    this._emitLine('return {');
+
+    blocks.forEach(function (block, i) {
+      var blockName = "b_" + block.name.value;
+
+      _this16._emitLine(blockName + ": " + blockName + ",");
+    });
+
+    this._emitLine('root: root\n};');
+  };
+
+  _proto.compile = function compile(node, frame) {
+    var _compile = this['compile' + node.typename];
+
+    if (_compile) {
+      _compile.call(this, node, frame);
+    } else {
+      this.fail("compile: Cannot compile node: " + node.typename, node.lineno, node.colno);
+    }
+  };
+
+  _proto.getCode = function getCode() {
+    return this.codebuf.join('');
+  };
+
+  return Compiler;
+}(Obj$1);
+
+var compiler$3 = {
+  compile: function compile(src, asyncFilters, extensions, name, opts) {
+    if (opts === void 0) {
+      opts = {};
+    }
+
+    var c = new Compiler(name, opts.throwOnUndefined); // Run the extension preprocessors against the source.
+
+    var preprocessors = (extensions || []).map(function (ext) {
+      return ext.preprocess;
+    }).filter(function (f) {
+      return !!f;
+    });
+    var processedSrc = preprocessors.reduce(function (s, processor) {
+      return processor(s);
+    }, src);
+    c.compile(transformer.transform(parser$1.parse(processedSrc, extensions, opts), asyncFilters, name));
+    return c.getCode();
+  },
+  Compiler: Compiler
+};
+
+var filters$1 = {exports: {}};
+
+var lib$3 = lib$9.exports;
+
+var r = runtime$1;
+
+var _exports = filters$1.exports = {};
+
+function normalize$1(value, defaultValue) {
+  if (value === null || value === undefined || value === false) {
+    return defaultValue;
+  }
+
+  return value;
+}
+
+_exports.abs = Math.abs;
+
+function isNaN$1(num) {
+  return num !== num; // eslint-disable-line no-self-compare
+}
+
+function batch(arr, linecount, fillWith) {
+  var i;
+  var res = [];
+  var tmp = [];
+
+  for (i = 0; i < arr.length; i++) {
+    if (i % linecount === 0 && tmp.length) {
+      res.push(tmp);
+      tmp = [];
+    }
+
+    tmp.push(arr[i]);
+  }
+
+  if (tmp.length) {
+    if (fillWith) {
+      for (i = tmp.length; i < linecount; i++) {
+        tmp.push(fillWith);
+      }
+    }
+
+    res.push(tmp);
+  }
+
+  return res;
+}
+
+_exports.batch = batch;
+
+function capitalize(str) {
+  str = normalize$1(str, '');
+  var ret = str.toLowerCase();
+  return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
+}
+
+_exports.capitalize = capitalize;
+
+function center(str, width) {
+  str = normalize$1(str, '');
+  width = width || 80;
+
+  if (str.length >= width) {
+    return str;
+  }
+
+  var spaces = width - str.length;
+  var pre = lib$3.repeat(' ', spaces / 2 - spaces % 2);
+  var post = lib$3.repeat(' ', spaces / 2);
+  return r.copySafeness(str, pre + str + post);
+}
+
+_exports.center = center;
+
+function default_(val, def, bool) {
+  if (bool) {
+    return val || def;
+  } else {
+    return val !== undefined ? val : def;
+  }
+} // TODO: it is confusing to export something called 'default'
+
+
+_exports['default'] = default_; // eslint-disable-line dot-notation
+
+function dictsort(val, caseSensitive, by) {
+  if (!lib$3.isObject(val)) {
+    throw new lib$3.TemplateError('dictsort filter: val must be an object');
+  }
+
+  var array = []; // deliberately include properties from the object's prototype
+
+  for (var k in val) {
+    // eslint-disable-line guard-for-in, no-restricted-syntax
+    array.push([k, val[k]]);
+  }
+
+  var si;
+
+  if (by === undefined || by === 'key') {
+    si = 0;
+  } else if (by === 'value') {
+    si = 1;
+  } else {
+    throw new lib$3.TemplateError('dictsort filter: You can only sort by either key or value');
+  }
+
+  array.sort(function (t1, t2) {
+    var a = t1[si];
+    var b = t2[si];
+
+    if (!caseSensitive) {
+      if (lib$3.isString(a)) {
+        a = a.toUpperCase();
+      }
+
+      if (lib$3.isString(b)) {
+        b = b.toUpperCase();
+      }
+    }
+
+    return a > b ? 1 : a === b ? 0 : -1; // eslint-disable-line no-nested-ternary
+  });
+  return array;
+}
+
+_exports.dictsort = dictsort;
+
+function dump(obj, spaces) {
+  return JSON.stringify(obj, null, spaces);
+}
+
+_exports.dump = dump;
+
+function escape(str) {
+  if (str instanceof r.SafeString) {
+    return str;
+  }
+
+  str = str === null || str === undefined ? '' : str;
+  return r.markSafe(lib$3.escape(str.toString()));
+}
+
+_exports.escape = escape;
+
+function safe(str) {
+  if (str instanceof r.SafeString) {
+    return str;
+  }
+
+  str = str === null || str === undefined ? '' : str;
+  return r.markSafe(str.toString());
+}
+
+_exports.safe = safe;
+
+function first(arr) {
+  return arr[0];
+}
+
+_exports.first = first;
+
+function forceescape(str) {
+  str = str === null || str === undefined ? '' : str;
+  return r.markSafe(lib$3.escape(str.toString()));
+}
+
+_exports.forceescape = forceescape;
+
+function groupby(arr, attr) {
+  return lib$3.groupBy(arr, attr, this.env.opts.throwOnUndefined);
+}
+
+_exports.groupby = groupby;
+
+function indent(str, width, indentfirst) {
+  str = normalize$1(str, '');
+
+  if (str === '') {
+    return '';
+  }
+
+  width = width || 4; // let res = '';
+
+  var lines = str.split('\n');
+  var sp = lib$3.repeat(' ', width);
+  var res = lines.map(function (l, i) {
+    return i === 0 && !indentfirst ? l : "" + sp + l;
+  }).join('\n');
+  return r.copySafeness(str, res);
+}
+
+_exports.indent = indent;
+
+function join(arr, del, attr) {
+  del = del || '';
+
+  if (attr) {
+    arr = lib$3.map(arr, function (v) {
+      return v[attr];
+    });
+  }
+
+  return arr.join(del);
+}
+
+_exports.join = join;
+
+function last(arr) {
+  return arr[arr.length - 1];
+}
+
+_exports.last = last;
+
+function lengthFilter(val) {
+  var value = normalize$1(val, '');
+
+  if (value !== undefined) {
+    if (typeof Map === 'function' && value instanceof Map || typeof Set === 'function' && value instanceof Set) {
+      // ECMAScript 2015 Maps and Sets
+      return value.size;
+    }
+
+    if (lib$3.isObject(value) && !(value instanceof r.SafeString)) {
+      // Objects (besides SafeStrings), non-primative Arrays
+      return lib$3.keys(value).length;
+    }
+
+    return value.length;
+  }
+
+  return 0;
+}
+
+_exports.length = lengthFilter;
+
+function list$1(val) {
+  if (lib$3.isString(val)) {
+    return val.split('');
+  } else if (lib$3.isObject(val)) {
+    return lib$3._entries(val || {}).map(function (_ref) {
+      var key = _ref[0],
+          value = _ref[1];
+      return {
+        key: key,
+        value: value
+      };
+    });
+  } else if (lib$3.isArray(val)) {
+    return val;
+  } else {
+    throw new lib$3.TemplateError('list filter: type not iterable');
+  }
+}
+
+_exports.list = list$1;
+
+function lower(str) {
+  str = normalize$1(str, '');
+  return str.toLowerCase();
+}
+
+_exports.lower = lower;
+
+function nl2br(str) {
+  if (str === null || str === undefined) {
+    return '';
+  }
+
+  return r.copySafeness(str, str.replace(/\r\n|\n/g, '<br />\n'));
+}
+
+_exports.nl2br = nl2br;
+
+function random(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+_exports.random = random;
+/**
+ * Construct select or reject filter
+ *
+ * @param {boolean} expectedTestResult
+ * @returns {function(array, string, *): array}
+ */
+
+function getSelectOrReject(expectedTestResult) {
+  function filter(arr, testName, secondArg) {
+    if (testName === void 0) {
+      testName = 'truthy';
+    }
+
+    var context = this;
+    var test = context.env.getTest(testName);
+    return lib$3.toArray(arr).filter(function examineTestResult(item) {
+      return test.call(context, item, secondArg) === expectedTestResult;
+    });
+  }
+
+  return filter;
+}
+
+_exports.reject = getSelectOrReject(false);
+
+function rejectattr(arr, attr) {
+  return arr.filter(function (item) {
+    return !item[attr];
+  });
+}
+
+_exports.rejectattr = rejectattr;
+_exports.select = getSelectOrReject(true);
+
+function selectattr(arr, attr) {
+  return arr.filter(function (item) {
+    return !!item[attr];
+  });
+}
+
+_exports.selectattr = selectattr;
+
+function replace(str, old, new_, maxCount) {
+  var originalStr = str;
+
+  if (old instanceof RegExp) {
+    return str.replace(old, new_);
+  }
+
+  if (typeof maxCount === 'undefined') {
+    maxCount = -1;
+  }
+
+  var res = ''; // Output
+  // Cast Numbers in the search term to string
+
+  if (typeof old === 'number') {
+    old = '' + old;
+  } else if (typeof old !== 'string') {
+    // If it is something other than number or string,
+    // return the original string
+    return str;
+  } // Cast numbers in the replacement to string
+
+
+  if (typeof str === 'number') {
+    str = '' + str;
+  } // If by now, we don't have a string, throw it back
+
+
+  if (typeof str !== 'string' && !(str instanceof r.SafeString)) {
+    return str;
+  } // ShortCircuits
+
+
+  if (old === '') {
+    // Mimic the python behaviour: empty string is replaced
+    // by replacement e.g. "abc"|replace("", ".") -> .a.b.c.
+    res = new_ + str.split('').join(new_) + new_;
+    return r.copySafeness(str, res);
+  }
+
+  var nextIndex = str.indexOf(old); // if # of replacements to perform is 0, or the string to does
+  // not contain the old value, return the string
+
+  if (maxCount === 0 || nextIndex === -1) {
+    return str;
+  }
+
+  var pos = 0;
+  var count = 0; // # of replacements made
+
+  while (nextIndex > -1 && (maxCount === -1 || count < maxCount)) {
+    // Grab the next chunk of src string and add it with the
+    // replacement, to the result
+    res += str.substring(pos, nextIndex) + new_; // Increment our pointer in the src string
+
+    pos = nextIndex + old.length;
+    count++; // See if there are any more replacements to be made
+
+    nextIndex = str.indexOf(old, pos);
+  } // We've either reached the end, or done the max # of
+  // replacements, tack on any remaining string
+
+
+  if (pos < str.length) {
+    res += str.substring(pos);
+  }
+
+  return r.copySafeness(originalStr, res);
+}
+
+_exports.replace = replace;
+
+function reverse(val) {
+  var arr;
+
+  if (lib$3.isString(val)) {
+    arr = list$1(val);
+  } else {
+    // Copy it
+    arr = lib$3.map(val, function (v) {
+      return v;
+    });
+  }
+
+  arr.reverse();
+
+  if (lib$3.isString(val)) {
+    return r.copySafeness(val, arr.join(''));
+  }
+
+  return arr;
+}
+
+_exports.reverse = reverse;
+
+function round(val, precision, method) {
+  precision = precision || 0;
+  var factor = Math.pow(10, precision);
+  var rounder;
+
+  if (method === 'ceil') {
+    rounder = Math.ceil;
+  } else if (method === 'floor') {
+    rounder = Math.floor;
+  } else {
+    rounder = Math.round;
+  }
+
+  return rounder(val * factor) / factor;
+}
+
+_exports.round = round;
+
+function slice(arr, slices, fillWith) {
+  var sliceLength = Math.floor(arr.length / slices);
+  var extra = arr.length % slices;
+  var res = [];
+  var offset = 0;
+
+  for (var i = 0; i < slices; i++) {
+    var start = offset + i * sliceLength;
+
+    if (i < extra) {
+      offset++;
+    }
+
+    var end = offset + (i + 1) * sliceLength;
+    var currSlice = arr.slice(start, end);
+
+    if (fillWith && i >= extra) {
+      currSlice.push(fillWith);
+    }
+
+    res.push(currSlice);
+  }
+
+  return res;
+}
+
+_exports.slice = slice;
+
+function sum$1(arr, attr, start) {
+  if (start === void 0) {
+    start = 0;
+  }
+
+  if (attr) {
+    arr = lib$3.map(arr, function (v) {
+      return v[attr];
+    });
+  }
+
+  return start + arr.reduce(function (a, b) {
+    return a + b;
+  }, 0);
+}
+
+_exports.sum = sum$1;
+_exports.sort = r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function sortFilter(arr, reversed, caseSens, attr) {
+  var _this = this;
+
+  // Copy it
+  var array = lib$3.map(arr, function (v) {
+    return v;
+  });
+  var getAttribute = lib$3.getAttrGetter(attr);
+  array.sort(function (a, b) {
+    var x = attr ? getAttribute(a) : a;
+    var y = attr ? getAttribute(b) : b;
+
+    if (_this.env.opts.throwOnUndefined && attr && (x === undefined || y === undefined)) {
+      throw new TypeError("sort: attribute \"" + attr + "\" resolved to undefined");
+    }
+
+    if (!caseSens && lib$3.isString(x) && lib$3.isString(y)) {
+      x = x.toLowerCase();
+      y = y.toLowerCase();
+    }
+
+    if (x < y) {
+      return reversed ? 1 : -1;
+    } else if (x > y) {
+      return reversed ? -1 : 1;
+    } else {
+      return 0;
+    }
+  });
+  return array;
+});
+
+function string(obj) {
+  return r.copySafeness(obj, obj);
+}
+
+_exports.string = string;
+
+function striptags(input, preserveLinebreaks) {
+  input = normalize$1(input, '');
+  var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>|<!--[\s\S]*?-->/gi;
+  var trimmedInput = trim(input.replace(tags, ''));
+  var res = '';
+
+  if (preserveLinebreaks) {
+    res = trimmedInput.replace(/^ +| +$/gm, '') // remove leading and trailing spaces
+    .replace(/ +/g, ' ') // squash adjacent spaces
+    .replace(/(\r\n)/g, '\n') // normalize linebreaks (CRLF -> LF)
+    .replace(/\n\n\n+/g, '\n\n'); // squash abnormal adjacent linebreaks
+  } else {
+    res = trimmedInput.replace(/\s+/gi, ' ');
+  }
+
+  return r.copySafeness(input, res);
+}
+
+_exports.striptags = striptags;
+
+function title(str) {
+  str = normalize$1(str, '');
+  var words = str.split(' ').map(function (word) {
+    return capitalize(word);
+  });
+  return r.copySafeness(str, words.join(' '));
+}
+
+_exports.title = title;
+
+function trim(str) {
+  return r.copySafeness(str, str.replace(/^\s*|\s*$/g, ''));
+}
+
+_exports.trim = trim;
+
+function truncate(input, length, killwords, end) {
+  var orig = input;
+  input = normalize$1(input, '');
+  length = length || 255;
+
+  if (input.length <= length) {
+    return input;
+  }
+
+  if (killwords) {
+    input = input.substring(0, length);
+  } else {
+    var idx = input.lastIndexOf(' ', length);
+
+    if (idx === -1) {
+      idx = length;
+    }
+
+    input = input.substring(0, idx);
+  }
+
+  input += end !== undefined && end !== null ? end : '...';
+  return r.copySafeness(orig, input);
+}
+
+_exports.truncate = truncate;
+
+function upper(str) {
+  str = normalize$1(str, '');
+  return str.toUpperCase();
+}
+
+_exports.upper = upper;
+
+function urlencode(obj) {
+  var enc = encodeURIComponent;
+
+  if (lib$3.isString(obj)) {
+    return enc(obj);
+  } else {
+    var keyvals = lib$3.isArray(obj) ? obj : lib$3._entries(obj);
+    return keyvals.map(function (_ref2) {
+      var k = _ref2[0],
+          v = _ref2[1];
+      return enc(k) + "=" + enc(v);
+    }).join('&');
+  }
+}
+
+_exports.urlencode = urlencode; // For the jinja regexp, see
+// https://github.com/mitsuhiko/jinja2/blob/f15b814dcba6aa12bc74d1f7d0c881d55f7126be/jinja2/utils.py#L20-L23
+
+var puncRe = /^(?:\(|<|&lt;)?(.*?)(?:\.|,|\)|\n|&gt;)?$/; // from http://blog.gerv.net/2011/05/html5_email_address_regexp/
+
+var emailRe = /^[\w.!#$%&'*+\-\/=?\^`{|}~]+@[a-z\d\-]+(\.[a-z\d\-]+)+$/i;
+var httpHttpsRe = /^https?:\/\/.*$/;
+var wwwRe = /^www\./;
+var tldRe = /\.(?:org|net|com)(?:\:|\/|$)/;
+
+function urlize(str, length, nofollow) {
+  if (isNaN$1(length)) {
+    length = Infinity;
+  }
+
+  var noFollowAttr = nofollow === true ? ' rel="nofollow"' : '';
+  var words = str.split(/(\s+)/).filter(function (word) {
+    // If the word has no length, bail. This can happen for str with
+    // trailing whitespace.
+    return word && word.length;
+  }).map(function (word) {
+    var matches = word.match(puncRe);
+    var possibleUrl = matches ? matches[1] : word;
+    var shortUrl = possibleUrl.substr(0, length); // url that starts with http or https
+
+    if (httpHttpsRe.test(possibleUrl)) {
+      return "<a href=\"" + possibleUrl + "\"" + noFollowAttr + ">" + shortUrl + "</a>";
+    } // url that starts with www.
+
+
+    if (wwwRe.test(possibleUrl)) {
+      return "<a href=\"http://" + possibleUrl + "\"" + noFollowAttr + ">" + shortUrl + "</a>";
+    } // an email address of the form username@domain.tld
+
+
+    if (emailRe.test(possibleUrl)) {
+      return "<a href=\"mailto:" + possibleUrl + "\">" + possibleUrl + "</a>";
+    } // url that ends in .com, .org or .net that is not an email address
+
+
+    if (tldRe.test(possibleUrl)) {
+      return "<a href=\"http://" + possibleUrl + "\"" + noFollowAttr + ">" + shortUrl + "</a>";
+    }
+
+    return word;
+  });
+  return words.join('');
+}
+
+_exports.urlize = urlize;
+
+function wordcount(str) {
+  str = normalize$1(str, '');
+  var words = str ? str.match(/\w+/g) : null;
+  return words ? words.length : null;
+}
+
+_exports.wordcount = wordcount;
+
+function float(val, def) {
+  var res = parseFloat(val);
+  return isNaN$1(res) ? def : res;
+}
+
+_exports.float = float;
+var intFilter = r.makeMacro(['value', 'default', 'base'], [], function doInt(value, defaultValue, base) {
+  if (base === void 0) {
+    base = 10;
+  }
+
+  var res = parseInt(value, base);
+  return isNaN$1(res) ? defaultValue : res;
+});
+_exports.int = intFilter; // Aliases
+
+_exports.d = _exports.default;
+_exports.e = _exports.escape;
+
+var loaders$1 = {exports: {}};
+
+function _inheritsLoose$3(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf$3(subClass, superClass); }
+
+function _setPrototypeOf$3(o, p) { _setPrototypeOf$3 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$3(o, p); }
+
+var path$3 = require$$0__default$2["default"];
+
+var _require$4 = object,
+    EmitterObj$1 = _require$4.EmitterObj;
+
+var loader = /*#__PURE__*/function (_EmitterObj) {
+  _inheritsLoose$3(Loader, _EmitterObj);
+
+  function Loader() {
+    return _EmitterObj.apply(this, arguments) || this;
+  }
+
+  var _proto = Loader.prototype;
+
+  _proto.resolve = function resolve(from, to) {
+    return path$3.resolve(path$3.dirname(from), to);
+  };
+
+  _proto.isRelative = function isRelative(filename) {
+    return filename.indexOf('./') === 0 || filename.indexOf('../') === 0;
+  };
+
+  return Loader;
+}(EmitterObj$1);
+
+function _inheritsLoose$2(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf$2(subClass, superClass); }
+
+function _setPrototypeOf$2(o, p) { _setPrototypeOf$2 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$2(o, p); }
+
+var Loader$2 = loader;
+
+var PrecompiledLoader$2 = /*#__PURE__*/function (_Loader) {
+  _inheritsLoose$2(PrecompiledLoader, _Loader);
+
+  function PrecompiledLoader(compiledTemplates) {
+    var _this;
+
+    _this = _Loader.call(this) || this;
+    _this.precompiled = compiledTemplates || {};
+    return _this;
+  }
+
+  var _proto = PrecompiledLoader.prototype;
+
+  _proto.getSource = function getSource(name) {
+    if (this.precompiled[name]) {
+      return {
+        src: {
+          type: 'code',
+          obj: this.precompiled[name]
+        },
+        path: name
+      };
+    }
+
+    return null;
+  };
+
+  return PrecompiledLoader;
+}(Loader$2);
+
+var precompiledLoader = {
+  PrecompiledLoader: PrecompiledLoader$2
+};
+
+var chokidar$1 = {};
+
+var picomatch = {exports: {}};
+
+var utils$3 = {};
+
+var constants$2;
+var hasRequiredConstants$2;
+
+function requireConstants$2 () {
+	if (hasRequiredConstants$2) return constants$2;
+	hasRequiredConstants$2 = 1;
+
+	const path = require$$0__default$2["default"];
+	const WIN_SLASH = '\\\\/';
+	const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
+
+	/**
+	 * Posix glob regex
+	 */
+
+	const DOT_LITERAL = '\\.';
+	const PLUS_LITERAL = '\\+';
+	const QMARK_LITERAL = '\\?';
+	const SLASH_LITERAL = '\\/';
+	const ONE_CHAR = '(?=.)';
+	const QMARK = '[^/]';
+	const END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
+	const START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
+	const DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
+	const NO_DOT = `(?!${DOT_LITERAL})`;
+	const NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
+	const NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
+	const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
+	const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
+	const STAR = `${QMARK}*?`;
+
+	const POSIX_CHARS = {
+	  DOT_LITERAL,
+	  PLUS_LITERAL,
+	  QMARK_LITERAL,
+	  SLASH_LITERAL,
+	  ONE_CHAR,
+	  QMARK,
+	  END_ANCHOR,
+	  DOTS_SLASH,
+	  NO_DOT,
+	  NO_DOTS,
+	  NO_DOT_SLASH,
+	  NO_DOTS_SLASH,
+	  QMARK_NO_DOT,
+	  STAR,
+	  START_ANCHOR
+	};
+
+	/**
+	 * Windows glob regex
+	 */
+
+	const WINDOWS_CHARS = {
+	  ...POSIX_CHARS,
+
+	  SLASH_LITERAL: `[${WIN_SLASH}]`,
+	  QMARK: WIN_NO_SLASH,
+	  STAR: `${WIN_NO_SLASH}*?`,
+	  DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
+	  NO_DOT: `(?!${DOT_LITERAL})`,
+	  NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+	  NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
+	  NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+	  QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
+	  START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
+	  END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
+	};
+
+	/**
+	 * POSIX Bracket Regex
+	 */
+
+	const POSIX_REGEX_SOURCE = {
+	  alnum: 'a-zA-Z0-9',
+	  alpha: 'a-zA-Z',
+	  ascii: '\\x00-\\x7F',
+	  blank: ' \\t',
+	  cntrl: '\\x00-\\x1F\\x7F',
+	  digit: '0-9',
+	  graph: '\\x21-\\x7E',
+	  lower: 'a-z',
+	  print: '\\x20-\\x7E ',
+	  punct: '\\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~',
+	  space: ' \\t\\r\\n\\v\\f',
+	  upper: 'A-Z',
+	  word: 'A-Za-z0-9_',
+	  xdigit: 'A-Fa-f0-9'
+	};
+
+	constants$2 = {
+	  MAX_LENGTH: 1024 * 64,
+	  POSIX_REGEX_SOURCE,
+
+	  // regular expressions
+	  REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
+	  REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
+	  REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
+	  REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
+	  REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
+	  REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+
+	  // Replace globs with equivalent patterns to reduce parsing time.
+	  REPLACEMENTS: {
+	    '***': '*',
+	    '**/**': '**',
+	    '**/**/**': '**'
+	  },
+
+	  // Digits
+	  CHAR_0: 48, /* 0 */
+	  CHAR_9: 57, /* 9 */
+
+	  // Alphabet chars.
+	  CHAR_UPPERCASE_A: 65, /* A */
+	  CHAR_LOWERCASE_A: 97, /* a */
+	  CHAR_UPPERCASE_Z: 90, /* Z */
+	  CHAR_LOWERCASE_Z: 122, /* z */
+
+	  CHAR_LEFT_PARENTHESES: 40, /* ( */
+	  CHAR_RIGHT_PARENTHESES: 41, /* ) */
+
+	  CHAR_ASTERISK: 42, /* * */
+
+	  // Non-alphabetic chars.
+	  CHAR_AMPERSAND: 38, /* & */
+	  CHAR_AT: 64, /* @ */
+	  CHAR_BACKWARD_SLASH: 92, /* \ */
+	  CHAR_CARRIAGE_RETURN: 13, /* \r */
+	  CHAR_CIRCUMFLEX_ACCENT: 94, /* ^ */
+	  CHAR_COLON: 58, /* : */
+	  CHAR_COMMA: 44, /* , */
+	  CHAR_DOT: 46, /* . */
+	  CHAR_DOUBLE_QUOTE: 34, /* " */
+	  CHAR_EQUAL: 61, /* = */
+	  CHAR_EXCLAMATION_MARK: 33, /* ! */
+	  CHAR_FORM_FEED: 12, /* \f */
+	  CHAR_FORWARD_SLASH: 47, /* / */
+	  CHAR_GRAVE_ACCENT: 96, /* ` */
+	  CHAR_HASH: 35, /* # */
+	  CHAR_HYPHEN_MINUS: 45, /* - */
+	  CHAR_LEFT_ANGLE_BRACKET: 60, /* < */
+	  CHAR_LEFT_CURLY_BRACE: 123, /* { */
+	  CHAR_LEFT_SQUARE_BRACKET: 91, /* [ */
+	  CHAR_LINE_FEED: 10, /* \n */
+	  CHAR_NO_BREAK_SPACE: 160, /* \u00A0 */
+	  CHAR_PERCENT: 37, /* % */
+	  CHAR_PLUS: 43, /* + */
+	  CHAR_QUESTION_MARK: 63, /* ? */
+	  CHAR_RIGHT_ANGLE_BRACKET: 62, /* > */
+	  CHAR_RIGHT_CURLY_BRACE: 125, /* } */
+	  CHAR_RIGHT_SQUARE_BRACKET: 93, /* ] */
+	  CHAR_SEMICOLON: 59, /* ; */
+	  CHAR_SINGLE_QUOTE: 39, /* ' */
+	  CHAR_SPACE: 32, /*   */
+	  CHAR_TAB: 9, /* \t */
+	  CHAR_UNDERSCORE: 95, /* _ */
+	  CHAR_VERTICAL_LINE: 124, /* | */
+	  CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
+
+	  SEP: path.sep,
+
+	  /**
+	   * Create EXTGLOB_CHARS
+	   */
+
+	  extglobChars(chars) {
+	    return {
+	      '!': { type: 'negate', open: '(?:(?!(?:', close: `))${chars.STAR})` },
+	      '?': { type: 'qmark', open: '(?:', close: ')?' },
+	      '+': { type: 'plus', open: '(?:', close: ')+' },
+	      '*': { type: 'star', open: '(?:', close: ')*' },
+	      '@': { type: 'at', open: '(?:', close: ')' }
+	    };
+	  },
+
+	  /**
+	   * Create GLOB_CHARS
+	   */
+
+	  globChars(win32) {
+	    return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
+	  }
+	};
+	return constants$2;
+}
+
+var hasRequiredUtils$1;
+
+function requireUtils$1 () {
+	if (hasRequiredUtils$1) return utils$3;
+	hasRequiredUtils$1 = 1;
+	(function (exports) {
+
+		const path = require$$0__default$2["default"];
+		const win32 = process.platform === 'win32';
+		const {
+		  REGEX_BACKSLASH,
+		  REGEX_REMOVE_BACKSLASH,
+		  REGEX_SPECIAL_CHARS,
+		  REGEX_SPECIAL_CHARS_GLOBAL
+		} = requireConstants$2();
+
+		exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+		exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
+		exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
+		exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
+		exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+
+		exports.removeBackslashes = str => {
+		  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
+		    return match === '\\' ? '' : match;
+		  });
+		};
+
+		exports.supportsLookbehinds = () => {
+		  const segs = process.version.slice(1).split('.').map(Number);
+		  if (segs.length === 3 && segs[0] >= 9 || (segs[0] === 8 && segs[1] >= 10)) {
+		    return true;
+		  }
+		  return false;
+		};
+
+		exports.isWindows = options => {
+		  if (options && typeof options.windows === 'boolean') {
+		    return options.windows;
+		  }
+		  return win32 === true || path.sep === '\\';
+		};
+
+		exports.escapeLast = (input, char, lastIdx) => {
+		  const idx = input.lastIndexOf(char, lastIdx);
+		  if (idx === -1) return input;
+		  if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
+		  return `${input.slice(0, idx)}\\${input.slice(idx)}`;
+		};
+
+		exports.removePrefix = (input, state = {}) => {
+		  let output = input;
+		  if (output.startsWith('./')) {
+		    output = output.slice(2);
+		    state.prefix = './';
+		  }
+		  return output;
+		};
+
+		exports.wrapOutput = (input, state = {}, options = {}) => {
+		  const prepend = options.contains ? '' : '^';
+		  const append = options.contains ? '' : '$';
+
+		  let output = `${prepend}(?:${input})${append}`;
+		  if (state.negated === true) {
+		    output = `(?:^(?!${output}).*$)`;
+		  }
+		  return output;
+		};
+} (utils$3));
+	return utils$3;
+}
+
+var scan_1;
+var hasRequiredScan;
+
+function requireScan () {
+	if (hasRequiredScan) return scan_1;
+	hasRequiredScan = 1;
+
+	const utils = requireUtils$1();
+	const {
+	  CHAR_ASTERISK,             /* * */
+	  CHAR_AT,                   /* @ */
+	  CHAR_BACKWARD_SLASH,       /* \ */
+	  CHAR_COMMA,                /* , */
+	  CHAR_DOT,                  /* . */
+	  CHAR_EXCLAMATION_MARK,     /* ! */
+	  CHAR_FORWARD_SLASH,        /* / */
+	  CHAR_LEFT_CURLY_BRACE,     /* { */
+	  CHAR_LEFT_PARENTHESES,     /* ( */
+	  CHAR_LEFT_SQUARE_BRACKET,  /* [ */
+	  CHAR_PLUS,                 /* + */
+	  CHAR_QUESTION_MARK,        /* ? */
+	  CHAR_RIGHT_CURLY_BRACE,    /* } */
+	  CHAR_RIGHT_PARENTHESES,    /* ) */
+	  CHAR_RIGHT_SQUARE_BRACKET  /* ] */
+	} = requireConstants$2();
+
+	const isPathSeparator = code => {
+	  return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
+	};
+
+	const depth = token => {
+	  if (token.isPrefix !== true) {
+	    token.depth = token.isGlobstar ? Infinity : 1;
+	  }
+	};
+
+	/**
+	 * Quickly scans a glob pattern and returns an object with a handful of
+	 * useful properties, like `isGlob`, `path` (the leading non-glob, if it exists),
+	 * `glob` (the actual pattern), `negated` (true if the path starts with `!` but not
+	 * with `!(`) and `negatedExtglob` (true if the path starts with `!(`).
+	 *
+	 * ```js
+	 * const pm = require('picomatch');
+	 * console.log(pm.scan('foo/bar/*.js'));
+	 * { isGlob: true, input: 'foo/bar/*.js', base: 'foo/bar', glob: '*.js' }
+	 * ```
+	 * @param {String} `str`
+	 * @param {Object} `options`
+	 * @return {Object} Returns an object with tokens and regex source string.
+	 * @api public
+	 */
+
+	const scan = (input, options) => {
+	  const opts = options || {};
+
+	  const length = input.length - 1;
+	  const scanToEnd = opts.parts === true || opts.scanToEnd === true;
+	  const slashes = [];
+	  const tokens = [];
+	  const parts = [];
+
+	  let str = input;
+	  let index = -1;
+	  let start = 0;
+	  let lastIndex = 0;
+	  let isBrace = false;
+	  let isBracket = false;
+	  let isGlob = false;
+	  let isExtglob = false;
+	  let isGlobstar = false;
+	  let braceEscaped = false;
+	  let backslashes = false;
+	  let negated = false;
+	  let negatedExtglob = false;
+	  let finished = false;
+	  let braces = 0;
+	  let prev;
+	  let code;
+	  let token = { value: '', depth: 0, isGlob: false };
+
+	  const eos = () => index >= length;
+	  const peek = () => str.charCodeAt(index + 1);
+	  const advance = () => {
+	    prev = code;
+	    return str.charCodeAt(++index);
+	  };
+
+	  while (index < length) {
+	    code = advance();
+	    let next;
+
+	    if (code === CHAR_BACKWARD_SLASH) {
+	      backslashes = token.backslashes = true;
+	      code = advance();
+
+	      if (code === CHAR_LEFT_CURLY_BRACE) {
+	        braceEscaped = true;
+	      }
+	      continue;
+	    }
+
+	    if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
+	      braces++;
+
+	      while (eos() !== true && (code = advance())) {
+	        if (code === CHAR_BACKWARD_SLASH) {
+	          backslashes = token.backslashes = true;
+	          advance();
+	          continue;
+	        }
+
+	        if (code === CHAR_LEFT_CURLY_BRACE) {
+	          braces++;
+	          continue;
+	        }
+
+	        if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
+	          isBrace = token.isBrace = true;
+	          isGlob = token.isGlob = true;
+	          finished = true;
+
+	          if (scanToEnd === true) {
+	            continue;
+	          }
+
+	          break;
+	        }
+
+	        if (braceEscaped !== true && code === CHAR_COMMA) {
+	          isBrace = token.isBrace = true;
+	          isGlob = token.isGlob = true;
+	          finished = true;
+
+	          if (scanToEnd === true) {
+	            continue;
+	          }
+
+	          break;
+	        }
+
+	        if (code === CHAR_RIGHT_CURLY_BRACE) {
+	          braces--;
+
+	          if (braces === 0) {
+	            braceEscaped = false;
+	            isBrace = token.isBrace = true;
+	            finished = true;
+	            break;
+	          }
+	        }
+	      }
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
+	    }
+
+	    if (code === CHAR_FORWARD_SLASH) {
+	      slashes.push(index);
+	      tokens.push(token);
+	      token = { value: '', depth: 0, isGlob: false };
+
+	      if (finished === true) continue;
+	      if (prev === CHAR_DOT && index === (start + 1)) {
+	        start += 2;
+	        continue;
+	      }
+
+	      lastIndex = index + 1;
+	      continue;
+	    }
+
+	    if (opts.noext !== true) {
+	      const isExtglobChar = code === CHAR_PLUS
+	        || code === CHAR_AT
+	        || code === CHAR_ASTERISK
+	        || code === CHAR_QUESTION_MARK
+	        || code === CHAR_EXCLAMATION_MARK;
+
+	      if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
+	        isGlob = token.isGlob = true;
+	        isExtglob = token.isExtglob = true;
+	        finished = true;
+	        if (code === CHAR_EXCLAMATION_MARK && index === start) {
+	          negatedExtglob = true;
+	        }
+
+	        if (scanToEnd === true) {
+	          while (eos() !== true && (code = advance())) {
+	            if (code === CHAR_BACKWARD_SLASH) {
+	              backslashes = token.backslashes = true;
+	              code = advance();
+	              continue;
+	            }
+
+	            if (code === CHAR_RIGHT_PARENTHESES) {
+	              isGlob = token.isGlob = true;
+	              finished = true;
+	              break;
+	            }
+	          }
+	          continue;
+	        }
+	        break;
+	      }
+	    }
+
+	    if (code === CHAR_ASTERISK) {
+	      if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
+	      isGlob = token.isGlob = true;
+	      finished = true;
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+	      break;
+	    }
+
+	    if (code === CHAR_QUESTION_MARK) {
+	      isGlob = token.isGlob = true;
+	      finished = true;
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+	      break;
+	    }
+
+	    if (code === CHAR_LEFT_SQUARE_BRACKET) {
+	      while (eos() !== true && (next = advance())) {
+	        if (next === CHAR_BACKWARD_SLASH) {
+	          backslashes = token.backslashes = true;
+	          advance();
+	          continue;
+	        }
+
+	        if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+	          isBracket = token.isBracket = true;
+	          isGlob = token.isGlob = true;
+	          finished = true;
+	          break;
+	        }
+	      }
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
+	    }
+
+	    if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
+	      negated = token.negated = true;
+	      start++;
+	      continue;
+	    }
+
+	    if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
+	      isGlob = token.isGlob = true;
+
+	      if (scanToEnd === true) {
+	        while (eos() !== true && (code = advance())) {
+	          if (code === CHAR_LEFT_PARENTHESES) {
+	            backslashes = token.backslashes = true;
+	            code = advance();
+	            continue;
+	          }
+
+	          if (code === CHAR_RIGHT_PARENTHESES) {
+	            finished = true;
+	            break;
+	          }
+	        }
+	        continue;
+	      }
+	      break;
+	    }
+
+	    if (isGlob === true) {
+	      finished = true;
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
+	    }
+	  }
+
+	  if (opts.noext === true) {
+	    isExtglob = false;
+	    isGlob = false;
+	  }
+
+	  let base = str;
+	  let prefix = '';
+	  let glob = '';
+
+	  if (start > 0) {
+	    prefix = str.slice(0, start);
+	    str = str.slice(start);
+	    lastIndex -= start;
+	  }
+
+	  if (base && isGlob === true && lastIndex > 0) {
+	    base = str.slice(0, lastIndex);
+	    glob = str.slice(lastIndex);
+	  } else if (isGlob === true) {
+	    base = '';
+	    glob = str;
+	  } else {
+	    base = str;
+	  }
+
+	  if (base && base !== '' && base !== '/' && base !== str) {
+	    if (isPathSeparator(base.charCodeAt(base.length - 1))) {
+	      base = base.slice(0, -1);
+	    }
+	  }
+
+	  if (opts.unescape === true) {
+	    if (glob) glob = utils.removeBackslashes(glob);
+
+	    if (base && backslashes === true) {
+	      base = utils.removeBackslashes(base);
+	    }
+	  }
+
+	  const state = {
+	    prefix,
+	    input,
+	    start,
+	    base,
+	    glob,
+	    isBrace,
+	    isBracket,
+	    isGlob,
+	    isExtglob,
+	    isGlobstar,
+	    negated,
+	    negatedExtglob
+	  };
+
+	  if (opts.tokens === true) {
+	    state.maxDepth = 0;
+	    if (!isPathSeparator(code)) {
+	      tokens.push(token);
+	    }
+	    state.tokens = tokens;
+	  }
+
+	  if (opts.parts === true || opts.tokens === true) {
+	    let prevIndex;
+
+	    for (let idx = 0; idx < slashes.length; idx++) {
+	      const n = prevIndex ? prevIndex + 1 : start;
+	      const i = slashes[idx];
+	      const value = input.slice(n, i);
+	      if (opts.tokens) {
+	        if (idx === 0 && start !== 0) {
+	          tokens[idx].isPrefix = true;
+	          tokens[idx].value = prefix;
+	        } else {
+	          tokens[idx].value = value;
+	        }
+	        depth(tokens[idx]);
+	        state.maxDepth += tokens[idx].depth;
+	      }
+	      if (idx !== 0 || value !== '') {
+	        parts.push(value);
+	      }
+	      prevIndex = i;
+	    }
+
+	    if (prevIndex && prevIndex + 1 < input.length) {
+	      const value = input.slice(prevIndex + 1);
+	      parts.push(value);
+
+	      if (opts.tokens) {
+	        tokens[tokens.length - 1].value = value;
+	        depth(tokens[tokens.length - 1]);
+	        state.maxDepth += tokens[tokens.length - 1].depth;
+	      }
+	    }
+
+	    state.slashes = slashes;
+	    state.parts = parts;
+	  }
+
+	  return state;
+	};
+
+	scan_1 = scan;
+	return scan_1;
+}
+
+var parse_1$1;
+var hasRequiredParse$1;
+
+function requireParse$1 () {
+	if (hasRequiredParse$1) return parse_1$1;
+	hasRequiredParse$1 = 1;
+
+	const constants = requireConstants$2();
+	const utils = requireUtils$1();
+
+	/**
+	 * Constants
+	 */
+
+	const {
+	  MAX_LENGTH,
+	  POSIX_REGEX_SOURCE,
+	  REGEX_NON_SPECIAL_CHARS,
+	  REGEX_SPECIAL_CHARS_BACKREF,
+	  REPLACEMENTS
+	} = constants;
+
+	/**
+	 * Helpers
+	 */
+
+	const expandRange = (args, options) => {
+	  if (typeof options.expandRange === 'function') {
+	    return options.expandRange(...args, options);
+	  }
+
+	  args.sort();
+	  const value = `[${args.join('-')}]`;
+
+	  try {
+	    /* eslint-disable-next-line no-new */
+	    new RegExp(value);
+	  } catch (ex) {
+	    return args.map(v => utils.escapeRegex(v)).join('..');
+	  }
+
+	  return value;
+	};
+
+	/**
+	 * Create the message for a syntax error
+	 */
+
+	const syntaxError = (type, char) => {
+	  return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
+	};
+
+	/**
+	 * Parse the given input string.
+	 * @param {String} input
+	 * @param {Object} options
+	 * @return {Object}
+	 */
+
+	const parse = (input, options) => {
+	  if (typeof input !== 'string') {
+	    throw new TypeError('Expected a string');
+	  }
+
+	  input = REPLACEMENTS[input] || input;
+
+	  const opts = { ...options };
+	  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+
+	  let len = input.length;
+	  if (len > max) {
+	    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+	  }
+
+	  const bos = { type: 'bos', value: '', output: opts.prepend || '' };
+	  const tokens = [bos];
+
+	  const capture = opts.capture ? '' : '?:';
+	  const win32 = utils.isWindows(options);
+
+	  // create constants based on platform, for windows or posix
+	  const PLATFORM_CHARS = constants.globChars(win32);
+	  const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
+
+	  const {
+	    DOT_LITERAL,
+	    PLUS_LITERAL,
+	    SLASH_LITERAL,
+	    ONE_CHAR,
+	    DOTS_SLASH,
+	    NO_DOT,
+	    NO_DOT_SLASH,
+	    NO_DOTS_SLASH,
+	    QMARK,
+	    QMARK_NO_DOT,
+	    STAR,
+	    START_ANCHOR
+	  } = PLATFORM_CHARS;
+
+	  const globstar = opts => {
+	    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+	  };
+
+	  const nodot = opts.dot ? '' : NO_DOT;
+	  const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
+	  let star = opts.bash === true ? globstar(opts) : STAR;
+
+	  if (opts.capture) {
+	    star = `(${star})`;
+	  }
+
+	  // minimatch options support
+	  if (typeof opts.noext === 'boolean') {
+	    opts.noextglob = opts.noext;
+	  }
+
+	  const state = {
+	    input,
+	    index: -1,
+	    start: 0,
+	    dot: opts.dot === true,
+	    consumed: '',
+	    output: '',
+	    prefix: '',
+	    backtrack: false,
+	    negated: false,
+	    brackets: 0,
+	    braces: 0,
+	    parens: 0,
+	    quotes: 0,
+	    globstar: false,
+	    tokens
+	  };
+
+	  input = utils.removePrefix(input, state);
+	  len = input.length;
+
+	  const extglobs = [];
+	  const braces = [];
+	  const stack = [];
+	  let prev = bos;
+	  let value;
+
+	  /**
+	   * Tokenizing helpers
+	   */
+
+	  const eos = () => state.index === len - 1;
+	  const peek = state.peek = (n = 1) => input[state.index + n];
+	  const advance = state.advance = () => input[++state.index] || '';
+	  const remaining = () => input.slice(state.index + 1);
+	  const consume = (value = '', num = 0) => {
+	    state.consumed += value;
+	    state.index += num;
+	  };
+
+	  const append = token => {
+	    state.output += token.output != null ? token.output : token.value;
+	    consume(token.value);
+	  };
+
+	  const negate = () => {
+	    let count = 1;
+
+	    while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
+	      advance();
+	      state.start++;
+	      count++;
+	    }
+
+	    if (count % 2 === 0) {
+	      return false;
+	    }
+
+	    state.negated = true;
+	    state.start++;
+	    return true;
+	  };
+
+	  const increment = type => {
+	    state[type]++;
+	    stack.push(type);
+	  };
+
+	  const decrement = type => {
+	    state[type]--;
+	    stack.pop();
+	  };
+
+	  /**
+	   * Push tokens onto the tokens array. This helper speeds up
+	   * tokenizing by 1) helping us avoid backtracking as much as possible,
+	   * and 2) helping us avoid creating extra tokens when consecutive
+	   * characters are plain text. This improves performance and simplifies
+	   * lookbehinds.
+	   */
+
+	  const push = tok => {
+	    if (prev.type === 'globstar') {
+	      const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
+	      const isExtglob = tok.extglob === true || (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'));
+
+	      if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
+	        state.output = state.output.slice(0, -prev.output.length);
+	        prev.type = 'star';
+	        prev.value = '*';
+	        prev.output = star;
+	        state.output += prev.output;
+	      }
+	    }
+
+	    if (extglobs.length && tok.type !== 'paren') {
+	      extglobs[extglobs.length - 1].inner += tok.value;
+	    }
+
+	    if (tok.value || tok.output) append(tok);
+	    if (prev && prev.type === 'text' && tok.type === 'text') {
+	      prev.value += tok.value;
+	      prev.output = (prev.output || '') + tok.value;
+	      return;
+	    }
+
+	    tok.prev = prev;
+	    tokens.push(tok);
+	    prev = tok;
+	  };
+
+	  const extglobOpen = (type, value) => {
+	    const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
+
+	    token.prev = prev;
+	    token.parens = state.parens;
+	    token.output = state.output;
+	    const output = (opts.capture ? '(' : '') + token.open;
+
+	    increment('parens');
+	    push({ type, value, output: state.output ? '' : ONE_CHAR });
+	    push({ type: 'paren', extglob: true, value: advance(), output });
+	    extglobs.push(token);
+	  };
+
+	  const extglobClose = token => {
+	    let output = token.close + (opts.capture ? ')' : '');
+	    let rest;
+
+	    if (token.type === 'negate') {
+	      let extglobStar = star;
+
+	      if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
+	        extglobStar = globstar(opts);
+	      }
+
+	      if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
+	        output = token.close = `)$))${extglobStar}`;
+	      }
+
+	      if (token.inner.includes('*') && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
+	        // Any non-magical string (`.ts`) or even nested expression (`.{ts,tsx}`) can follow after the closing parenthesis.
+	        // In this case, we need to parse the string and use it in the output of the original pattern.
+	        // Suitable patterns: `/!(*.d).ts`, `/!(*.d).{ts,tsx}`, `**/!(*-dbg).@(js)`.
+	        //
+	        // Disabling the `fastpaths` option due to a problem with parsing strings as `.ts` in the pattern like `**/!(*.d).ts`.
+	        const expression = parse(rest, { ...options, fastpaths: false }).output;
+
+	        output = token.close = `)${expression})${extglobStar})`;
+	      }
+
+	      if (token.prev.type === 'bos') {
+	        state.negatedExtglob = true;
+	      }
+	    }
+
+	    push({ type: 'paren', extglob: true, value, output });
+	    decrement('parens');
+	  };
+
+	  /**
+	   * Fast paths
+	   */
+
+	  if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
+	    let backslashes = false;
+
+	    let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
+	      if (first === '\\') {
+	        backslashes = true;
+	        return m;
+	      }
+
+	      if (first === '?') {
+	        if (esc) {
+	          return esc + first + (rest ? QMARK.repeat(rest.length) : '');
+	        }
+	        if (index === 0) {
+	          return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
+	        }
+	        return QMARK.repeat(chars.length);
+	      }
+
+	      if (first === '.') {
+	        return DOT_LITERAL.repeat(chars.length);
+	      }
+
+	      if (first === '*') {
+	        if (esc) {
+	          return esc + first + (rest ? star : '');
+	        }
+	        return star;
+	      }
+	      return esc ? m : `\\${m}`;
+	    });
+
+	    if (backslashes === true) {
+	      if (opts.unescape === true) {
+	        output = output.replace(/\\/g, '');
+	      } else {
+	        output = output.replace(/\\+/g, m => {
+	          return m.length % 2 === 0 ? '\\\\' : (m ? '\\' : '');
+	        });
+	      }
+	    }
+
+	    if (output === input && opts.contains === true) {
+	      state.output = input;
+	      return state;
+	    }
+
+	    state.output = utils.wrapOutput(output, state, options);
+	    return state;
+	  }
+
+	  /**
+	   * Tokenize input until we reach end-of-string
+	   */
+
+	  while (!eos()) {
+	    value = advance();
+
+	    if (value === '\u0000') {
+	      continue;
+	    }
+
+	    /**
+	     * Escaped characters
+	     */
+
+	    if (value === '\\') {
+	      const next = peek();
+
+	      if (next === '/' && opts.bash !== true) {
+	        continue;
+	      }
+
+	      if (next === '.' || next === ';') {
+	        continue;
+	      }
+
+	      if (!next) {
+	        value += '\\';
+	        push({ type: 'text', value });
+	        continue;
+	      }
+
+	      // collapse slashes to reduce potential for exploits
+	      const match = /^\\+/.exec(remaining());
+	      let slashes = 0;
+
+	      if (match && match[0].length > 2) {
+	        slashes = match[0].length;
+	        state.index += slashes;
+	        if (slashes % 2 !== 0) {
+	          value += '\\';
+	        }
+	      }
+
+	      if (opts.unescape === true) {
+	        value = advance();
+	      } else {
+	        value += advance();
+	      }
+
+	      if (state.brackets === 0) {
+	        push({ type: 'text', value });
+	        continue;
+	      }
+	    }
+
+	    /**
+	     * If we're inside a regex character class, continue
+	     * until we reach the closing bracket.
+	     */
+
+	    if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
+	      if (opts.posix !== false && value === ':') {
+	        const inner = prev.value.slice(1);
+	        if (inner.includes('[')) {
+	          prev.posix = true;
+
+	          if (inner.includes(':')) {
+	            const idx = prev.value.lastIndexOf('[');
+	            const pre = prev.value.slice(0, idx);
+	            const rest = prev.value.slice(idx + 2);
+	            const posix = POSIX_REGEX_SOURCE[rest];
+	            if (posix) {
+	              prev.value = pre + posix;
+	              state.backtrack = true;
+	              advance();
+
+	              if (!bos.output && tokens.indexOf(prev) === 1) {
+	                bos.output = ONE_CHAR;
+	              }
+	              continue;
+	            }
+	          }
+	        }
+	      }
+
+	      if ((value === '[' && peek() !== ':') || (value === '-' && peek() === ']')) {
+	        value = `\\${value}`;
+	      }
+
+	      if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
+	        value = `\\${value}`;
+	      }
+
+	      if (opts.posix === true && value === '!' && prev.value === '[') {
+	        value = '^';
+	      }
+
+	      prev.value += value;
+	      append({ value });
+	      continue;
+	    }
+
+	    /**
+	     * If we're inside a quoted string, continue
+	     * until we reach the closing double quote.
+	     */
+
+	    if (state.quotes === 1 && value !== '"') {
+	      value = utils.escapeRegex(value);
+	      prev.value += value;
+	      append({ value });
+	      continue;
+	    }
+
+	    /**
+	     * Double quotes
+	     */
+
+	    if (value === '"') {
+	      state.quotes = state.quotes === 1 ? 0 : 1;
+	      if (opts.keepQuotes === true) {
+	        push({ type: 'text', value });
+	      }
+	      continue;
+	    }
+
+	    /**
+	     * Parentheses
+	     */
+
+	    if (value === '(') {
+	      increment('parens');
+	      push({ type: 'paren', value });
+	      continue;
+	    }
+
+	    if (value === ')') {
+	      if (state.parens === 0 && opts.strictBrackets === true) {
+	        throw new SyntaxError(syntaxError('opening', '('));
+	      }
+
+	      const extglob = extglobs[extglobs.length - 1];
+	      if (extglob && state.parens === extglob.parens + 1) {
+	        extglobClose(extglobs.pop());
+	        continue;
+	      }
+
+	      push({ type: 'paren', value, output: state.parens ? ')' : '\\)' });
+	      decrement('parens');
+	      continue;
+	    }
+
+	    /**
+	     * Square brackets
+	     */
+
+	    if (value === '[') {
+	      if (opts.nobracket === true || !remaining().includes(']')) {
+	        if (opts.nobracket !== true && opts.strictBrackets === true) {
+	          throw new SyntaxError(syntaxError('closing', ']'));
+	        }
+
+	        value = `\\${value}`;
+	      } else {
+	        increment('brackets');
+	      }
+
+	      push({ type: 'bracket', value });
+	      continue;
+	    }
+
+	    if (value === ']') {
+	      if (opts.nobracket === true || (prev && prev.type === 'bracket' && prev.value.length === 1)) {
+	        push({ type: 'text', value, output: `\\${value}` });
+	        continue;
+	      }
+
+	      if (state.brackets === 0) {
+	        if (opts.strictBrackets === true) {
+	          throw new SyntaxError(syntaxError('opening', '['));
+	        }
+
+	        push({ type: 'text', value, output: `\\${value}` });
+	        continue;
+	      }
+
+	      decrement('brackets');
+
+	      const prevValue = prev.value.slice(1);
+	      if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
+	        value = `/${value}`;
+	      }
+
+	      prev.value += value;
+	      append({ value });
+
+	      // when literal brackets are explicitly disabled
+	      // assume we should match with a regex character class
+	      if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
+	        continue;
+	      }
+
+	      const escaped = utils.escapeRegex(prev.value);
+	      state.output = state.output.slice(0, -prev.value.length);
+
+	      // when literal brackets are explicitly enabled
+	      // assume we should escape the brackets to match literal characters
+	      if (opts.literalBrackets === true) {
+	        state.output += escaped;
+	        prev.value = escaped;
+	        continue;
+	      }
+
+	      // when the user specifies nothing, try to match both
+	      prev.value = `(${capture}${escaped}|${prev.value})`;
+	      state.output += prev.value;
+	      continue;
+	    }
+
+	    /**
+	     * Braces
+	     */
+
+	    if (value === '{' && opts.nobrace !== true) {
+	      increment('braces');
+
+	      const open = {
+	        type: 'brace',
+	        value,
+	        output: '(',
+	        outputIndex: state.output.length,
+	        tokensIndex: state.tokens.length
+	      };
+
+	      braces.push(open);
+	      push(open);
+	      continue;
+	    }
+
+	    if (value === '}') {
+	      const brace = braces[braces.length - 1];
+
+	      if (opts.nobrace === true || !brace) {
+	        push({ type: 'text', value, output: value });
+	        continue;
+	      }
+
+	      let output = ')';
+
+	      if (brace.dots === true) {
+	        const arr = tokens.slice();
+	        const range = [];
+
+	        for (let i = arr.length - 1; i >= 0; i--) {
+	          tokens.pop();
+	          if (arr[i].type === 'brace') {
+	            break;
+	          }
+	          if (arr[i].type !== 'dots') {
+	            range.unshift(arr[i].value);
+	          }
+	        }
+
+	        output = expandRange(range, opts);
+	        state.backtrack = true;
+	      }
+
+	      if (brace.comma !== true && brace.dots !== true) {
+	        const out = state.output.slice(0, brace.outputIndex);
+	        const toks = state.tokens.slice(brace.tokensIndex);
+	        brace.value = brace.output = '\\{';
+	        value = output = '\\}';
+	        state.output = out;
+	        for (const t of toks) {
+	          state.output += (t.output || t.value);
+	        }
+	      }
+
+	      push({ type: 'brace', value, output });
+	      decrement('braces');
+	      braces.pop();
+	      continue;
+	    }
+
+	    /**
+	     * Pipes
+	     */
+
+	    if (value === '|') {
+	      if (extglobs.length > 0) {
+	        extglobs[extglobs.length - 1].conditions++;
+	      }
+	      push({ type: 'text', value });
+	      continue;
+	    }
+
+	    /**
+	     * Commas
+	     */
+
+	    if (value === ',') {
+	      let output = value;
+
+	      const brace = braces[braces.length - 1];
+	      if (brace && stack[stack.length - 1] === 'braces') {
+	        brace.comma = true;
+	        output = '|';
+	      }
+
+	      push({ type: 'comma', value, output });
+	      continue;
+	    }
+
+	    /**
+	     * Slashes
+	     */
+
+	    if (value === '/') {
+	      // if the beginning of the glob is "./", advance the start
+	      // to the current index, and don't add the "./" characters
+	      // to the state. This greatly simplifies lookbehinds when
+	      // checking for BOS characters like "!" and "." (not "./")
+	      if (prev.type === 'dot' && state.index === state.start + 1) {
+	        state.start = state.index + 1;
+	        state.consumed = '';
+	        state.output = '';
+	        tokens.pop();
+	        prev = bos; // reset "prev" to the first token
+	        continue;
+	      }
+
+	      push({ type: 'slash', value, output: SLASH_LITERAL });
+	      continue;
+	    }
+
+	    /**
+	     * Dots
+	     */
+
+	    if (value === '.') {
+	      if (state.braces > 0 && prev.type === 'dot') {
+	        if (prev.value === '.') prev.output = DOT_LITERAL;
+	        const brace = braces[braces.length - 1];
+	        prev.type = 'dots';
+	        prev.output += value;
+	        prev.value += value;
+	        brace.dots = true;
+	        continue;
+	      }
+
+	      if ((state.braces + state.parens) === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
+	        push({ type: 'text', value, output: DOT_LITERAL });
+	        continue;
+	      }
+
+	      push({ type: 'dot', value, output: DOT_LITERAL });
+	      continue;
+	    }
+
+	    /**
+	     * Question marks
+	     */
+
+	    if (value === '?') {
+	      const isGroup = prev && prev.value === '(';
+	      if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+	        extglobOpen('qmark', value);
+	        continue;
+	      }
+
+	      if (prev && prev.type === 'paren') {
+	        const next = peek();
+	        let output = value;
+
+	        if (next === '<' && !utils.supportsLookbehinds()) {
+	          throw new Error('Node.js v10 or higher is required for regex lookbehinds');
+	        }
+
+	        if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
+	          output = `\\${value}`;
+	        }
+
+	        push({ type: 'text', value, output });
+	        continue;
+	      }
+
+	      if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
+	        push({ type: 'qmark', value, output: QMARK_NO_DOT });
+	        continue;
+	      }
+
+	      push({ type: 'qmark', value, output: QMARK });
+	      continue;
+	    }
+
+	    /**
+	     * Exclamation
+	     */
+
+	    if (value === '!') {
+	      if (opts.noextglob !== true && peek() === '(') {
+	        if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
+	          extglobOpen('negate', value);
+	          continue;
+	        }
+	      }
+
+	      if (opts.nonegate !== true && state.index === 0) {
+	        negate();
+	        continue;
+	      }
+	    }
+
+	    /**
+	     * Plus
+	     */
+
+	    if (value === '+') {
+	      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+	        extglobOpen('plus', value);
+	        continue;
+	      }
+
+	      if ((prev && prev.value === '(') || opts.regex === false) {
+	        push({ type: 'plus', value, output: PLUS_LITERAL });
+	        continue;
+	      }
+
+	      if ((prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace')) || state.parens > 0) {
+	        push({ type: 'plus', value });
+	        continue;
+	      }
+
+	      push({ type: 'plus', value: PLUS_LITERAL });
+	      continue;
+	    }
+
+	    /**
+	     * Plain text
+	     */
+
+	    if (value === '@') {
+	      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+	        push({ type: 'at', extglob: true, value, output: '' });
+	        continue;
+	      }
+
+	      push({ type: 'text', value });
+	      continue;
+	    }
+
+	    /**
+	     * Plain text
+	     */
+
+	    if (value !== '*') {
+	      if (value === '$' || value === '^') {
+	        value = `\\${value}`;
+	      }
+
+	      const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
+	      if (match) {
+	        value += match[0];
+	        state.index += match[0].length;
+	      }
+
+	      push({ type: 'text', value });
+	      continue;
+	    }
+
+	    /**
+	     * Stars
+	     */
+
+	    if (prev && (prev.type === 'globstar' || prev.star === true)) {
+	      prev.type = 'star';
+	      prev.star = true;
+	      prev.value += value;
+	      prev.output = star;
+	      state.backtrack = true;
+	      state.globstar = true;
+	      consume(value);
+	      continue;
+	    }
+
+	    let rest = remaining();
+	    if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+	      extglobOpen('star', value);
+	      continue;
+	    }
+
+	    if (prev.type === 'star') {
+	      if (opts.noglobstar === true) {
+	        consume(value);
+	        continue;
+	      }
+
+	      const prior = prev.prev;
+	      const before = prior.prev;
+	      const isStart = prior.type === 'slash' || prior.type === 'bos';
+	      const afterStar = before && (before.type === 'star' || before.type === 'globstar');
+
+	      if (opts.bash === true && (!isStart || (rest[0] && rest[0] !== '/'))) {
+	        push({ type: 'star', value, output: '' });
+	        continue;
+	      }
+
+	      const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
+	      const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
+	      if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
+	        push({ type: 'star', value, output: '' });
+	        continue;
+	      }
+
+	      // strip consecutive `/**/`
+	      while (rest.slice(0, 3) === '/**') {
+	        const after = input[state.index + 4];
+	        if (after && after !== '/') {
+	          break;
+	        }
+	        rest = rest.slice(3);
+	        consume('/**', 3);
+	      }
+
+	      if (prior.type === 'bos' && eos()) {
+	        prev.type = 'globstar';
+	        prev.value += value;
+	        prev.output = globstar(opts);
+	        state.output = prev.output;
+	        state.globstar = true;
+	        consume(value);
+	        continue;
+	      }
+
+	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
+	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+	        prior.output = `(?:${prior.output}`;
+
+	        prev.type = 'globstar';
+	        prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
+	        prev.value += value;
+	        state.globstar = true;
+	        state.output += prior.output + prev.output;
+	        consume(value);
+	        continue;
+	      }
+
+	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
+	        const end = rest[1] !== void 0 ? '|$' : '';
+
+	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+	        prior.output = `(?:${prior.output}`;
+
+	        prev.type = 'globstar';
+	        prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
+	        prev.value += value;
+
+	        state.output += prior.output + prev.output;
+	        state.globstar = true;
+
+	        consume(value + advance());
+
+	        push({ type: 'slash', value: '/', output: '' });
+	        continue;
+	      }
+
+	      if (prior.type === 'bos' && rest[0] === '/') {
+	        prev.type = 'globstar';
+	        prev.value += value;
+	        prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
+	        state.output = prev.output;
+	        state.globstar = true;
+	        consume(value + advance());
+	        push({ type: 'slash', value: '/', output: '' });
+	        continue;
+	      }
+
+	      // remove single star from output
+	      state.output = state.output.slice(0, -prev.output.length);
+
+	      // reset previous token to globstar
+	      prev.type = 'globstar';
+	      prev.output = globstar(opts);
+	      prev.value += value;
+
+	      // reset output with globstar
+	      state.output += prev.output;
+	      state.globstar = true;
+	      consume(value);
+	      continue;
+	    }
+
+	    const token = { type: 'star', value, output: star };
+
+	    if (opts.bash === true) {
+	      token.output = '.*?';
+	      if (prev.type === 'bos' || prev.type === 'slash') {
+	        token.output = nodot + token.output;
+	      }
+	      push(token);
+	      continue;
+	    }
+
+	    if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
+	      token.output = value;
+	      push(token);
+	      continue;
+	    }
+
+	    if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
+	      if (prev.type === 'dot') {
+	        state.output += NO_DOT_SLASH;
+	        prev.output += NO_DOT_SLASH;
+
+	      } else if (opts.dot === true) {
+	        state.output += NO_DOTS_SLASH;
+	        prev.output += NO_DOTS_SLASH;
+
+	      } else {
+	        state.output += nodot;
+	        prev.output += nodot;
+	      }
+
+	      if (peek() !== '*') {
+	        state.output += ONE_CHAR;
+	        prev.output += ONE_CHAR;
+	      }
+	    }
+
+	    push(token);
+	  }
+
+	  while (state.brackets > 0) {
+	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
+	    state.output = utils.escapeLast(state.output, '[');
+	    decrement('brackets');
+	  }
+
+	  while (state.parens > 0) {
+	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
+	    state.output = utils.escapeLast(state.output, '(');
+	    decrement('parens');
+	  }
+
+	  while (state.braces > 0) {
+	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
+	    state.output = utils.escapeLast(state.output, '{');
+	    decrement('braces');
+	  }
+
+	  if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
+	    push({ type: 'maybe_slash', value: '', output: `${SLASH_LITERAL}?` });
+	  }
+
+	  // rebuild the output if we had to backtrack at any point
+	  if (state.backtrack === true) {
+	    state.output = '';
+
+	    for (const token of state.tokens) {
+	      state.output += token.output != null ? token.output : token.value;
+
+	      if (token.suffix) {
+	        state.output += token.suffix;
+	      }
+	    }
+	  }
+
+	  return state;
+	};
+
+	/**
+	 * Fast paths for creating regular expressions for common glob patterns.
+	 * This can significantly speed up processing and has very little downside
+	 * impact when none of the fast paths match.
+	 */
+
+	parse.fastpaths = (input, options) => {
+	  const opts = { ...options };
+	  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+	  const len = input.length;
+	  if (len > max) {
+	    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+	  }
+
+	  input = REPLACEMENTS[input] || input;
+	  const win32 = utils.isWindows(options);
+
+	  // create constants based on platform, for windows or posix
+	  const {
+	    DOT_LITERAL,
+	    SLASH_LITERAL,
+	    ONE_CHAR,
+	    DOTS_SLASH,
+	    NO_DOT,
+	    NO_DOTS,
+	    NO_DOTS_SLASH,
+	    STAR,
+	    START_ANCHOR
+	  } = constants.globChars(win32);
+
+	  const nodot = opts.dot ? NO_DOTS : NO_DOT;
+	  const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
+	  const capture = opts.capture ? '' : '?:';
+	  const state = { negated: false, prefix: '' };
+	  let star = opts.bash === true ? '.*?' : STAR;
+
+	  if (opts.capture) {
+	    star = `(${star})`;
+	  }
+
+	  const globstar = opts => {
+	    if (opts.noglobstar === true) return star;
+	    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+	  };
+
+	  const create = str => {
+	    switch (str) {
+	      case '*':
+	        return `${nodot}${ONE_CHAR}${star}`;
+
+	      case '.*':
+	        return `${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+	      case '*.*':
+	        return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+	      case '*/*':
+	        return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
+
+	      case '**':
+	        return nodot + globstar(opts);
+
+	      case '**/*':
+	        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
+
+	      case '**/*.*':
+	        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+	      case '**/.*':
+	        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+	      default: {
+	        const match = /^(.*?)\.(\w+)$/.exec(str);
+	        if (!match) return;
+
+	        const source = create(match[1]);
+	        if (!source) return;
+
+	        return source + DOT_LITERAL + match[2];
+	      }
+	    }
+	  };
+
+	  const output = utils.removePrefix(input, state);
+	  let source = create(output);
+
+	  if (source && opts.strictSlashes !== true) {
+	    source += `${SLASH_LITERAL}?`;
+	  }
+
+	  return source;
+	};
+
+	parse_1$1 = parse;
+	return parse_1$1;
+}
+
+var picomatch_1;
+var hasRequiredPicomatch$1;
+
+function requirePicomatch$1 () {
+	if (hasRequiredPicomatch$1) return picomatch_1;
+	hasRequiredPicomatch$1 = 1;
+
+	const path = require$$0__default$2["default"];
+	const scan = requireScan();
+	const parse = requireParse$1();
+	const utils = requireUtils$1();
+	const constants = requireConstants$2();
+	const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
+
+	/**
+	 * Creates a matcher function from one or more glob patterns. The
+	 * returned function takes a string to match as its first argument,
+	 * and returns true if the string is a match. The returned matcher
+	 * function also takes a boolean as the second argument that, when true,
+	 * returns an object with additional information.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch(glob[, options]);
+	 *
+	 * const isMatch = picomatch('*.!(*a)');
+	 * console.log(isMatch('a.a')); //=> false
+	 * console.log(isMatch('a.b')); //=> true
+	 * ```
+	 * @name picomatch
+	 * @param {String|Array} `globs` One or more glob patterns.
+	 * @param {Object=} `options`
+	 * @return {Function=} Returns a matcher function.
+	 * @api public
+	 */
+
+	const picomatch = (glob, options, returnState = false) => {
+	  if (Array.isArray(glob)) {
+	    const fns = glob.map(input => picomatch(input, options, returnState));
+	    const arrayMatcher = str => {
+	      for (const isMatch of fns) {
+	        const state = isMatch(str);
+	        if (state) return state;
+	      }
+	      return false;
+	    };
+	    return arrayMatcher;
+	  }
+
+	  const isState = isObject(glob) && glob.tokens && glob.input;
+
+	  if (glob === '' || (typeof glob !== 'string' && !isState)) {
+	    throw new TypeError('Expected pattern to be a non-empty string');
+	  }
+
+	  const opts = options || {};
+	  const posix = utils.isWindows(options);
+	  const regex = isState
+	    ? picomatch.compileRe(glob, options)
+	    : picomatch.makeRe(glob, options, false, true);
+
+	  const state = regex.state;
+	  delete regex.state;
+
+	  let isIgnored = () => false;
+	  if (opts.ignore) {
+	    const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
+	    isIgnored = picomatch(opts.ignore, ignoreOpts, returnState);
+	  }
+
+	  const matcher = (input, returnObject = false) => {
+	    const { isMatch, match, output } = picomatch.test(input, regex, options, { glob, posix });
+	    const result = { glob, state, regex, posix, input, output, match, isMatch };
+
+	    if (typeof opts.onResult === 'function') {
+	      opts.onResult(result);
+	    }
+
+	    if (isMatch === false) {
+	      result.isMatch = false;
+	      return returnObject ? result : false;
+	    }
+
+	    if (isIgnored(input)) {
+	      if (typeof opts.onIgnore === 'function') {
+	        opts.onIgnore(result);
+	      }
+	      result.isMatch = false;
+	      return returnObject ? result : false;
+	    }
+
+	    if (typeof opts.onMatch === 'function') {
+	      opts.onMatch(result);
+	    }
+	    return returnObject ? result : true;
+	  };
+
+	  if (returnState) {
+	    matcher.state = state;
+	  }
+
+	  return matcher;
+	};
+
+	/**
+	 * Test `input` with the given `regex`. This is used by the main
+	 * `picomatch()` function to test the input string.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.test(input, regex[, options]);
+	 *
+	 * console.log(picomatch.test('foo/bar', /^(?:([^/]*?)\/([^/]*?))$/));
+	 * // { isMatch: true, match: [ 'foo/', 'foo', 'bar' ], output: 'foo/bar' }
+	 * ```
+	 * @param {String} `input` String to test.
+	 * @param {RegExp} `regex`
+	 * @return {Object} Returns an object with matching info.
+	 * @api public
+	 */
+
+	picomatch.test = (input, regex, options, { glob, posix } = {}) => {
+	  if (typeof input !== 'string') {
+	    throw new TypeError('Expected input to be a string');
+	  }
+
+	  if (input === '') {
+	    return { isMatch: false, output: '' };
+	  }
+
+	  const opts = options || {};
+	  const format = opts.format || (posix ? utils.toPosixSlashes : null);
+	  let match = input === glob;
+	  let output = (match && format) ? format(input) : input;
+
+	  if (match === false) {
+	    output = format ? format(input) : input;
+	    match = output === glob;
+	  }
+
+	  if (match === false || opts.capture === true) {
+	    if (opts.matchBase === true || opts.basename === true) {
+	      match = picomatch.matchBase(input, regex, options, posix);
+	    } else {
+	      match = regex.exec(output);
+	    }
+	  }
+
+	  return { isMatch: Boolean(match), match, output };
+	};
+
+	/**
+	 * Match the basename of a filepath.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.matchBase(input, glob[, options]);
+	 * console.log(picomatch.matchBase('foo/bar.js', '*.js'); // true
+	 * ```
+	 * @param {String} `input` String to test.
+	 * @param {RegExp|String} `glob` Glob pattern or regex created by [.makeRe](#makeRe).
+	 * @return {Boolean}
+	 * @api public
+	 */
+
+	picomatch.matchBase = (input, glob, options, posix = utils.isWindows(options)) => {
+	  const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
+	  return regex.test(path.basename(input));
+	};
+
+	/**
+	 * Returns true if **any** of the given glob `patterns` match the specified `string`.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.isMatch(string, patterns[, options]);
+	 *
+	 * console.log(picomatch.isMatch('a.a', ['b.*', '*.a'])); //=> true
+	 * console.log(picomatch.isMatch('a.a', 'b.*')); //=> false
+	 * ```
+	 * @param {String|Array} str The string to test.
+	 * @param {String|Array} patterns One or more glob patterns to use for matching.
+	 * @param {Object} [options] See available [options](#options).
+	 * @return {Boolean} Returns true if any patterns match `str`
+	 * @api public
+	 */
+
+	picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+
+	/**
+	 * Parse a glob pattern to create the source string for a regular
+	 * expression.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * const result = picomatch.parse(pattern[, options]);
+	 * ```
+	 * @param {String} `pattern`
+	 * @param {Object} `options`
+	 * @return {Object} Returns an object with useful properties and output to be used as a regex source string.
+	 * @api public
+	 */
+
+	picomatch.parse = (pattern, options) => {
+	  if (Array.isArray(pattern)) return pattern.map(p => picomatch.parse(p, options));
+	  return parse(pattern, { ...options, fastpaths: false });
+	};
+
+	/**
+	 * Scan a glob pattern to separate the pattern into segments.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.scan(input[, options]);
+	 *
+	 * const result = picomatch.scan('!./foo/*.js');
+	 * console.log(result);
+	 * { prefix: '!./',
+	 *   input: '!./foo/*.js',
+	 *   start: 3,
+	 *   base: 'foo',
+	 *   glob: '*.js',
+	 *   isBrace: false,
+	 *   isBracket: false,
+	 *   isGlob: true,
+	 *   isExtglob: false,
+	 *   isGlobstar: false,
+	 *   negated: true }
+	 * ```
+	 * @param {String} `input` Glob pattern to scan.
+	 * @param {Object} `options`
+	 * @return {Object} Returns an object with
+	 * @api public
+	 */
+
+	picomatch.scan = (input, options) => scan(input, options);
+
+	/**
+	 * Compile a regular expression from the `state` object returned by the
+	 * [parse()](#parse) method.
+	 *
+	 * @param {Object} `state`
+	 * @param {Object} `options`
+	 * @param {Boolean} `returnOutput` Intended for implementors, this argument allows you to return the raw output from the parser.
+	 * @param {Boolean} `returnState` Adds the state to a `state` property on the returned regex. Useful for implementors and debugging.
+	 * @return {RegExp}
+	 * @api public
+	 */
+
+	picomatch.compileRe = (state, options, returnOutput = false, returnState = false) => {
+	  if (returnOutput === true) {
+	    return state.output;
+	  }
+
+	  const opts = options || {};
+	  const prepend = opts.contains ? '' : '^';
+	  const append = opts.contains ? '' : '$';
+
+	  let source = `${prepend}(?:${state.output})${append}`;
+	  if (state && state.negated === true) {
+	    source = `^(?!${source}).*$`;
+	  }
+
+	  const regex = picomatch.toRegex(source, options);
+	  if (returnState === true) {
+	    regex.state = state;
+	  }
+
+	  return regex;
+	};
+
+	/**
+	 * Create a regular expression from a parsed glob pattern.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * const state = picomatch.parse('*.js');
+	 * // picomatch.compileRe(state[, options]);
+	 *
+	 * console.log(picomatch.compileRe(state));
+	 * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+	 * ```
+	 * @param {String} `state` The object returned from the `.parse` method.
+	 * @param {Object} `options`
+	 * @param {Boolean} `returnOutput` Implementors may use this argument to return the compiled output, instead of a regular expression. This is not exposed on the options to prevent end-users from mutating the result.
+	 * @param {Boolean} `returnState` Implementors may use this argument to return the state from the parsed glob with the returned regular expression.
+	 * @return {RegExp} Returns a regex created from the given pattern.
+	 * @api public
+	 */
+
+	picomatch.makeRe = (input, options = {}, returnOutput = false, returnState = false) => {
+	  if (!input || typeof input !== 'string') {
+	    throw new TypeError('Expected a non-empty string');
+	  }
+
+	  let parsed = { negated: false, fastpaths: true };
+
+	  if (options.fastpaths !== false && (input[0] === '.' || input[0] === '*')) {
+	    parsed.output = parse.fastpaths(input, options);
+	  }
+
+	  if (!parsed.output) {
+	    parsed = parse(input, options);
+	  }
+
+	  return picomatch.compileRe(parsed, options, returnOutput, returnState);
+	};
+
+	/**
+	 * Create a regular expression from the given regex source string.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.toRegex(source[, options]);
+	 *
+	 * const { output } = picomatch.parse('*.js');
+	 * console.log(picomatch.toRegex(output));
+	 * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+	 * ```
+	 * @param {String} `source` Regular expression source string.
+	 * @param {Object} `options`
+	 * @return {RegExp}
+	 * @api public
+	 */
+
+	picomatch.toRegex = (source, options) => {
+	  try {
+	    const opts = options || {};
+	    return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
+	  } catch (err) {
+	    if (options && options.debug === true) throw err;
+	    return /$^/;
+	  }
+	};
+
+	/**
+	 * Picomatch constants.
+	 * @return {Object}
+	 */
+
+	picomatch.constants = constants;
+
+	/**
+	 * Expose "picomatch"
+	 */
+
+	picomatch_1 = picomatch;
+	return picomatch_1;
+}
+
+var hasRequiredPicomatch;
+
+function requirePicomatch () {
+	if (hasRequiredPicomatch) return picomatch.exports;
+	hasRequiredPicomatch = 1;
+	(function (module) {
+
+		module.exports = requirePicomatch$1();
+} (picomatch));
+	return picomatch.exports;
+}
+
+var readdirp_1;
+var hasRequiredReaddirp;
+
+function requireReaddirp () {
+	if (hasRequiredReaddirp) return readdirp_1;
+	hasRequiredReaddirp = 1;
+
+	const fs = require$$0__default["default"];
+	const { Readable } = Stream__default["default"];
+	const sysPath = require$$0__default$2["default"];
+	const { promisify } = require$$2__default["default"];
+	const picomatch = requirePicomatch();
+
+	const readdir = promisify(fs.readdir);
+	const stat = promisify(fs.stat);
+	const lstat = promisify(fs.lstat);
+	const realpath = promisify(fs.realpath);
+
+	/**
+	 * @typedef {Object} EntryInfo
+	 * @property {String} path
+	 * @property {String} fullPath
+	 * @property {fs.Stats=} stats
+	 * @property {fs.Dirent=} dirent
+	 * @property {String} basename
+	 */
+
+	const BANG = '!';
+	const RECURSIVE_ERROR_CODE = 'READDIRP_RECURSIVE_ERROR';
+	const NORMAL_FLOW_ERRORS = new Set(['ENOENT', 'EPERM', 'EACCES', 'ELOOP', RECURSIVE_ERROR_CODE]);
+	const FILE_TYPE = 'files';
+	const DIR_TYPE = 'directories';
+	const FILE_DIR_TYPE = 'files_directories';
+	const EVERYTHING_TYPE = 'all';
+	const ALL_TYPES = [FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE];
+
+	const isNormalFlowError = error => NORMAL_FLOW_ERRORS.has(error.code);
+	const [maj, min] = process.versions.node.split('.').slice(0, 2).map(n => Number.parseInt(n, 10));
+	const wantBigintFsStats = process.platform === 'win32' && (maj > 10 || (maj === 10 && min >= 5));
+
+	const normalizeFilter = filter => {
+	  if (filter === undefined) return;
+	  if (typeof filter === 'function') return filter;
+
+	  if (typeof filter === 'string') {
+	    const glob = picomatch(filter.trim());
+	    return entry => glob(entry.basename);
+	  }
+
+	  if (Array.isArray(filter)) {
+	    const positive = [];
+	    const negative = [];
+	    for (const item of filter) {
+	      const trimmed = item.trim();
+	      if (trimmed.charAt(0) === BANG) {
+	        negative.push(picomatch(trimmed.slice(1)));
+	      } else {
+	        positive.push(picomatch(trimmed));
+	      }
+	    }
+
+	    if (negative.length > 0) {
+	      if (positive.length > 0) {
+	        return entry =>
+	          positive.some(f => f(entry.basename)) && !negative.some(f => f(entry.basename));
+	      }
+	      return entry => !negative.some(f => f(entry.basename));
+	    }
+	    return entry => positive.some(f => f(entry.basename));
+	  }
+	};
+
+	class ReaddirpStream extends Readable {
+	  static get defaultOptions() {
+	    return {
+	      root: '.',
+	      /* eslint-disable no-unused-vars */
+	      fileFilter: (path) => true,
+	      directoryFilter: (path) => true,
+	      /* eslint-enable no-unused-vars */
+	      type: FILE_TYPE,
+	      lstat: false,
+	      depth: 2147483648,
+	      alwaysStat: false
+	    };
+	  }
+
+	  constructor(options = {}) {
+	    super({
+	      objectMode: true,
+	      autoDestroy: true,
+	      highWaterMark: options.highWaterMark || 4096
+	    });
+	    const opts = { ...ReaddirpStream.defaultOptions, ...options };
+	    const { root, type } = opts;
+
+	    this._fileFilter = normalizeFilter(opts.fileFilter);
+	    this._directoryFilter = normalizeFilter(opts.directoryFilter);
+
+	    const statMethod = opts.lstat ? lstat : stat;
+	    // Use bigint stats if it's windows and stat() supports options (node 10+).
+	    if (wantBigintFsStats) {
+	      this._stat = path => statMethod(path, { bigint: true });
+	    } else {
+	      this._stat = statMethod;
+	    }
+
+	    this._maxDepth = opts.depth;
+	    this._wantsDir = [DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE].includes(type);
+	    this._wantsFile = [FILE_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE].includes(type);
+	    this._wantsEverything = type === EVERYTHING_TYPE;
+	    this._root = sysPath.resolve(root);
+	    this._isDirent = ('Dirent' in fs) && !opts.alwaysStat;
+	    this._statsProp = this._isDirent ? 'dirent' : 'stats';
+	    this._rdOptions = { encoding: 'utf8', withFileTypes: this._isDirent };
+
+	    // Launch stream with one parent, the root dir.
+	    this.parents = [this._exploreDir(root, 1)];
+	    this.reading = false;
+	    this.parent = undefined;
+	  }
+
+	  async _read(batch) {
+	    if (this.reading) return;
+	    this.reading = true;
+
+	    try {
+	      while (!this.destroyed && batch > 0) {
+	        const { path, depth, files = [] } = this.parent || {};
+
+	        if (files.length > 0) {
+	          const slice = files.splice(0, batch).map(dirent => this._formatEntry(dirent, path));
+	          for (const entry of await Promise.all(slice)) {
+	            if (this.destroyed) return;
+
+	            const entryType = await this._getEntryType(entry);
+	            if (entryType === 'directory' && this._directoryFilter(entry)) {
+	              if (depth <= this._maxDepth) {
+	                this.parents.push(this._exploreDir(entry.fullPath, depth + 1));
+	              }
+
+	              if (this._wantsDir) {
+	                this.push(entry);
+	                batch--;
+	              }
+	            } else if ((entryType === 'file' || this._includeAsFile(entry)) && this._fileFilter(entry)) {
+	              if (this._wantsFile) {
+	                this.push(entry);
+	                batch--;
+	              }
+	            }
+	          }
+	        } else {
+	          const parent = this.parents.pop();
+	          if (!parent) {
+	            this.push(null);
+	            break;
+	          }
+	          this.parent = await parent;
+	          if (this.destroyed) return;
+	        }
+	      }
+	    } catch (error) {
+	      this.destroy(error);
+	    } finally {
+	      this.reading = false;
+	    }
+	  }
+
+	  async _exploreDir(path, depth) {
+	    let files;
+	    try {
+	      files = await readdir(path, this._rdOptions);
+	    } catch (error) {
+	      this._onError(error);
+	    }
+	    return { files, depth, path };
+	  }
+
+	  async _formatEntry(dirent, path) {
+	    let entry;
+	    try {
+	      const basename = this._isDirent ? dirent.name : dirent;
+	      const fullPath = sysPath.resolve(sysPath.join(path, basename));
+	      entry = { path: sysPath.relative(this._root, fullPath), fullPath, basename };
+	      entry[this._statsProp] = this._isDirent ? dirent : await this._stat(fullPath);
+	    } catch (err) {
+	      this._onError(err);
+	    }
+	    return entry;
+	  }
+
+	  _onError(err) {
+	    if (isNormalFlowError(err) && !this.destroyed) {
+	      this.emit('warn', err);
+	    } else {
+	      this.destroy(err);
+	    }
+	  }
+
+	  async _getEntryType(entry) {
+	    // entry may be undefined, because a warning or an error were emitted
+	    // and the statsProp is undefined
+	    const stats = entry && entry[this._statsProp];
+	    if (!stats) {
+	      return;
+	    }
+	    if (stats.isFile()) {
+	      return 'file';
+	    }
+	    if (stats.isDirectory()) {
+	      return 'directory';
+	    }
+	    if (stats && stats.isSymbolicLink()) {
+	      const full = entry.fullPath;
+	      try {
+	        const entryRealPath = await realpath(full);
+	        const entryRealPathStats = await lstat(entryRealPath);
+	        if (entryRealPathStats.isFile()) {
+	          return 'file';
+	        }
+	        if (entryRealPathStats.isDirectory()) {
+	          const len = entryRealPath.length;
+	          if (full.startsWith(entryRealPath) && full.substr(len, 1) === sysPath.sep) {
+	            const recursiveError = new Error(
+	              `Circular symlink detected: "${full}" points to "${entryRealPath}"`
+	            );
+	            recursiveError.code = RECURSIVE_ERROR_CODE;
+	            return this._onError(recursiveError);
+	          }
+	          return 'directory';
+	        }
+	      } catch (error) {
+	        this._onError(error);
+	      }
+	    }
+	  }
+
+	  _includeAsFile(entry) {
+	    const stats = entry && entry[this._statsProp];
+
+	    return stats && this._wantsEverything && !stats.isDirectory();
+	  }
+	}
+
+	/**
+	 * @typedef {Object} ReaddirpArguments
+	 * @property {Function=} fileFilter
+	 * @property {Function=} directoryFilter
+	 * @property {String=} type
+	 * @property {Number=} depth
+	 * @property {String=} root
+	 * @property {Boolean=} lstat
+	 * @property {Boolean=} bigint
+	 */
+
+	/**
+	 * Main function which ends up calling readdirRec and reads all files and directories in given root recursively.
+	 * @param {String} root Root directory
+	 * @param {ReaddirpArguments=} options Options to specify root (start directory), filters and recursion depth
+	 */
+	const readdirp = (root, options = {}) => {
+	  let type = options.entryType || options.type;
+	  if (type === 'both') type = FILE_DIR_TYPE; // backwards-compatibility
+	  if (type) options.type = type;
+	  if (!root) {
+	    throw new Error('readdirp: root argument is required. Usage: readdirp(root, options)');
+	  } else if (typeof root !== 'string') {
+	    throw new TypeError('readdirp: root argument must be a string. Usage: readdirp(root, options)');
+	  } else if (type && !ALL_TYPES.includes(type)) {
+	    throw new Error(`readdirp: Invalid type passed. Use one of ${ALL_TYPES.join(', ')}`);
+	  }
+
+	  options.root = root;
+	  return new ReaddirpStream(options);
+	};
+
+	const readdirpPromise = (root, options = {}) => {
+	  return new Promise((resolve, reject) => {
+	    const files = [];
+	    readdirp(root, options)
+	      .on('data', entry => files.push(entry))
+	      .on('end', () => resolve(files))
+	      .on('error', error => reject(error));
+	  });
+	};
+
+	readdirp.promise = readdirpPromise;
+	readdirp.ReaddirpStream = ReaddirpStream;
+	readdirp.default = readdirp;
+
+	readdirp_1 = readdirp;
+	return readdirp_1;
+}
+
+var anymatch = {exports: {}};
+
+/*!
+ * normalize-path <https://github.com/jonschlinkert/normalize-path>
+ *
+ * Copyright (c) 2014-2018, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+var normalizePath;
+var hasRequiredNormalizePath;
+
+function requireNormalizePath () {
+	if (hasRequiredNormalizePath) return normalizePath;
+	hasRequiredNormalizePath = 1;
+	normalizePath = function(path, stripTrailing) {
+	  if (typeof path !== 'string') {
+	    throw new TypeError('expected path to be a string');
+	  }
+
+	  if (path === '\\' || path === '/') return '/';
+
+	  var len = path.length;
+	  if (len <= 1) return path;
+
+	  // ensure that win32 namespaces has two leading slashes, so that the path is
+	  // handled properly by the win32 version of path.parse() after being normalized
+	  // https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces
+	  var prefix = '';
+	  if (len > 4 && path[3] === '\\') {
+	    var ch = path[2];
+	    if ((ch === '?' || ch === '.') && path.slice(0, 2) === '\\\\') {
+	      path = path.slice(2);
+	      prefix = '//';
+	    }
+	  }
+
+	  var segs = path.split(/[/\\]+/);
+	  if (stripTrailing !== false && segs[segs.length - 1] === '') {
+	    segs.pop();
+	  }
+	  return prefix + segs.join('/');
+	};
+	return normalizePath;
+}
+
+var hasRequiredAnymatch;
+
+function requireAnymatch () {
+	if (hasRequiredAnymatch) return anymatch.exports;
+	hasRequiredAnymatch = 1;
+
+	Object.defineProperty(anymatch.exports, "__esModule", { value: true });
+
+	const picomatch = requirePicomatch();
+	const normalizePath = requireNormalizePath();
+
+	/**
+	 * @typedef {(testString: string) => boolean} AnymatchFn
+	 * @typedef {string|RegExp|AnymatchFn} AnymatchPattern
+	 * @typedef {AnymatchPattern|AnymatchPattern[]} AnymatchMatcher
+	 */
+	const BANG = '!';
+	const DEFAULT_OPTIONS = {returnIndex: false};
+	const arrify = (item) => Array.isArray(item) ? item : [item];
+
+	/**
+	 * @param {AnymatchPattern} matcher
+	 * @param {object} options
+	 * @returns {AnymatchFn}
+	 */
+	const createPattern = (matcher, options) => {
+	  if (typeof matcher === 'function') {
+	    return matcher;
+	  }
+	  if (typeof matcher === 'string') {
+	    const glob = picomatch(matcher, options);
+	    return (string) => matcher === string || glob(string);
+	  }
+	  if (matcher instanceof RegExp) {
+	    return (string) => matcher.test(string);
+	  }
+	  return (string) => false;
+	};
+
+	/**
+	 * @param {Array<Function>} patterns
+	 * @param {Array<Function>} negPatterns
+	 * @param {String|Array} args
+	 * @param {Boolean} returnIndex
+	 * @returns {boolean|number}
+	 */
+	const matchPatterns = (patterns, negPatterns, args, returnIndex) => {
+	  const isList = Array.isArray(args);
+	  const _path = isList ? args[0] : args;
+	  if (!isList && typeof _path !== 'string') {
+	    throw new TypeError('anymatch: second argument must be a string: got ' +
+	      Object.prototype.toString.call(_path))
+	  }
+	  const path = normalizePath(_path);
+
+	  for (let index = 0; index < negPatterns.length; index++) {
+	    const nglob = negPatterns[index];
+	    if (nglob(path)) {
+	      return returnIndex ? -1 : false;
+	    }
+	  }
+
+	  const applied = isList && [path].concat(args.slice(1));
+	  for (let index = 0; index < patterns.length; index++) {
+	    const pattern = patterns[index];
+	    if (isList ? pattern(...applied) : pattern(path)) {
+	      return returnIndex ? index : true;
+	    }
+	  }
+
+	  return returnIndex ? -1 : false;
+	};
+
+	/**
+	 * @param {AnymatchMatcher} matchers
+	 * @param {Array|string} testString
+	 * @param {object} options
+	 * @returns {boolean|number|Function}
+	 */
+	const anymatch$1 = (matchers, testString, options = DEFAULT_OPTIONS) => {
+	  if (matchers == null) {
+	    throw new TypeError('anymatch: specify first argument');
+	  }
+	  const opts = typeof options === 'boolean' ? {returnIndex: options} : options;
+	  const returnIndex = opts.returnIndex || false;
+
+	  // Early cache for matchers.
+	  const mtchers = arrify(matchers);
+	  const negatedGlobs = mtchers
+	    .filter(item => typeof item === 'string' && item.charAt(0) === BANG)
+	    .map(item => item.slice(1))
+	    .map(item => picomatch(item, opts));
+	  const patterns = mtchers
+	    .filter(item => typeof item !== 'string' || (typeof item === 'string' && item.charAt(0) !== BANG))
+	    .map(matcher => createPattern(matcher, opts));
+
+	  if (testString == null) {
+	    return (testString, ri = false) => {
+	      const returnIndex = typeof ri === 'boolean' ? ri : false;
+	      return matchPatterns(patterns, negatedGlobs, testString, returnIndex);
+	    }
+	  }
+
+	  return matchPatterns(patterns, negatedGlobs, testString, returnIndex);
+	};
+
+	anymatch$1.default = anymatch$1;
+	anymatch.exports = anymatch$1;
+	return anymatch.exports;
+}
+
+/*!
+ * is-extglob <https://github.com/jonschlinkert/is-extglob>
+ *
+ * Copyright (c) 2014-2016, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+var isExtglob;
+var hasRequiredIsExtglob;
+
+function requireIsExtglob () {
+	if (hasRequiredIsExtglob) return isExtglob;
+	hasRequiredIsExtglob = 1;
+	isExtglob = function isExtglob(str) {
+	  if (typeof str !== 'string' || str === '') {
+	    return false;
+	  }
+
+	  var match;
+	  while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
+	    if (match[2]) return true;
+	    str = str.slice(match.index + match[0].length);
+	  }
+
+	  return false;
+	};
+	return isExtglob;
+}
+
+/*!
+ * is-glob <https://github.com/jonschlinkert/is-glob>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+var isGlob;
+var hasRequiredIsGlob;
+
+function requireIsGlob () {
+	if (hasRequiredIsGlob) return isGlob;
+	hasRequiredIsGlob = 1;
+	var isExtglob = requireIsExtglob();
+	var chars = { '{': '}', '(': ')', '[': ']'};
+	var strictCheck = function(str) {
+	  if (str[0] === '!') {
+	    return true;
+	  }
+	  var index = 0;
+	  var pipeIndex = -2;
+	  var closeSquareIndex = -2;
+	  var closeCurlyIndex = -2;
+	  var closeParenIndex = -2;
+	  var backSlashIndex = -2;
+	  while (index < str.length) {
+	    if (str[index] === '*') {
+	      return true;
+	    }
+
+	    if (str[index + 1] === '?' && /[\].+)]/.test(str[index])) {
+	      return true;
+	    }
+
+	    if (closeSquareIndex !== -1 && str[index] === '[' && str[index + 1] !== ']') {
+	      if (closeSquareIndex < index) {
+	        closeSquareIndex = str.indexOf(']', index);
+	      }
+	      if (closeSquareIndex > index) {
+	        if (backSlashIndex === -1 || backSlashIndex > closeSquareIndex) {
+	          return true;
+	        }
+	        backSlashIndex = str.indexOf('\\', index);
+	        if (backSlashIndex === -1 || backSlashIndex > closeSquareIndex) {
+	          return true;
+	        }
+	      }
+	    }
+
+	    if (closeCurlyIndex !== -1 && str[index] === '{' && str[index + 1] !== '}') {
+	      closeCurlyIndex = str.indexOf('}', index);
+	      if (closeCurlyIndex > index) {
+	        backSlashIndex = str.indexOf('\\', index);
+	        if (backSlashIndex === -1 || backSlashIndex > closeCurlyIndex) {
+	          return true;
+	        }
+	      }
+	    }
+
+	    if (closeParenIndex !== -1 && str[index] === '(' && str[index + 1] === '?' && /[:!=]/.test(str[index + 2]) && str[index + 3] !== ')') {
+	      closeParenIndex = str.indexOf(')', index);
+	      if (closeParenIndex > index) {
+	        backSlashIndex = str.indexOf('\\', index);
+	        if (backSlashIndex === -1 || backSlashIndex > closeParenIndex) {
+	          return true;
+	        }
+	      }
+	    }
+
+	    if (pipeIndex !== -1 && str[index] === '(' && str[index + 1] !== '|') {
+	      if (pipeIndex < index) {
+	        pipeIndex = str.indexOf('|', index);
+	      }
+	      if (pipeIndex !== -1 && str[pipeIndex + 1] !== ')') {
+	        closeParenIndex = str.indexOf(')', pipeIndex);
+	        if (closeParenIndex > pipeIndex) {
+	          backSlashIndex = str.indexOf('\\', pipeIndex);
+	          if (backSlashIndex === -1 || backSlashIndex > closeParenIndex) {
+	            return true;
+	          }
+	        }
+	      }
+	    }
+
+	    if (str[index] === '\\') {
+	      var open = str[index + 1];
+	      index += 2;
+	      var close = chars[open];
+
+	      if (close) {
+	        var n = str.indexOf(close, index);
+	        if (n !== -1) {
+	          index = n + 1;
+	        }
+	      }
+
+	      if (str[index] === '!') {
+	        return true;
+	      }
+	    } else {
+	      index++;
+	    }
+	  }
+	  return false;
+	};
+
+	var relaxedCheck = function(str) {
+	  if (str[0] === '!') {
+	    return true;
+	  }
+	  var index = 0;
+	  while (index < str.length) {
+	    if (/[*?{}()[\]]/.test(str[index])) {
+	      return true;
+	    }
+
+	    if (str[index] === '\\') {
+	      var open = str[index + 1];
+	      index += 2;
+	      var close = chars[open];
+
+	      if (close) {
+	        var n = str.indexOf(close, index);
+	        if (n !== -1) {
+	          index = n + 1;
+	        }
+	      }
+
+	      if (str[index] === '!') {
+	        return true;
+	      }
+	    } else {
+	      index++;
+	    }
+	  }
+	  return false;
+	};
+
+	isGlob = function isGlob(str, options) {
+	  if (typeof str !== 'string' || str === '') {
+	    return false;
+	  }
+
+	  if (isExtglob(str)) {
+	    return true;
+	  }
+
+	  var check = strictCheck;
+
+	  // optionally relax check
+	  if (options && options.strict === false) {
+	    check = relaxedCheck;
+	  }
+
+	  return check(str);
+	};
+	return isGlob;
+}
+
+var globParent;
+var hasRequiredGlobParent;
+
+function requireGlobParent () {
+	if (hasRequiredGlobParent) return globParent;
+	hasRequiredGlobParent = 1;
+
+	var isGlob = requireIsGlob();
+	var pathPosixDirname = require$$0__default$2["default"].posix.dirname;
+	var isWin32 = require$$1__default["default"].platform() === 'win32';
+
+	var slash = '/';
+	var backslash = /\\/g;
+	var enclosure = /[\{\[].*[\}\]]$/;
+	var globby = /(^|[^\\])([\{\[]|\([^\)]+$)/;
+	var escaped = /\\([\!\*\?\|\[\]\(\)\{\}])/g;
+
+	/**
+	 * @param {string} str
+	 * @param {Object} opts
+	 * @param {boolean} [opts.flipBackslashes=true]
+	 * @returns {string}
+	 */
+	globParent = function globParent(str, opts) {
+	  var options = Object.assign({ flipBackslashes: true }, opts);
+
+	  // flip windows path separators
+	  if (options.flipBackslashes && isWin32 && str.indexOf(slash) < 0) {
+	    str = str.replace(backslash, slash);
+	  }
+
+	  // special case for strings ending in enclosure containing path separator
+	  if (enclosure.test(str)) {
+	    str += slash;
+	  }
+
+	  // preserves full path in case of trailing path separator
+	  str += 'a';
+
+	  // remove path parts that are globby
+	  do {
+	    str = pathPosixDirname(str);
+	  } while (isGlob(str) || globby.test(str));
+
+	  // remove escape chars and return result
+	  return str.replace(escaped, '$1');
+	};
+	return globParent;
+}
+
+var utils$2 = {};
+
+var hasRequiredUtils;
+
+function requireUtils () {
+	if (hasRequiredUtils) return utils$2;
+	hasRequiredUtils = 1;
+	(function (exports) {
+
+		exports.isInteger = num => {
+		  if (typeof num === 'number') {
+		    return Number.isInteger(num);
+		  }
+		  if (typeof num === 'string' && num.trim() !== '') {
+		    return Number.isInteger(Number(num));
+		  }
+		  return false;
+		};
+
+		/**
+		 * Find a node of the given type
+		 */
+
+		exports.find = (node, type) => node.nodes.find(node => node.type === type);
+
+		/**
+		 * Find a node of the given type
+		 */
+
+		exports.exceedsLimit = (min, max, step = 1, limit) => {
+		  if (limit === false) return false;
+		  if (!exports.isInteger(min) || !exports.isInteger(max)) return false;
+		  return ((Number(max) - Number(min)) / Number(step)) >= limit;
+		};
+
+		/**
+		 * Escape the given node with '\\' before node.value
+		 */
+
+		exports.escapeNode = (block, n = 0, type) => {
+		  let node = block.nodes[n];
+		  if (!node) return;
+
+		  if ((type && node.type === type) || node.type === 'open' || node.type === 'close') {
+		    if (node.escaped !== true) {
+		      node.value = '\\' + node.value;
+		      node.escaped = true;
+		    }
+		  }
+		};
+
+		/**
+		 * Returns true if the given brace node should be enclosed in literal braces
+		 */
+
+		exports.encloseBrace = node => {
+		  if (node.type !== 'brace') return false;
+		  if ((node.commas >> 0 + node.ranges >> 0) === 0) {
+		    node.invalid = true;
+		    return true;
+		  }
+		  return false;
+		};
+
+		/**
+		 * Returns true if a brace node is invalid.
+		 */
+
+		exports.isInvalidBrace = block => {
+		  if (block.type !== 'brace') return false;
+		  if (block.invalid === true || block.dollar) return true;
+		  if ((block.commas >> 0 + block.ranges >> 0) === 0) {
+		    block.invalid = true;
+		    return true;
+		  }
+		  if (block.open !== true || block.close !== true) {
+		    block.invalid = true;
+		    return true;
+		  }
+		  return false;
+		};
+
+		/**
+		 * Returns true if a node is an open or close node
+		 */
+
+		exports.isOpenOrClose = node => {
+		  if (node.type === 'open' || node.type === 'close') {
+		    return true;
+		  }
+		  return node.open === true || node.close === true;
+		};
+
+		/**
+		 * Reduce an array of text nodes.
+		 */
+
+		exports.reduce = nodes => nodes.reduce((acc, node) => {
+		  if (node.type === 'text') acc.push(node.value);
+		  if (node.type === 'range') node.type = 'text';
+		  return acc;
+		}, []);
+
+		/**
+		 * Flatten an array
+		 */
+
+		exports.flatten = (...args) => {
+		  const result = [];
+		  const flat = arr => {
+		    for (let i = 0; i < arr.length; i++) {
+		      let ele = arr[i];
+		      Array.isArray(ele) ? flat(ele) : ele !== void 0 && result.push(ele);
+		    }
+		    return result;
+		  };
+		  flat(args);
+		  return result;
+		};
+} (utils$2));
+	return utils$2;
+}
+
+var stringify;
+var hasRequiredStringify;
+
+function requireStringify () {
+	if (hasRequiredStringify) return stringify;
+	hasRequiredStringify = 1;
+
+	const utils = requireUtils();
+
+	stringify = (ast, options = {}) => {
+	  let stringify = (node, parent = {}) => {
+	    let invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
+	    let invalidNode = node.invalid === true && options.escapeInvalid === true;
+	    let output = '';
+
+	    if (node.value) {
+	      if ((invalidBlock || invalidNode) && utils.isOpenOrClose(node)) {
+	        return '\\' + node.value;
+	      }
+	      return node.value;
+	    }
+
+	    if (node.value) {
+	      return node.value;
+	    }
+
+	    if (node.nodes) {
+	      for (let child of node.nodes) {
+	        output += stringify(child);
+	      }
+	    }
+	    return output;
+	  };
+
+	  return stringify(ast);
+	};
+	return stringify;
+}
+
+/*!
+ * is-number <https://github.com/jonschlinkert/is-number>
+ *
+ * Copyright (c) 2014-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+var isNumber;
+var hasRequiredIsNumber;
+
+function requireIsNumber () {
+	if (hasRequiredIsNumber) return isNumber;
+	hasRequiredIsNumber = 1;
+
+	isNumber = function(num) {
+	  if (typeof num === 'number') {
+	    return num - num === 0;
+	  }
+	  if (typeof num === 'string' && num.trim() !== '') {
+	    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+	  }
+	  return false;
+	};
+	return isNumber;
+}
+
+/*!
+ * to-regex-range <https://github.com/micromatch/to-regex-range>
+ *
+ * Copyright (c) 2015-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+var toRegexRange_1;
+var hasRequiredToRegexRange;
+
+function requireToRegexRange () {
+	if (hasRequiredToRegexRange) return toRegexRange_1;
+	hasRequiredToRegexRange = 1;
+
+	const isNumber = requireIsNumber();
+
+	const toRegexRange = (min, max, options) => {
+	  if (isNumber(min) === false) {
+	    throw new TypeError('toRegexRange: expected the first argument to be a number');
+	  }
+
+	  if (max === void 0 || min === max) {
+	    return String(min);
+	  }
+
+	  if (isNumber(max) === false) {
+	    throw new TypeError('toRegexRange: expected the second argument to be a number.');
+	  }
+
+	  let opts = { relaxZeros: true, ...options };
+	  if (typeof opts.strictZeros === 'boolean') {
+	    opts.relaxZeros = opts.strictZeros === false;
+	  }
+
+	  let relax = String(opts.relaxZeros);
+	  let shorthand = String(opts.shorthand);
+	  let capture = String(opts.capture);
+	  let wrap = String(opts.wrap);
+	  let cacheKey = min + ':' + max + '=' + relax + shorthand + capture + wrap;
+
+	  if (toRegexRange.cache.hasOwnProperty(cacheKey)) {
+	    return toRegexRange.cache[cacheKey].result;
+	  }
+
+	  let a = Math.min(min, max);
+	  let b = Math.max(min, max);
+
+	  if (Math.abs(a - b) === 1) {
+	    let result = min + '|' + max;
+	    if (opts.capture) {
+	      return `(${result})`;
+	    }
+	    if (opts.wrap === false) {
+	      return result;
+	    }
+	    return `(?:${result})`;
+	  }
+
+	  let isPadded = hasPadding(min) || hasPadding(max);
+	  let state = { min, max, a, b };
+	  let positives = [];
+	  let negatives = [];
+
+	  if (isPadded) {
+	    state.isPadded = isPadded;
+	    state.maxLen = String(state.max).length;
+	  }
+
+	  if (a < 0) {
+	    let newMin = b < 0 ? Math.abs(b) : 1;
+	    negatives = splitToPatterns(newMin, Math.abs(a), state, opts);
+	    a = state.a = 0;
+	  }
+
+	  if (b >= 0) {
+	    positives = splitToPatterns(a, b, state, opts);
+	  }
+
+	  state.negatives = negatives;
+	  state.positives = positives;
+	  state.result = collatePatterns(negatives, positives);
+
+	  if (opts.capture === true) {
+	    state.result = `(${state.result})`;
+	  } else if (opts.wrap !== false && (positives.length + negatives.length) > 1) {
+	    state.result = `(?:${state.result})`;
+	  }
+
+	  toRegexRange.cache[cacheKey] = state;
+	  return state.result;
+	};
+
+	function collatePatterns(neg, pos, options) {
+	  let onlyNegative = filterPatterns(neg, pos, '-', false) || [];
+	  let onlyPositive = filterPatterns(pos, neg, '', false) || [];
+	  let intersected = filterPatterns(neg, pos, '-?', true) || [];
+	  let subpatterns = onlyNegative.concat(intersected).concat(onlyPositive);
+	  return subpatterns.join('|');
+	}
+
+	function splitToRanges(min, max) {
+	  let nines = 1;
+	  let zeros = 1;
+
+	  let stop = countNines(min, nines);
+	  let stops = new Set([max]);
+
+	  while (min <= stop && stop <= max) {
+	    stops.add(stop);
+	    nines += 1;
+	    stop = countNines(min, nines);
+	  }
+
+	  stop = countZeros(max + 1, zeros) - 1;
+
+	  while (min < stop && stop <= max) {
+	    stops.add(stop);
+	    zeros += 1;
+	    stop = countZeros(max + 1, zeros) - 1;
+	  }
+
+	  stops = [...stops];
+	  stops.sort(compare);
+	  return stops;
+	}
+
+	/**
+	 * Convert a range to a regex pattern
+	 * @param {Number} `start`
+	 * @param {Number} `stop`
+	 * @return {String}
+	 */
+
+	function rangeToPattern(start, stop, options) {
+	  if (start === stop) {
+	    return { pattern: start, count: [], digits: 0 };
+	  }
+
+	  let zipped = zip(start, stop);
+	  let digits = zipped.length;
+	  let pattern = '';
+	  let count = 0;
+
+	  for (let i = 0; i < digits; i++) {
+	    let [startDigit, stopDigit] = zipped[i];
+
+	    if (startDigit === stopDigit) {
+	      pattern += startDigit;
+
+	    } else if (startDigit !== '0' || stopDigit !== '9') {
+	      pattern += toCharacterClass(startDigit, stopDigit);
+
+	    } else {
+	      count++;
+	    }
+	  }
+
+	  if (count) {
+	    pattern += options.shorthand === true ? '\\d' : '[0-9]';
+	  }
+
+	  return { pattern, count: [count], digits };
+	}
+
+	function splitToPatterns(min, max, tok, options) {
+	  let ranges = splitToRanges(min, max);
+	  let tokens = [];
+	  let start = min;
+	  let prev;
+
+	  for (let i = 0; i < ranges.length; i++) {
+	    let max = ranges[i];
+	    let obj = rangeToPattern(String(start), String(max), options);
+	    let zeros = '';
+
+	    if (!tok.isPadded && prev && prev.pattern === obj.pattern) {
+	      if (prev.count.length > 1) {
+	        prev.count.pop();
+	      }
+
+	      prev.count.push(obj.count[0]);
+	      prev.string = prev.pattern + toQuantifier(prev.count);
+	      start = max + 1;
+	      continue;
+	    }
+
+	    if (tok.isPadded) {
+	      zeros = padZeros(max, tok, options);
+	    }
+
+	    obj.string = zeros + obj.pattern + toQuantifier(obj.count);
+	    tokens.push(obj);
+	    start = max + 1;
+	    prev = obj;
+	  }
+
+	  return tokens;
+	}
+
+	function filterPatterns(arr, comparison, prefix, intersection, options) {
+	  let result = [];
+
+	  for (let ele of arr) {
+	    let { string } = ele;
+
+	    // only push if _both_ are negative...
+	    if (!intersection && !contains(comparison, 'string', string)) {
+	      result.push(prefix + string);
+	    }
+
+	    // or _both_ are positive
+	    if (intersection && contains(comparison, 'string', string)) {
+	      result.push(prefix + string);
+	    }
+	  }
+	  return result;
+	}
+
+	/**
+	 * Zip strings
+	 */
+
+	function zip(a, b) {
+	  let arr = [];
+	  for (let i = 0; i < a.length; i++) arr.push([a[i], b[i]]);
+	  return arr;
+	}
+
+	function compare(a, b) {
+	  return a > b ? 1 : b > a ? -1 : 0;
+	}
+
+	function contains(arr, key, val) {
+	  return arr.some(ele => ele[key] === val);
+	}
+
+	function countNines(min, len) {
+	  return Number(String(min).slice(0, -len) + '9'.repeat(len));
+	}
+
+	function countZeros(integer, zeros) {
+	  return integer - (integer % Math.pow(10, zeros));
+	}
+
+	function toQuantifier(digits) {
+	  let [start = 0, stop = ''] = digits;
+	  if (stop || start > 1) {
+	    return `{${start + (stop ? ',' + stop : '')}}`;
+	  }
+	  return '';
+	}
+
+	function toCharacterClass(a, b, options) {
+	  return `[${a}${(b - a === 1) ? '' : '-'}${b}]`;
+	}
+
+	function hasPadding(str) {
+	  return /^-?(0+)\d/.test(str);
+	}
+
+	function padZeros(value, tok, options) {
+	  if (!tok.isPadded) {
+	    return value;
+	  }
+
+	  let diff = Math.abs(tok.maxLen - String(value).length);
+	  let relax = options.relaxZeros !== false;
+
+	  switch (diff) {
+	    case 0:
+	      return '';
+	    case 1:
+	      return relax ? '0?' : '0';
+	    case 2:
+	      return relax ? '0{0,2}' : '00';
+	    default: {
+	      return relax ? `0{0,${diff}}` : `0{${diff}}`;
+	    }
+	  }
+	}
+
+	/**
+	 * Cache
+	 */
+
+	toRegexRange.cache = {};
+	toRegexRange.clearCache = () => (toRegexRange.cache = {});
+
+	/**
+	 * Expose `toRegexRange`
+	 */
+
+	toRegexRange_1 = toRegexRange;
+	return toRegexRange_1;
+}
+
+/*!
+ * fill-range <https://github.com/jonschlinkert/fill-range>
+ *
+ * Copyright (c) 2014-present, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+var fillRange;
+var hasRequiredFillRange;
+
+function requireFillRange () {
+	if (hasRequiredFillRange) return fillRange;
+	hasRequiredFillRange = 1;
+
+	const util = require$$2__default["default"];
+	const toRegexRange = requireToRegexRange();
+
+	const isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+
+	const transform = toNumber => {
+	  return value => toNumber === true ? Number(value) : String(value);
+	};
+
+	const isValidValue = value => {
+	  return typeof value === 'number' || (typeof value === 'string' && value !== '');
+	};
+
+	const isNumber = num => Number.isInteger(+num);
+
+	const zeros = input => {
+	  let value = `${input}`;
+	  let index = -1;
+	  if (value[0] === '-') value = value.slice(1);
+	  if (value === '0') return false;
+	  while (value[++index] === '0');
+	  return index > 0;
+	};
+
+	const stringify = (start, end, options) => {
+	  if (typeof start === 'string' || typeof end === 'string') {
+	    return true;
+	  }
+	  return options.stringify === true;
+	};
+
+	const pad = (input, maxLength, toNumber) => {
+	  if (maxLength > 0) {
+	    let dash = input[0] === '-' ? '-' : '';
+	    if (dash) input = input.slice(1);
+	    input = (dash + input.padStart(dash ? maxLength - 1 : maxLength, '0'));
+	  }
+	  if (toNumber === false) {
+	    return String(input);
+	  }
+	  return input;
+	};
+
+	const toMaxLen = (input, maxLength) => {
+	  let negative = input[0] === '-' ? '-' : '';
+	  if (negative) {
+	    input = input.slice(1);
+	    maxLength--;
+	  }
+	  while (input.length < maxLength) input = '0' + input;
+	  return negative ? ('-' + input) : input;
+	};
+
+	const toSequence = (parts, options) => {
+	  parts.negatives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+	  parts.positives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+
+	  let prefix = options.capture ? '' : '?:';
+	  let positives = '';
+	  let negatives = '';
+	  let result;
+
+	  if (parts.positives.length) {
+	    positives = parts.positives.join('|');
+	  }
+
+	  if (parts.negatives.length) {
+	    negatives = `-(${prefix}${parts.negatives.join('|')})`;
+	  }
+
+	  if (positives && negatives) {
+	    result = `${positives}|${negatives}`;
+	  } else {
+	    result = positives || negatives;
+	  }
+
+	  if (options.wrap) {
+	    return `(${prefix}${result})`;
+	  }
+
+	  return result;
+	};
+
+	const toRange = (a, b, isNumbers, options) => {
+	  if (isNumbers) {
+	    return toRegexRange(a, b, { wrap: false, ...options });
+	  }
+
+	  let start = String.fromCharCode(a);
+	  if (a === b) return start;
+
+	  let stop = String.fromCharCode(b);
+	  return `[${start}-${stop}]`;
+	};
+
+	const toRegex = (start, end, options) => {
+	  if (Array.isArray(start)) {
+	    let wrap = options.wrap === true;
+	    let prefix = options.capture ? '' : '?:';
+	    return wrap ? `(${prefix}${start.join('|')})` : start.join('|');
+	  }
+	  return toRegexRange(start, end, options);
+	};
+
+	const rangeError = (...args) => {
+	  return new RangeError('Invalid range arguments: ' + util.inspect(...args));
+	};
+
+	const invalidRange = (start, end, options) => {
+	  if (options.strictRanges === true) throw rangeError([start, end]);
+	  return [];
+	};
+
+	const invalidStep = (step, options) => {
+	  if (options.strictRanges === true) {
+	    throw new TypeError(`Expected step "${step}" to be a number`);
+	  }
+	  return [];
+	};
+
+	const fillNumbers = (start, end, step = 1, options = {}) => {
+	  let a = Number(start);
+	  let b = Number(end);
+
+	  if (!Number.isInteger(a) || !Number.isInteger(b)) {
+	    if (options.strictRanges === true) throw rangeError([start, end]);
+	    return [];
+	  }
+
+	  // fix negative zero
+	  if (a === 0) a = 0;
+	  if (b === 0) b = 0;
+
+	  let descending = a > b;
+	  let startString = String(start);
+	  let endString = String(end);
+	  let stepString = String(step);
+	  step = Math.max(Math.abs(step), 1);
+
+	  let padded = zeros(startString) || zeros(endString) || zeros(stepString);
+	  let maxLen = padded ? Math.max(startString.length, endString.length, stepString.length) : 0;
+	  let toNumber = padded === false && stringify(start, end, options) === false;
+	  let format = options.transform || transform(toNumber);
+
+	  if (options.toRegex && step === 1) {
+	    return toRange(toMaxLen(start, maxLen), toMaxLen(end, maxLen), true, options);
+	  }
+
+	  let parts = { negatives: [], positives: [] };
+	  let push = num => parts[num < 0 ? 'negatives' : 'positives'].push(Math.abs(num));
+	  let range = [];
+	  let index = 0;
+
+	  while (descending ? a >= b : a <= b) {
+	    if (options.toRegex === true && step > 1) {
+	      push(a);
+	    } else {
+	      range.push(pad(format(a, index), maxLen, toNumber));
+	    }
+	    a = descending ? a - step : a + step;
+	    index++;
+	  }
+
+	  if (options.toRegex === true) {
+	    return step > 1
+	      ? toSequence(parts, options)
+	      : toRegex(range, null, { wrap: false, ...options });
+	  }
+
+	  return range;
+	};
+
+	const fillLetters = (start, end, step = 1, options = {}) => {
+	  if ((!isNumber(start) && start.length > 1) || (!isNumber(end) && end.length > 1)) {
+	    return invalidRange(start, end, options);
+	  }
+
+
+	  let format = options.transform || (val => String.fromCharCode(val));
+	  let a = `${start}`.charCodeAt(0);
+	  let b = `${end}`.charCodeAt(0);
+
+	  let descending = a > b;
+	  let min = Math.min(a, b);
+	  let max = Math.max(a, b);
+
+	  if (options.toRegex && step === 1) {
+	    return toRange(min, max, false, options);
+	  }
+
+	  let range = [];
+	  let index = 0;
+
+	  while (descending ? a >= b : a <= b) {
+	    range.push(format(a, index));
+	    a = descending ? a - step : a + step;
+	    index++;
+	  }
+
+	  if (options.toRegex === true) {
+	    return toRegex(range, null, { wrap: false, options });
+	  }
+
+	  return range;
+	};
+
+	const fill = (start, end, step, options = {}) => {
+	  if (end == null && isValidValue(start)) {
+	    return [start];
+	  }
+
+	  if (!isValidValue(start) || !isValidValue(end)) {
+	    return invalidRange(start, end, options);
+	  }
+
+	  if (typeof step === 'function') {
+	    return fill(start, end, 1, { transform: step });
+	  }
+
+	  if (isObject(step)) {
+	    return fill(start, end, 0, step);
+	  }
+
+	  let opts = { ...options };
+	  if (opts.capture === true) opts.wrap = true;
+	  step = step || opts.step || 1;
+
+	  if (!isNumber(step)) {
+	    if (step != null && !isObject(step)) return invalidStep(step, opts);
+	    return fill(start, end, 1, step);
+	  }
+
+	  if (isNumber(start) && isNumber(end)) {
+	    return fillNumbers(start, end, step, opts);
+	  }
+
+	  return fillLetters(start, end, Math.max(Math.abs(step), 1), opts);
+	};
+
+	fillRange = fill;
+	return fillRange;
+}
+
+var compile_1;
+var hasRequiredCompile;
+
+function requireCompile () {
+	if (hasRequiredCompile) return compile_1;
+	hasRequiredCompile = 1;
+
+	const fill = requireFillRange();
+	const utils = requireUtils();
+
+	const compile = (ast, options = {}) => {
+	  let walk = (node, parent = {}) => {
+	    let invalidBlock = utils.isInvalidBrace(parent);
+	    let invalidNode = node.invalid === true && options.escapeInvalid === true;
+	    let invalid = invalidBlock === true || invalidNode === true;
+	    let prefix = options.escapeInvalid === true ? '\\' : '';
+	    let output = '';
+
+	    if (node.isOpen === true) {
+	      return prefix + node.value;
+	    }
+	    if (node.isClose === true) {
+	      return prefix + node.value;
+	    }
+
+	    if (node.type === 'open') {
+	      return invalid ? (prefix + node.value) : '(';
+	    }
+
+	    if (node.type === 'close') {
+	      return invalid ? (prefix + node.value) : ')';
+	    }
+
+	    if (node.type === 'comma') {
+	      return node.prev.type === 'comma' ? '' : (invalid ? node.value : '|');
+	    }
+
+	    if (node.value) {
+	      return node.value;
+	    }
+
+	    if (node.nodes && node.ranges > 0) {
+	      let args = utils.reduce(node.nodes);
+	      let range = fill(...args, { ...options, wrap: false, toRegex: true });
+
+	      if (range.length !== 0) {
+	        return args.length > 1 && range.length > 1 ? `(${range})` : range;
+	      }
+	    }
+
+	    if (node.nodes) {
+	      for (let child of node.nodes) {
+	        output += walk(child, node);
+	      }
+	    }
+	    return output;
+	  };
+
+	  return walk(ast);
+	};
+
+	compile_1 = compile;
+	return compile_1;
+}
+
+var expand_1;
+var hasRequiredExpand;
+
+function requireExpand () {
+	if (hasRequiredExpand) return expand_1;
+	hasRequiredExpand = 1;
+
+	const fill = requireFillRange();
+	const stringify = requireStringify();
+	const utils = requireUtils();
+
+	const append = (queue = '', stash = '', enclose = false) => {
+	  let result = [];
+
+	  queue = [].concat(queue);
+	  stash = [].concat(stash);
+
+	  if (!stash.length) return queue;
+	  if (!queue.length) {
+	    return enclose ? utils.flatten(stash).map(ele => `{${ele}}`) : stash;
+	  }
+
+	  for (let item of queue) {
+	    if (Array.isArray(item)) {
+	      for (let value of item) {
+	        result.push(append(value, stash, enclose));
+	      }
+	    } else {
+	      for (let ele of stash) {
+	        if (enclose === true && typeof ele === 'string') ele = `{${ele}}`;
+	        result.push(Array.isArray(ele) ? append(item, ele, enclose) : (item + ele));
+	      }
+	    }
+	  }
+	  return utils.flatten(result);
+	};
+
+	const expand = (ast, options = {}) => {
+	  let rangeLimit = options.rangeLimit === void 0 ? 1000 : options.rangeLimit;
+
+	  let walk = (node, parent = {}) => {
+	    node.queue = [];
+
+	    let p = parent;
+	    let q = parent.queue;
+
+	    while (p.type !== 'brace' && p.type !== 'root' && p.parent) {
+	      p = p.parent;
+	      q = p.queue;
+	    }
+
+	    if (node.invalid || node.dollar) {
+	      q.push(append(q.pop(), stringify(node, options)));
+	      return;
+	    }
+
+	    if (node.type === 'brace' && node.invalid !== true && node.nodes.length === 2) {
+	      q.push(append(q.pop(), ['{}']));
+	      return;
+	    }
+
+	    if (node.nodes && node.ranges > 0) {
+	      let args = utils.reduce(node.nodes);
+
+	      if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
+	        throw new RangeError('expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.');
+	      }
+
+	      let range = fill(...args, options);
+	      if (range.length === 0) {
+	        range = stringify(node, options);
+	      }
+
+	      q.push(append(q.pop(), range));
+	      node.nodes = [];
+	      return;
+	    }
+
+	    let enclose = utils.encloseBrace(node);
+	    let queue = node.queue;
+	    let block = node;
+
+	    while (block.type !== 'brace' && block.type !== 'root' && block.parent) {
+	      block = block.parent;
+	      queue = block.queue;
+	    }
+
+	    for (let i = 0; i < node.nodes.length; i++) {
+	      let child = node.nodes[i];
+
+	      if (child.type === 'comma' && node.type === 'brace') {
+	        if (i === 1) queue.push('');
+	        queue.push('');
+	        continue;
+	      }
+
+	      if (child.type === 'close') {
+	        q.push(append(q.pop(), queue, enclose));
+	        continue;
+	      }
+
+	      if (child.value && child.type !== 'open') {
+	        queue.push(append(queue.pop(), child.value));
+	        continue;
+	      }
+
+	      if (child.nodes) {
+	        walk(child, node);
+	      }
+	    }
+
+	    return queue;
+	  };
+
+	  return utils.flatten(walk(ast));
+	};
+
+	expand_1 = expand;
+	return expand_1;
+}
+
+var constants$1;
+var hasRequiredConstants$1;
+
+function requireConstants$1 () {
+	if (hasRequiredConstants$1) return constants$1;
+	hasRequiredConstants$1 = 1;
+
+	constants$1 = {
+	  MAX_LENGTH: 1024 * 64,
+
+	  // Digits
+	  CHAR_0: '0', /* 0 */
+	  CHAR_9: '9', /* 9 */
+
+	  // Alphabet chars.
+	  CHAR_UPPERCASE_A: 'A', /* A */
+	  CHAR_LOWERCASE_A: 'a', /* a */
+	  CHAR_UPPERCASE_Z: 'Z', /* Z */
+	  CHAR_LOWERCASE_Z: 'z', /* z */
+
+	  CHAR_LEFT_PARENTHESES: '(', /* ( */
+	  CHAR_RIGHT_PARENTHESES: ')', /* ) */
+
+	  CHAR_ASTERISK: '*', /* * */
+
+	  // Non-alphabetic chars.
+	  CHAR_AMPERSAND: '&', /* & */
+	  CHAR_AT: '@', /* @ */
+	  CHAR_BACKSLASH: '\\', /* \ */
+	  CHAR_BACKTICK: '`', /* ` */
+	  CHAR_CARRIAGE_RETURN: '\r', /* \r */
+	  CHAR_CIRCUMFLEX_ACCENT: '^', /* ^ */
+	  CHAR_COLON: ':', /* : */
+	  CHAR_COMMA: ',', /* , */
+	  CHAR_DOLLAR: '$', /* . */
+	  CHAR_DOT: '.', /* . */
+	  CHAR_DOUBLE_QUOTE: '"', /* " */
+	  CHAR_EQUAL: '=', /* = */
+	  CHAR_EXCLAMATION_MARK: '!', /* ! */
+	  CHAR_FORM_FEED: '\f', /* \f */
+	  CHAR_FORWARD_SLASH: '/', /* / */
+	  CHAR_HASH: '#', /* # */
+	  CHAR_HYPHEN_MINUS: '-', /* - */
+	  CHAR_LEFT_ANGLE_BRACKET: '<', /* < */
+	  CHAR_LEFT_CURLY_BRACE: '{', /* { */
+	  CHAR_LEFT_SQUARE_BRACKET: '[', /* [ */
+	  CHAR_LINE_FEED: '\n', /* \n */
+	  CHAR_NO_BREAK_SPACE: '\u00A0', /* \u00A0 */
+	  CHAR_PERCENT: '%', /* % */
+	  CHAR_PLUS: '+', /* + */
+	  CHAR_QUESTION_MARK: '?', /* ? */
+	  CHAR_RIGHT_ANGLE_BRACKET: '>', /* > */
+	  CHAR_RIGHT_CURLY_BRACE: '}', /* } */
+	  CHAR_RIGHT_SQUARE_BRACKET: ']', /* ] */
+	  CHAR_SEMICOLON: ';', /* ; */
+	  CHAR_SINGLE_QUOTE: '\'', /* ' */
+	  CHAR_SPACE: ' ', /*   */
+	  CHAR_TAB: '\t', /* \t */
+	  CHAR_UNDERSCORE: '_', /* _ */
+	  CHAR_VERTICAL_LINE: '|', /* | */
+	  CHAR_ZERO_WIDTH_NOBREAK_SPACE: '\uFEFF' /* \uFEFF */
+	};
+	return constants$1;
+}
+
+var parse_1;
+var hasRequiredParse;
+
+function requireParse () {
+	if (hasRequiredParse) return parse_1;
+	hasRequiredParse = 1;
+
+	const stringify = requireStringify();
+
+	/**
+	 * Constants
+	 */
+
+	const {
+	  MAX_LENGTH,
+	  CHAR_BACKSLASH, /* \ */
+	  CHAR_BACKTICK, /* ` */
+	  CHAR_COMMA, /* , */
+	  CHAR_DOT, /* . */
+	  CHAR_LEFT_PARENTHESES, /* ( */
+	  CHAR_RIGHT_PARENTHESES, /* ) */
+	  CHAR_LEFT_CURLY_BRACE, /* { */
+	  CHAR_RIGHT_CURLY_BRACE, /* } */
+	  CHAR_LEFT_SQUARE_BRACKET, /* [ */
+	  CHAR_RIGHT_SQUARE_BRACKET, /* ] */
+	  CHAR_DOUBLE_QUOTE, /* " */
+	  CHAR_SINGLE_QUOTE, /* ' */
+	  CHAR_NO_BREAK_SPACE,
+	  CHAR_ZERO_WIDTH_NOBREAK_SPACE
+	} = requireConstants$1();
+
+	/**
+	 * parse
+	 */
+
+	const parse = (input, options = {}) => {
+	  if (typeof input !== 'string') {
+	    throw new TypeError('Expected a string');
+	  }
+
+	  let opts = options || {};
+	  let max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+	  if (input.length > max) {
+	    throw new SyntaxError(`Input length (${input.length}), exceeds max characters (${max})`);
+	  }
+
+	  let ast = { type: 'root', input, nodes: [] };
+	  let stack = [ast];
+	  let block = ast;
+	  let prev = ast;
+	  let brackets = 0;
+	  let length = input.length;
+	  let index = 0;
+	  let depth = 0;
+	  let value;
+
+	  /**
+	   * Helpers
+	   */
+
+	  const advance = () => input[index++];
+	  const push = node => {
+	    if (node.type === 'text' && prev.type === 'dot') {
+	      prev.type = 'text';
+	    }
+
+	    if (prev && prev.type === 'text' && node.type === 'text') {
+	      prev.value += node.value;
+	      return;
+	    }
+
+	    block.nodes.push(node);
+	    node.parent = block;
+	    node.prev = prev;
+	    prev = node;
+	    return node;
+	  };
+
+	  push({ type: 'bos' });
+
+	  while (index < length) {
+	    block = stack[stack.length - 1];
+	    value = advance();
+
+	    /**
+	     * Invalid chars
+	     */
+
+	    if (value === CHAR_ZERO_WIDTH_NOBREAK_SPACE || value === CHAR_NO_BREAK_SPACE) {
+	      continue;
+	    }
+
+	    /**
+	     * Escaped chars
+	     */
+
+	    if (value === CHAR_BACKSLASH) {
+	      push({ type: 'text', value: (options.keepEscaping ? value : '') + advance() });
+	      continue;
+	    }
+
+	    /**
+	     * Right square bracket (literal): ']'
+	     */
+
+	    if (value === CHAR_RIGHT_SQUARE_BRACKET) {
+	      push({ type: 'text', value: '\\' + value });
+	      continue;
+	    }
+
+	    /**
+	     * Left square bracket: '['
+	     */
+
+	    if (value === CHAR_LEFT_SQUARE_BRACKET) {
+	      brackets++;
+	      let next;
+
+	      while (index < length && (next = advance())) {
+	        value += next;
+
+	        if (next === CHAR_LEFT_SQUARE_BRACKET) {
+	          brackets++;
+	          continue;
+	        }
+
+	        if (next === CHAR_BACKSLASH) {
+	          value += advance();
+	          continue;
+	        }
+
+	        if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+	          brackets--;
+
+	          if (brackets === 0) {
+	            break;
+	          }
+	        }
+	      }
+
+	      push({ type: 'text', value });
+	      continue;
+	    }
+
+	    /**
+	     * Parentheses
+	     */
+
+	    if (value === CHAR_LEFT_PARENTHESES) {
+	      block = push({ type: 'paren', nodes: [] });
+	      stack.push(block);
+	      push({ type: 'text', value });
+	      continue;
+	    }
+
+	    if (value === CHAR_RIGHT_PARENTHESES) {
+	      if (block.type !== 'paren') {
+	        push({ type: 'text', value });
+	        continue;
+	      }
+	      block = stack.pop();
+	      push({ type: 'text', value });
+	      block = stack[stack.length - 1];
+	      continue;
+	    }
+
+	    /**
+	     * Quotes: '|"|`
+	     */
+
+	    if (value === CHAR_DOUBLE_QUOTE || value === CHAR_SINGLE_QUOTE || value === CHAR_BACKTICK) {
+	      let open = value;
+	      let next;
+
+	      if (options.keepQuotes !== true) {
+	        value = '';
+	      }
+
+	      while (index < length && (next = advance())) {
+	        if (next === CHAR_BACKSLASH) {
+	          value += next + advance();
+	          continue;
+	        }
+
+	        if (next === open) {
+	          if (options.keepQuotes === true) value += next;
+	          break;
+	        }
+
+	        value += next;
+	      }
+
+	      push({ type: 'text', value });
+	      continue;
+	    }
+
+	    /**
+	     * Left curly brace: '{'
+	     */
+
+	    if (value === CHAR_LEFT_CURLY_BRACE) {
+	      depth++;
+
+	      let dollar = prev.value && prev.value.slice(-1) === '$' || block.dollar === true;
+	      let brace = {
+	        type: 'brace',
+	        open: true,
+	        close: false,
+	        dollar,
+	        depth,
+	        commas: 0,
+	        ranges: 0,
+	        nodes: []
+	      };
+
+	      block = push(brace);
+	      stack.push(block);
+	      push({ type: 'open', value });
+	      continue;
+	    }
+
+	    /**
+	     * Right curly brace: '}'
+	     */
+
+	    if (value === CHAR_RIGHT_CURLY_BRACE) {
+	      if (block.type !== 'brace') {
+	        push({ type: 'text', value });
+	        continue;
+	      }
+
+	      let type = 'close';
+	      block = stack.pop();
+	      block.close = true;
+
+	      push({ type, value });
+	      depth--;
+
+	      block = stack[stack.length - 1];
+	      continue;
+	    }
+
+	    /**
+	     * Comma: ','
+	     */
+
+	    if (value === CHAR_COMMA && depth > 0) {
+	      if (block.ranges > 0) {
+	        block.ranges = 0;
+	        let open = block.nodes.shift();
+	        block.nodes = [open, { type: 'text', value: stringify(block) }];
+	      }
+
+	      push({ type: 'comma', value });
+	      block.commas++;
+	      continue;
+	    }
+
+	    /**
+	     * Dot: '.'
+	     */
+
+	    if (value === CHAR_DOT && depth > 0 && block.commas === 0) {
+	      let siblings = block.nodes;
+
+	      if (depth === 0 || siblings.length === 0) {
+	        push({ type: 'text', value });
+	        continue;
+	      }
+
+	      if (prev.type === 'dot') {
+	        block.range = [];
+	        prev.value += value;
+	        prev.type = 'range';
+
+	        if (block.nodes.length !== 3 && block.nodes.length !== 5) {
+	          block.invalid = true;
+	          block.ranges = 0;
+	          prev.type = 'text';
+	          continue;
+	        }
+
+	        block.ranges++;
+	        block.args = [];
+	        continue;
+	      }
+
+	      if (prev.type === 'range') {
+	        siblings.pop();
+
+	        let before = siblings[siblings.length - 1];
+	        before.value += prev.value + value;
+	        prev = before;
+	        block.ranges--;
+	        continue;
+	      }
+
+	      push({ type: 'dot', value });
+	      continue;
+	    }
+
+	    /**
+	     * Text
+	     */
+
+	    push({ type: 'text', value });
+	  }
+
+	  // Mark imbalanced braces and brackets as invalid
+	  do {
+	    block = stack.pop();
+
+	    if (block.type !== 'root') {
+	      block.nodes.forEach(node => {
+	        if (!node.nodes) {
+	          if (node.type === 'open') node.isOpen = true;
+	          if (node.type === 'close') node.isClose = true;
+	          if (!node.nodes) node.type = 'text';
+	          node.invalid = true;
+	        }
+	      });
+
+	      // get the location of the block on parent.nodes (block's siblings)
+	      let parent = stack[stack.length - 1];
+	      let index = parent.nodes.indexOf(block);
+	      // replace the (invalid) block with it's nodes
+	      parent.nodes.splice(index, 1, ...block.nodes);
+	    }
+	  } while (stack.length > 0);
+
+	  push({ type: 'eos' });
+	  return ast;
+	};
+
+	parse_1 = parse;
+	return parse_1;
+}
+
+var braces_1;
+var hasRequiredBraces;
+
+function requireBraces () {
+	if (hasRequiredBraces) return braces_1;
+	hasRequiredBraces = 1;
+
+	const stringify = requireStringify();
+	const compile = requireCompile();
+	const expand = requireExpand();
+	const parse = requireParse();
+
+	/**
+	 * Expand the given pattern or create a regex-compatible string.
+	 *
+	 * ```js
+	 * const braces = require('braces');
+	 * console.log(braces('{a,b,c}', { compile: true })); //=> ['(a|b|c)']
+	 * console.log(braces('{a,b,c}')); //=> ['a', 'b', 'c']
+	 * ```
+	 * @param {String} `str`
+	 * @param {Object} `options`
+	 * @return {String}
+	 * @api public
+	 */
+
+	const braces = (input, options = {}) => {
+	  let output = [];
+
+	  if (Array.isArray(input)) {
+	    for (let pattern of input) {
+	      let result = braces.create(pattern, options);
+	      if (Array.isArray(result)) {
+	        output.push(...result);
+	      } else {
+	        output.push(result);
+	      }
+	    }
+	  } else {
+	    output = [].concat(braces.create(input, options));
+	  }
+
+	  if (options && options.expand === true && options.nodupes === true) {
+	    output = [...new Set(output)];
+	  }
+	  return output;
+	};
+
+	/**
+	 * Parse the given `str` with the given `options`.
+	 *
+	 * ```js
+	 * // braces.parse(pattern, [, options]);
+	 * const ast = braces.parse('a/{b,c}/d');
+	 * console.log(ast);
+	 * ```
+	 * @param {String} pattern Brace pattern to parse
+	 * @param {Object} options
+	 * @return {Object} Returns an AST
+	 * @api public
+	 */
+
+	braces.parse = (input, options = {}) => parse(input, options);
+
+	/**
+	 * Creates a braces string from an AST, or an AST node.
+	 *
+	 * ```js
+	 * const braces = require('braces');
+	 * let ast = braces.parse('foo/{a,b}/bar');
+	 * console.log(stringify(ast.nodes[2])); //=> '{a,b}'
+	 * ```
+	 * @param {String} `input` Brace pattern or AST.
+	 * @param {Object} `options`
+	 * @return {Array} Returns an array of expanded values.
+	 * @api public
+	 */
+
+	braces.stringify = (input, options = {}) => {
+	  if (typeof input === 'string') {
+	    return stringify(braces.parse(input, options), options);
+	  }
+	  return stringify(input, options);
+	};
+
+	/**
+	 * Compiles a brace pattern into a regex-compatible, optimized string.
+	 * This method is called by the main [braces](#braces) function by default.
+	 *
+	 * ```js
+	 * const braces = require('braces');
+	 * console.log(braces.compile('a/{b,c}/d'));
+	 * //=> ['a/(b|c)/d']
+	 * ```
+	 * @param {String} `input` Brace pattern or AST.
+	 * @param {Object} `options`
+	 * @return {Array} Returns an array of expanded values.
+	 * @api public
+	 */
+
+	braces.compile = (input, options = {}) => {
+	  if (typeof input === 'string') {
+	    input = braces.parse(input, options);
+	  }
+	  return compile(input, options);
+	};
+
+	/**
+	 * Expands a brace pattern into an array. This method is called by the
+	 * main [braces](#braces) function when `options.expand` is true. Before
+	 * using this method it's recommended that you read the [performance notes](#performance))
+	 * and advantages of using [.compile](#compile) instead.
+	 *
+	 * ```js
+	 * const braces = require('braces');
+	 * console.log(braces.expand('a/{b,c}/d'));
+	 * //=> ['a/b/d', 'a/c/d'];
+	 * ```
+	 * @param {String} `pattern` Brace pattern
+	 * @param {Object} `options`
+	 * @return {Array} Returns an array of expanded values.
+	 * @api public
+	 */
+
+	braces.expand = (input, options = {}) => {
+	  if (typeof input === 'string') {
+	    input = braces.parse(input, options);
+	  }
+
+	  let result = expand(input, options);
+
+	  // filter out empty strings if specified
+	  if (options.noempty === true) {
+	    result = result.filter(Boolean);
+	  }
+
+	  // filter out duplicates if specified
+	  if (options.nodupes === true) {
+	    result = [...new Set(result)];
+	  }
+
+	  return result;
+	};
+
+	/**
+	 * Processes a brace pattern and returns either an expanded array
+	 * (if `options.expand` is true), a highly optimized regex-compatible string.
+	 * This method is called by the main [braces](#braces) function.
+	 *
+	 * ```js
+	 * const braces = require('braces');
+	 * console.log(braces.create('user-{200..300}/project-{a,b,c}-{1..10}'))
+	 * //=> 'user-(20[0-9]|2[1-9][0-9]|300)/project-(a|b|c)-([1-9]|10)'
+	 * ```
+	 * @param {String} `pattern` Brace pattern
+	 * @param {Object} `options`
+	 * @return {Array} Returns an array of expanded values.
+	 * @api public
+	 */
+
+	braces.create = (input, options = {}) => {
+	  if (input === '' || input.length < 3) {
+	    return [input];
+	  }
+
+	 return options.expand !== true
+	    ? braces.compile(input, options)
+	    : braces.expand(input, options);
+	};
+
+	/**
+	 * Expose "braces"
+	 */
+
+	braces_1 = braces;
+	return braces_1;
+}
+
+var binaryExtensions = {exports: {}};
+
+var require$$0$1 = [
+	"3dm",
+	"3ds",
+	"3g2",
+	"3gp",
+	"7z",
+	"a",
+	"aac",
+	"adp",
+	"ai",
+	"aif",
+	"aiff",
+	"alz",
+	"ape",
+	"apk",
+	"appimage",
+	"ar",
+	"arj",
+	"asf",
+	"au",
+	"avi",
+	"bak",
+	"baml",
+	"bh",
+	"bin",
+	"bk",
+	"bmp",
+	"btif",
+	"bz2",
+	"bzip2",
+	"cab",
+	"caf",
+	"cgm",
+	"class",
+	"cmx",
+	"cpio",
+	"cr2",
+	"cur",
+	"dat",
+	"dcm",
+	"deb",
+	"dex",
+	"djvu",
+	"dll",
+	"dmg",
+	"dng",
+	"doc",
+	"docm",
+	"docx",
+	"dot",
+	"dotm",
+	"dra",
+	"DS_Store",
+	"dsk",
+	"dts",
+	"dtshd",
+	"dvb",
+	"dwg",
+	"dxf",
+	"ecelp4800",
+	"ecelp7470",
+	"ecelp9600",
+	"egg",
+	"eol",
+	"eot",
+	"epub",
+	"exe",
+	"f4v",
+	"fbs",
+	"fh",
+	"fla",
+	"flac",
+	"flatpak",
+	"fli",
+	"flv",
+	"fpx",
+	"fst",
+	"fvt",
+	"g3",
+	"gh",
+	"gif",
+	"graffle",
+	"gz",
+	"gzip",
+	"h261",
+	"h263",
+	"h264",
+	"icns",
+	"ico",
+	"ief",
+	"img",
+	"ipa",
+	"iso",
+	"jar",
+	"jpeg",
+	"jpg",
+	"jpgv",
+	"jpm",
+	"jxr",
+	"key",
+	"ktx",
+	"lha",
+	"lib",
+	"lvp",
+	"lz",
+	"lzh",
+	"lzma",
+	"lzo",
+	"m3u",
+	"m4a",
+	"m4v",
+	"mar",
+	"mdi",
+	"mht",
+	"mid",
+	"midi",
+	"mj2",
+	"mka",
+	"mkv",
+	"mmr",
+	"mng",
+	"mobi",
+	"mov",
+	"movie",
+	"mp3",
+	"mp4",
+	"mp4a",
+	"mpeg",
+	"mpg",
+	"mpga",
+	"mxu",
+	"nef",
+	"npx",
+	"numbers",
+	"nupkg",
+	"o",
+	"odp",
+	"ods",
+	"odt",
+	"oga",
+	"ogg",
+	"ogv",
+	"otf",
+	"ott",
+	"pages",
+	"pbm",
+	"pcx",
+	"pdb",
+	"pdf",
+	"pea",
+	"pgm",
+	"pic",
+	"png",
+	"pnm",
+	"pot",
+	"potm",
+	"potx",
+	"ppa",
+	"ppam",
+	"ppm",
+	"pps",
+	"ppsm",
+	"ppsx",
+	"ppt",
+	"pptm",
+	"pptx",
+	"psd",
+	"pya",
+	"pyc",
+	"pyo",
+	"pyv",
+	"qt",
+	"rar",
+	"ras",
+	"raw",
+	"resources",
+	"rgb",
+	"rip",
+	"rlc",
+	"rmf",
+	"rmvb",
+	"rpm",
+	"rtf",
+	"rz",
+	"s3m",
+	"s7z",
+	"scpt",
+	"sgi",
+	"shar",
+	"snap",
+	"sil",
+	"sketch",
+	"slk",
+	"smv",
+	"snk",
+	"so",
+	"stl",
+	"suo",
+	"sub",
+	"swf",
+	"tar",
+	"tbz",
+	"tbz2",
+	"tga",
+	"tgz",
+	"thmx",
+	"tif",
+	"tiff",
+	"tlz",
+	"ttc",
+	"ttf",
+	"txz",
+	"udf",
+	"uvh",
+	"uvi",
+	"uvm",
+	"uvp",
+	"uvs",
+	"uvu",
+	"viv",
+	"vob",
+	"war",
+	"wav",
+	"wax",
+	"wbmp",
+	"wdp",
+	"weba",
+	"webm",
+	"webp",
+	"whl",
+	"wim",
+	"wm",
+	"wma",
+	"wmv",
+	"wmx",
+	"woff",
+	"woff2",
+	"wrm",
+	"wvx",
+	"xbm",
+	"xif",
+	"xla",
+	"xlam",
+	"xls",
+	"xlsb",
+	"xlsm",
+	"xlsx",
+	"xlt",
+	"xltm",
+	"xltx",
+	"xm",
+	"xmind",
+	"xpi",
+	"xpm",
+	"xwd",
+	"xz",
+	"z",
+	"zip",
+	"zipx"
+];
+
+var hasRequiredBinaryExtensions;
+
+function requireBinaryExtensions () {
+	if (hasRequiredBinaryExtensions) return binaryExtensions.exports;
+	hasRequiredBinaryExtensions = 1;
+	(function (module) {
+		module.exports = require$$0$1;
+} (binaryExtensions));
+	return binaryExtensions.exports;
+}
+
+var isBinaryPath;
+var hasRequiredIsBinaryPath;
+
+function requireIsBinaryPath () {
+	if (hasRequiredIsBinaryPath) return isBinaryPath;
+	hasRequiredIsBinaryPath = 1;
+	const path = require$$0__default$2["default"];
+	const binaryExtensions = requireBinaryExtensions();
+
+	const extensions = new Set(binaryExtensions);
+
+	isBinaryPath = filePath => extensions.has(path.extname(filePath).slice(1).toLowerCase());
+	return isBinaryPath;
+}
+
+var constants = {};
+
+var hasRequiredConstants;
+
+function requireConstants () {
+	if (hasRequiredConstants) return constants;
+	hasRequiredConstants = 1;
+	(function (exports) {
+
+		const {sep} = require$$0__default$2["default"];
+		const {platform} = process;
+		const os = require$$1__default["default"];
+
+		exports.EV_ALL = 'all';
+		exports.EV_READY = 'ready';
+		exports.EV_ADD = 'add';
+		exports.EV_CHANGE = 'change';
+		exports.EV_ADD_DIR = 'addDir';
+		exports.EV_UNLINK = 'unlink';
+		exports.EV_UNLINK_DIR = 'unlinkDir';
+		exports.EV_RAW = 'raw';
+		exports.EV_ERROR = 'error';
+
+		exports.STR_DATA = 'data';
+		exports.STR_END = 'end';
+		exports.STR_CLOSE = 'close';
+
+		exports.FSEVENT_CREATED = 'created';
+		exports.FSEVENT_MODIFIED = 'modified';
+		exports.FSEVENT_DELETED = 'deleted';
+		exports.FSEVENT_MOVED = 'moved';
+		exports.FSEVENT_CLONED = 'cloned';
+		exports.FSEVENT_UNKNOWN = 'unknown';
+		exports.FSEVENT_TYPE_FILE = 'file';
+		exports.FSEVENT_TYPE_DIRECTORY = 'directory';
+		exports.FSEVENT_TYPE_SYMLINK = 'symlink';
+
+		exports.KEY_LISTENERS = 'listeners';
+		exports.KEY_ERR = 'errHandlers';
+		exports.KEY_RAW = 'rawEmitters';
+		exports.HANDLER_KEYS = [exports.KEY_LISTENERS, exports.KEY_ERR, exports.KEY_RAW];
+
+		exports.DOT_SLASH = `.${sep}`;
+
+		exports.BACK_SLASH_RE = /\\/g;
+		exports.DOUBLE_SLASH_RE = /\/\//;
+		exports.SLASH_OR_BACK_SLASH_RE = /[/\\]/;
+		exports.DOT_RE = /\..*\.(sw[px])$|~$|\.subl.*\.tmp/;
+		exports.REPLACER_RE = /^\.[/\\]/;
+
+		exports.SLASH = '/';
+		exports.SLASH_SLASH = '//';
+		exports.BRACE_START = '{';
+		exports.BANG = '!';
+		exports.ONE_DOT = '.';
+		exports.TWO_DOTS = '..';
+		exports.STAR = '*';
+		exports.GLOBSTAR = '**';
+		exports.ROOT_GLOBSTAR = '/**/*';
+		exports.SLASH_GLOBSTAR = '/**';
+		exports.DIR_SUFFIX = 'Dir';
+		exports.ANYMATCH_OPTS = {dot: true};
+		exports.STRING_TYPE = 'string';
+		exports.FUNCTION_TYPE = 'function';
+		exports.EMPTY_STR = '';
+		exports.EMPTY_FN = () => {};
+		exports.IDENTITY_FN = val => val;
+
+		exports.isWindows = platform === 'win32';
+		exports.isMacos = platform === 'darwin';
+		exports.isLinux = platform === 'linux';
+		exports.isIBMi = os.type() === 'OS400';
+} (constants));
+	return constants;
+}
+
+var nodefsHandler;
+var hasRequiredNodefsHandler;
+
+function requireNodefsHandler () {
+	if (hasRequiredNodefsHandler) return nodefsHandler;
+	hasRequiredNodefsHandler = 1;
+
+	const fs = require$$0__default["default"];
+	const sysPath = require$$0__default$2["default"];
+	const { promisify } = require$$2__default["default"];
+	const isBinaryPath = requireIsBinaryPath();
+	const {
+	  isWindows,
+	  isLinux,
+	  EMPTY_FN,
+	  EMPTY_STR,
+	  KEY_LISTENERS,
+	  KEY_ERR,
+	  KEY_RAW,
+	  HANDLER_KEYS,
+	  EV_CHANGE,
+	  EV_ADD,
+	  EV_ADD_DIR,
+	  EV_ERROR,
+	  STR_DATA,
+	  STR_END,
+	  BRACE_START,
+	  STAR
+	} = requireConstants();
+
+	const THROTTLE_MODE_WATCH = 'watch';
+
+	const open = promisify(fs.open);
+	const stat = promisify(fs.stat);
+	const lstat = promisify(fs.lstat);
+	const close = promisify(fs.close);
+	const fsrealpath = promisify(fs.realpath);
+
+	const statMethods = { lstat, stat };
+
+	// TODO: emit errors properly. Example: EMFILE on Macos.
+	const foreach = (val, fn) => {
+	  if (val instanceof Set) {
+	    val.forEach(fn);
+	  } else {
+	    fn(val);
+	  }
+	};
+
+	const addAndConvert = (main, prop, item) => {
+	  let container = main[prop];
+	  if (!(container instanceof Set)) {
+	    main[prop] = container = new Set([container]);
+	  }
+	  container.add(item);
+	};
+
+	const clearItem = cont => key => {
+	  const set = cont[key];
+	  if (set instanceof Set) {
+	    set.clear();
+	  } else {
+	    delete cont[key];
+	  }
+	};
+
+	const delFromSet = (main, prop, item) => {
+	  const container = main[prop];
+	  if (container instanceof Set) {
+	    container.delete(item);
+	  } else if (container === item) {
+	    delete main[prop];
+	  }
+	};
+
+	const isEmptySet = (val) => val instanceof Set ? val.size === 0 : !val;
+
+	/**
+	 * @typedef {String} Path
+	 */
+
+	// fs_watch helpers
+
+	// object to hold per-process fs_watch instances
+	// (may be shared across chokidar FSWatcher instances)
+
+	/**
+	 * @typedef {Object} FsWatchContainer
+	 * @property {Set} listeners
+	 * @property {Set} errHandlers
+	 * @property {Set} rawEmitters
+	 * @property {fs.FSWatcher=} watcher
+	 * @property {Boolean=} watcherUnusable
+	 */
+
+	/**
+	 * @type {Map<String,FsWatchContainer>}
+	 */
+	const FsWatchInstances = new Map();
+
+	/**
+	 * Instantiates the fs_watch interface
+	 * @param {String} path to be watched
+	 * @param {Object} options to be passed to fs_watch
+	 * @param {Function} listener main event handler
+	 * @param {Function} errHandler emits info about errors
+	 * @param {Function} emitRaw emits raw event data
+	 * @returns {fs.FSWatcher} new fsevents instance
+	 */
+	function createFsWatchInstance(path, options, listener, errHandler, emitRaw) {
+	  const handleEvent = (rawEvent, evPath) => {
+	    listener(path);
+	    emitRaw(rawEvent, evPath, {watchedPath: path});
+
+	    // emit based on events occurring for files from a directory's watcher in
+	    // case the file's watcher misses it (and rely on throttling to de-dupe)
+	    if (evPath && path !== evPath) {
+	      fsWatchBroadcast(
+	        sysPath.resolve(path, evPath), KEY_LISTENERS, sysPath.join(path, evPath)
+	      );
+	    }
+	  };
+	  try {
+	    return fs.watch(path, options, handleEvent);
+	  } catch (error) {
+	    errHandler(error);
+	  }
+	}
+
+	/**
+	 * Helper for passing fs_watch event data to a collection of listeners
+	 * @param {Path} fullPath absolute path bound to fs_watch instance
+	 * @param {String} type listener type
+	 * @param {*=} val1 arguments to be passed to listeners
+	 * @param {*=} val2
+	 * @param {*=} val3
+	 */
+	const fsWatchBroadcast = (fullPath, type, val1, val2, val3) => {
+	  const cont = FsWatchInstances.get(fullPath);
+	  if (!cont) return;
+	  foreach(cont[type], (listener) => {
+	    listener(val1, val2, val3);
+	  });
+	};
+
+	/**
+	 * Instantiates the fs_watch interface or binds listeners
+	 * to an existing one covering the same file system entry
+	 * @param {String} path
+	 * @param {String} fullPath absolute path
+	 * @param {Object} options to be passed to fs_watch
+	 * @param {Object} handlers container for event listener functions
+	 */
+	const setFsWatchListener = (path, fullPath, options, handlers) => {
+	  const {listener, errHandler, rawEmitter} = handlers;
+	  let cont = FsWatchInstances.get(fullPath);
+
+	  /** @type {fs.FSWatcher=} */
+	  let watcher;
+	  if (!options.persistent) {
+	    watcher = createFsWatchInstance(
+	      path, options, listener, errHandler, rawEmitter
+	    );
+	    return watcher.close.bind(watcher);
+	  }
+	  if (cont) {
+	    addAndConvert(cont, KEY_LISTENERS, listener);
+	    addAndConvert(cont, KEY_ERR, errHandler);
+	    addAndConvert(cont, KEY_RAW, rawEmitter);
+	  } else {
+	    watcher = createFsWatchInstance(
+	      path,
+	      options,
+	      fsWatchBroadcast.bind(null, fullPath, KEY_LISTENERS),
+	      errHandler, // no need to use broadcast here
+	      fsWatchBroadcast.bind(null, fullPath, KEY_RAW)
+	    );
+	    if (!watcher) return;
+	    watcher.on(EV_ERROR, async (error) => {
+	      const broadcastErr = fsWatchBroadcast.bind(null, fullPath, KEY_ERR);
+	      cont.watcherUnusable = true; // documented since Node 10.4.1
+	      // Workaround for https://github.com/joyent/node/issues/4337
+	      if (isWindows && error.code === 'EPERM') {
+	        try {
+	          const fd = await open(path, 'r');
+	          await close(fd);
+	          broadcastErr(error);
+	        } catch (err) {}
+	      } else {
+	        broadcastErr(error);
+	      }
+	    });
+	    cont = {
+	      listeners: listener,
+	      errHandlers: errHandler,
+	      rawEmitters: rawEmitter,
+	      watcher
+	    };
+	    FsWatchInstances.set(fullPath, cont);
+	  }
+	  // const index = cont.listeners.indexOf(listener);
+
+	  // removes this instance's listeners and closes the underlying fs_watch
+	  // instance if there are no more listeners left
+	  return () => {
+	    delFromSet(cont, KEY_LISTENERS, listener);
+	    delFromSet(cont, KEY_ERR, errHandler);
+	    delFromSet(cont, KEY_RAW, rawEmitter);
+	    if (isEmptySet(cont.listeners)) {
+	      // Check to protect against issue gh-730.
+	      // if (cont.watcherUnusable) {
+	      cont.watcher.close();
+	      // }
+	      FsWatchInstances.delete(fullPath);
+	      HANDLER_KEYS.forEach(clearItem(cont));
+	      cont.watcher = undefined;
+	      Object.freeze(cont);
+	    }
+	  };
+	};
+
+	// fs_watchFile helpers
+
+	// object to hold per-process fs_watchFile instances
+	// (may be shared across chokidar FSWatcher instances)
+	const FsWatchFileInstances = new Map();
+
+	/**
+	 * Instantiates the fs_watchFile interface or binds listeners
+	 * to an existing one covering the same file system entry
+	 * @param {String} path to be watched
+	 * @param {String} fullPath absolute path
+	 * @param {Object} options options to be passed to fs_watchFile
+	 * @param {Object} handlers container for event listener functions
+	 * @returns {Function} closer
+	 */
+	const setFsWatchFileListener = (path, fullPath, options, handlers) => {
+	  const {listener, rawEmitter} = handlers;
+	  let cont = FsWatchFileInstances.get(fullPath);
+
+	  const copts = cont && cont.options;
+	  if (copts && (copts.persistent < options.persistent || copts.interval > options.interval)) {
+	    // "Upgrade" the watcher to persistence or a quicker interval.
+	    // This creates some unlikely edge case issues if the user mixes
+	    // settings in a very weird way, but solving for those cases
+	    // doesn't seem worthwhile for the added complexity.
+	    cont.listeners;
+	    cont.rawEmitters;
+	    fs.unwatchFile(fullPath);
+	    cont = undefined;
+	  }
+
+	  /* eslint-enable no-unused-vars, prefer-destructuring */
+
+	  if (cont) {
+	    addAndConvert(cont, KEY_LISTENERS, listener);
+	    addAndConvert(cont, KEY_RAW, rawEmitter);
+	  } else {
+	    // TODO
+	    // listeners.add(listener);
+	    // rawEmitters.add(rawEmitter);
+	    cont = {
+	      listeners: listener,
+	      rawEmitters: rawEmitter,
+	      options,
+	      watcher: fs.watchFile(fullPath, options, (curr, prev) => {
+	        foreach(cont.rawEmitters, (rawEmitter) => {
+	          rawEmitter(EV_CHANGE, fullPath, {curr, prev});
+	        });
+	        const currmtime = curr.mtimeMs;
+	        if (curr.size !== prev.size || currmtime > prev.mtimeMs || currmtime === 0) {
+	          foreach(cont.listeners, (listener) => listener(path, curr));
+	        }
+	      })
+	    };
+	    FsWatchFileInstances.set(fullPath, cont);
+	  }
+	  // const index = cont.listeners.indexOf(listener);
+
+	  // Removes this instance's listeners and closes the underlying fs_watchFile
+	  // instance if there are no more listeners left.
+	  return () => {
+	    delFromSet(cont, KEY_LISTENERS, listener);
+	    delFromSet(cont, KEY_RAW, rawEmitter);
+	    if (isEmptySet(cont.listeners)) {
+	      FsWatchFileInstances.delete(fullPath);
+	      fs.unwatchFile(fullPath);
+	      cont.options = cont.watcher = undefined;
+	      Object.freeze(cont);
+	    }
+	  };
+	};
+
+	/**
+	 * @mixin
+	 */
+	class NodeFsHandler {
+
+	/**
+	 * @param {import("../index").FSWatcher} fsW
+	 */
+	constructor(fsW) {
+	  this.fsw = fsW;
+	  this._boundHandleError = (error) => fsW._handleError(error);
+	}
+
+	/**
+	 * Watch file for changes with fs_watchFile or fs_watch.
+	 * @param {String} path to file or dir
+	 * @param {Function} listener on fs change
+	 * @returns {Function} closer for the watcher instance
+	 */
+	_watchWithNodeFs(path, listener) {
+	  const opts = this.fsw.options;
+	  const directory = sysPath.dirname(path);
+	  const basename = sysPath.basename(path);
+	  const parent = this.fsw._getWatchedDir(directory);
+	  parent.add(basename);
+	  const absolutePath = sysPath.resolve(path);
+	  const options = {persistent: opts.persistent};
+	  if (!listener) listener = EMPTY_FN;
+
+	  let closer;
+	  if (opts.usePolling) {
+	    options.interval = opts.enableBinaryInterval && isBinaryPath(basename) ?
+	      opts.binaryInterval : opts.interval;
+	    closer = setFsWatchFileListener(path, absolutePath, options, {
+	      listener,
+	      rawEmitter: this.fsw._emitRaw
+	    });
+	  } else {
+	    closer = setFsWatchListener(path, absolutePath, options, {
+	      listener,
+	      errHandler: this._boundHandleError,
+	      rawEmitter: this.fsw._emitRaw
+	    });
+	  }
+	  return closer;
+	}
+
+	/**
+	 * Watch a file and emit add event if warranted.
+	 * @param {Path} file Path
+	 * @param {fs.Stats} stats result of fs_stat
+	 * @param {Boolean} initialAdd was the file added at watch instantiation?
+	 * @returns {Function} closer for the watcher instance
+	 */
+	_handleFile(file, stats, initialAdd) {
+	  if (this.fsw.closed) {
+	    return;
+	  }
+	  const dirname = sysPath.dirname(file);
+	  const basename = sysPath.basename(file);
+	  const parent = this.fsw._getWatchedDir(dirname);
+	  // stats is always present
+	  let prevStats = stats;
+
+	  // if the file is already being watched, do nothing
+	  if (parent.has(basename)) return;
+
+	  const listener = async (path, newStats) => {
+	    if (!this.fsw._throttle(THROTTLE_MODE_WATCH, file, 5)) return;
+	    if (!newStats || newStats.mtimeMs === 0) {
+	      try {
+	        const newStats = await stat(file);
+	        if (this.fsw.closed) return;
+	        // Check that change event was not fired because of changed only accessTime.
+	        const at = newStats.atimeMs;
+	        const mt = newStats.mtimeMs;
+	        if (!at || at <= mt || mt !== prevStats.mtimeMs) {
+	          this.fsw._emit(EV_CHANGE, file, newStats);
+	        }
+	        if (isLinux && prevStats.ino !== newStats.ino) {
+	          this.fsw._closeFile(path);
+	          prevStats = newStats;
+	          this.fsw._addPathCloser(path, this._watchWithNodeFs(file, listener));
+	        } else {
+	          prevStats = newStats;
+	        }
+	      } catch (error) {
+	        // Fix issues where mtime is null but file is still present
+	        this.fsw._remove(dirname, basename);
+	      }
+	      // add is about to be emitted if file not already tracked in parent
+	    } else if (parent.has(basename)) {
+	      // Check that change event was not fired because of changed only accessTime.
+	      const at = newStats.atimeMs;
+	      const mt = newStats.mtimeMs;
+	      if (!at || at <= mt || mt !== prevStats.mtimeMs) {
+	        this.fsw._emit(EV_CHANGE, file, newStats);
+	      }
+	      prevStats = newStats;
+	    }
+	  };
+	  // kick off the watcher
+	  const closer = this._watchWithNodeFs(file, listener);
+
+	  // emit an add event if we're supposed to
+	  if (!(initialAdd && this.fsw.options.ignoreInitial) && this.fsw._isntIgnored(file)) {
+	    if (!this.fsw._throttle(EV_ADD, file, 0)) return;
+	    this.fsw._emit(EV_ADD, file, stats);
+	  }
+
+	  return closer;
+	}
+
+	/**
+	 * Handle symlinks encountered while reading a dir.
+	 * @param {Object} entry returned by readdirp
+	 * @param {String} directory path of dir being read
+	 * @param {String} path of this item
+	 * @param {String} item basename of this item
+	 * @returns {Promise<Boolean>} true if no more processing is needed for this entry.
+	 */
+	async _handleSymlink(entry, directory, path, item) {
+	  if (this.fsw.closed) {
+	    return;
+	  }
+	  const full = entry.fullPath;
+	  const dir = this.fsw._getWatchedDir(directory);
+
+	  if (!this.fsw.options.followSymlinks) {
+	    // watch symlink directly (don't follow) and detect changes
+	    this.fsw._incrReadyCount();
+
+	    let linkPath;
+	    try {
+	      linkPath = await fsrealpath(path);
+	    } catch (e) {
+	      this.fsw._emitReady();
+	      return true;
+	    }
+
+	    if (this.fsw.closed) return;
+	    if (dir.has(item)) {
+	      if (this.fsw._symlinkPaths.get(full) !== linkPath) {
+	        this.fsw._symlinkPaths.set(full, linkPath);
+	        this.fsw._emit(EV_CHANGE, path, entry.stats);
+	      }
+	    } else {
+	      dir.add(item);
+	      this.fsw._symlinkPaths.set(full, linkPath);
+	      this.fsw._emit(EV_ADD, path, entry.stats);
+	    }
+	    this.fsw._emitReady();
+	    return true;
+	  }
+
+	  // don't follow the same symlink more than once
+	  if (this.fsw._symlinkPaths.has(full)) {
+	    return true;
+	  }
+
+	  this.fsw._symlinkPaths.set(full, true);
+	}
+
+	_handleRead(directory, initialAdd, wh, target, dir, depth, throttler) {
+	  // Normalize the directory name on Windows
+	  directory = sysPath.join(directory, EMPTY_STR);
+
+	  if (!wh.hasGlob) {
+	    throttler = this.fsw._throttle('readdir', directory, 1000);
+	    if (!throttler) return;
+	  }
+
+	  const previous = this.fsw._getWatchedDir(wh.path);
+	  const current = new Set();
+
+	  let stream = this.fsw._readdirp(directory, {
+	    fileFilter: entry => wh.filterPath(entry),
+	    directoryFilter: entry => wh.filterDir(entry),
+	    depth: 0
+	  }).on(STR_DATA, async (entry) => {
+	    if (this.fsw.closed) {
+	      stream = undefined;
+	      return;
+	    }
+	    const item = entry.path;
+	    let path = sysPath.join(directory, item);
+	    current.add(item);
+
+	    if (entry.stats.isSymbolicLink() && await this._handleSymlink(entry, directory, path, item)) {
+	      return;
+	    }
+
+	    if (this.fsw.closed) {
+	      stream = undefined;
+	      return;
+	    }
+	    // Files that present in current directory snapshot
+	    // but absent in previous are added to watch list and
+	    // emit `add` event.
+	    if (item === target || !target && !previous.has(item)) {
+	      this.fsw._incrReadyCount();
+
+	      // ensure relativeness of path is preserved in case of watcher reuse
+	      path = sysPath.join(dir, sysPath.relative(dir, path));
+
+	      this._addToNodeFs(path, initialAdd, wh, depth + 1);
+	    }
+	  }).on(EV_ERROR, this._boundHandleError);
+
+	  return new Promise(resolve =>
+	    stream.once(STR_END, () => {
+	      if (this.fsw.closed) {
+	        stream = undefined;
+	        return;
+	      }
+	      const wasThrottled = throttler ? throttler.clear() : false;
+
+	      resolve();
+
+	      // Files that absent in current directory snapshot
+	      // but present in previous emit `remove` event
+	      // and are removed from @watched[directory].
+	      previous.getChildren().filter((item) => {
+	        return item !== directory &&
+	          !current.has(item) &&
+	          // in case of intersecting globs;
+	          // a path may have been filtered out of this readdir, but
+	          // shouldn't be removed because it matches a different glob
+	          (!wh.hasGlob || wh.filterPath({
+	            fullPath: sysPath.resolve(directory, item)
+	          }));
+	      }).forEach((item) => {
+	        this.fsw._remove(directory, item);
+	      });
+
+	      stream = undefined;
+
+	      // one more time for any missed in case changes came in extremely quickly
+	      if (wasThrottled) this._handleRead(directory, false, wh, target, dir, depth, throttler);
+	    })
+	  );
+	}
+
+	/**
+	 * Read directory to add / remove files from `@watched` list and re-read it on change.
+	 * @param {String} dir fs path
+	 * @param {fs.Stats} stats
+	 * @param {Boolean} initialAdd
+	 * @param {Number} depth relative to user-supplied path
+	 * @param {String} target child path targeted for watch
+	 * @param {Object} wh Common watch helpers for this path
+	 * @param {String} realpath
+	 * @returns {Promise<Function>} closer for the watcher instance.
+	 */
+	async _handleDir(dir, stats, initialAdd, depth, target, wh, realpath) {
+	  const parentDir = this.fsw._getWatchedDir(sysPath.dirname(dir));
+	  const tracked = parentDir.has(sysPath.basename(dir));
+	  if (!(initialAdd && this.fsw.options.ignoreInitial) && !target && !tracked) {
+	    if (!wh.hasGlob || wh.globFilter(dir)) this.fsw._emit(EV_ADD_DIR, dir, stats);
+	  }
+
+	  // ensure dir is tracked (harmless if redundant)
+	  parentDir.add(sysPath.basename(dir));
+	  this.fsw._getWatchedDir(dir);
+	  let throttler;
+	  let closer;
+
+	  const oDepth = this.fsw.options.depth;
+	  if ((oDepth == null || depth <= oDepth) && !this.fsw._symlinkPaths.has(realpath)) {
+	    if (!target) {
+	      await this._handleRead(dir, initialAdd, wh, target, dir, depth, throttler);
+	      if (this.fsw.closed) return;
+	    }
+
+	    closer = this._watchWithNodeFs(dir, (dirPath, stats) => {
+	      // if current directory is removed, do nothing
+	      if (stats && stats.mtimeMs === 0) return;
+
+	      this._handleRead(dirPath, false, wh, target, dir, depth, throttler);
+	    });
+	  }
+	  return closer;
+	}
+
+	/**
+	 * Handle added file, directory, or glob pattern.
+	 * Delegates call to _handleFile / _handleDir after checks.
+	 * @param {String} path to file or ir
+	 * @param {Boolean} initialAdd was the file added at watch instantiation?
+	 * @param {Object} priorWh depth relative to user-supplied path
+	 * @param {Number} depth Child path actually targeted for watch
+	 * @param {String=} target Child path actually targeted for watch
+	 * @returns {Promise}
+	 */
+	async _addToNodeFs(path, initialAdd, priorWh, depth, target) {
+	  const ready = this.fsw._emitReady;
+	  if (this.fsw._isIgnored(path) || this.fsw.closed) {
+	    ready();
+	    return false;
+	  }
+
+	  const wh = this.fsw._getWatchHelpers(path, depth);
+	  if (!wh.hasGlob && priorWh) {
+	    wh.hasGlob = priorWh.hasGlob;
+	    wh.globFilter = priorWh.globFilter;
+	    wh.filterPath = entry => priorWh.filterPath(entry);
+	    wh.filterDir = entry => priorWh.filterDir(entry);
+	  }
+
+	  // evaluate what is at the path we're being asked to watch
+	  try {
+	    const stats = await statMethods[wh.statMethod](wh.watchPath);
+	    if (this.fsw.closed) return;
+	    if (this.fsw._isIgnored(wh.watchPath, stats)) {
+	      ready();
+	      return false;
+	    }
+
+	    const follow = this.fsw.options.followSymlinks && !path.includes(STAR) && !path.includes(BRACE_START);
+	    let closer;
+	    if (stats.isDirectory()) {
+	      const absPath = sysPath.resolve(path);
+	      const targetPath = follow ? await fsrealpath(path) : path;
+	      if (this.fsw.closed) return;
+	      closer = await this._handleDir(wh.watchPath, stats, initialAdd, depth, target, wh, targetPath);
+	      if (this.fsw.closed) return;
+	      // preserve this symlink's target path
+	      if (absPath !== targetPath && targetPath !== undefined) {
+	        this.fsw._symlinkPaths.set(absPath, targetPath);
+	      }
+	    } else if (stats.isSymbolicLink()) {
+	      const targetPath = follow ? await fsrealpath(path) : path;
+	      if (this.fsw.closed) return;
+	      const parent = sysPath.dirname(wh.watchPath);
+	      this.fsw._getWatchedDir(parent).add(wh.watchPath);
+	      this.fsw._emit(EV_ADD, wh.watchPath, stats);
+	      closer = await this._handleDir(parent, stats, initialAdd, depth, path, wh, targetPath);
+	      if (this.fsw.closed) return;
+
+	      // preserve this symlink's target path
+	      if (targetPath !== undefined) {
+	        this.fsw._symlinkPaths.set(sysPath.resolve(path), targetPath);
+	      }
+	    } else {
+	      closer = this._handleFile(wh.watchPath, stats, initialAdd);
+	    }
+	    ready();
+
+	    this.fsw._addPathCloser(path, closer);
+	    return false;
+
+	  } catch (error) {
+	    if (this.fsw._handleError(error)) {
+	      ready();
+	      return path;
+	    }
+	  }
+	}
+
+	}
+
+	nodefsHandler = NodeFsHandler;
+	return nodefsHandler;
+}
+
+var fseventsHandler = {exports: {}};
+
+var hasRequiredFseventsHandler;
+
+function requireFseventsHandler () {
+	if (hasRequiredFseventsHandler) return fseventsHandler.exports;
+	hasRequiredFseventsHandler = 1;
+
+	const fs = require$$0__default["default"];
+	const sysPath = require$$0__default$2["default"];
+	const { promisify } = require$$2__default["default"];
+
+	let fsevents;
+	try {
+	  fsevents = require('fsevents');
+	} catch (error) {
+	  if (process.env.CHOKIDAR_PRINT_FSEVENTS_REQUIRE_ERROR) console.error(error);
+	}
+
+	if (fsevents) {
+	  // TODO: real check
+	  const mtch = process.version.match(/v(\d+)\.(\d+)/);
+	  if (mtch && mtch[1] && mtch[2]) {
+	    const maj = Number.parseInt(mtch[1], 10);
+	    const min = Number.parseInt(mtch[2], 10);
+	    if (maj === 8 && min < 16) {
+	      fsevents = undefined;
+	    }
+	  }
+	}
+
+	const {
+	  EV_ADD,
+	  EV_CHANGE,
+	  EV_ADD_DIR,
+	  EV_UNLINK,
+	  EV_ERROR,
+	  STR_DATA,
+	  STR_END,
+	  FSEVENT_CREATED,
+	  FSEVENT_MODIFIED,
+	  FSEVENT_DELETED,
+	  FSEVENT_MOVED,
+	  // FSEVENT_CLONED,
+	  FSEVENT_UNKNOWN,
+	  FSEVENT_TYPE_FILE,
+	  FSEVENT_TYPE_DIRECTORY,
+	  FSEVENT_TYPE_SYMLINK,
+
+	  ROOT_GLOBSTAR,
+	  DIR_SUFFIX,
+	  DOT_SLASH,
+	  FUNCTION_TYPE,
+	  EMPTY_FN,
+	  IDENTITY_FN
+	} = requireConstants();
+
+	const Depth = (value) => isNaN(value) ? {} : {depth: value};
+
+	const stat = promisify(fs.stat);
+	const lstat = promisify(fs.lstat);
+	const realpath = promisify(fs.realpath);
+
+	const statMethods = { stat, lstat };
+
+	/**
+	 * @typedef {String} Path
+	 */
+
+	/**
+	 * @typedef {Object} FsEventsWatchContainer
+	 * @property {Set<Function>} listeners
+	 * @property {Function} rawEmitter
+	 * @property {{stop: Function}} watcher
+	 */
+
+	// fsevents instance helper functions
+	/**
+	 * Object to hold per-process fsevents instances (may be shared across chokidar FSWatcher instances)
+	 * @type {Map<Path,FsEventsWatchContainer>}
+	 */
+	const FSEventsWatchers = new Map();
+
+	// Threshold of duplicate path prefixes at which to start
+	// consolidating going forward
+	const consolidateThreshhold = 10;
+
+	const wrongEventFlags = new Set([
+	  69888, 70400, 71424, 72704, 73472, 131328, 131840, 262912
+	]);
+
+	/**
+	 * Instantiates the fsevents interface
+	 * @param {Path} path path to be watched
+	 * @param {Function} callback called when fsevents is bound and ready
+	 * @returns {{stop: Function}} new fsevents instance
+	 */
+	const createFSEventsInstance = (path, callback) => {
+	  const stop = fsevents.watch(path, callback);
+	  return {stop};
+	};
+
+	/**
+	 * Instantiates the fsevents interface or binds listeners to an existing one covering
+	 * the same file tree.
+	 * @param {Path} path           - to be watched
+	 * @param {Path} realPath       - real path for symlinks
+	 * @param {Function} listener   - called when fsevents emits events
+	 * @param {Function} rawEmitter - passes data to listeners of the 'raw' event
+	 * @returns {Function} closer
+	 */
+	function setFSEventsListener(path, realPath, listener, rawEmitter) {
+	  let watchPath = sysPath.extname(realPath) ? sysPath.dirname(realPath) : realPath;
+
+	  const parentPath = sysPath.dirname(watchPath);
+	  let cont = FSEventsWatchers.get(watchPath);
+
+	  // If we've accumulated a substantial number of paths that
+	  // could have been consolidated by watching one directory
+	  // above the current one, create a watcher on the parent
+	  // path instead, so that we do consolidate going forward.
+	  if (couldConsolidate(parentPath)) {
+	    watchPath = parentPath;
+	  }
+
+	  const resolvedPath = sysPath.resolve(path);
+	  const hasSymlink = resolvedPath !== realPath;
+
+	  const filteredListener = (fullPath, flags, info) => {
+	    if (hasSymlink) fullPath = fullPath.replace(realPath, resolvedPath);
+	    if (
+	      fullPath === resolvedPath ||
+	      !fullPath.indexOf(resolvedPath + sysPath.sep)
+	    ) listener(fullPath, flags, info);
+	  };
+
+	  // check if there is already a watcher on a parent path
+	  // modifies `watchPath` to the parent path when it finds a match
+	  let watchedParent = false;
+	  for (const watchedPath of FSEventsWatchers.keys()) {
+	    if (realPath.indexOf(sysPath.resolve(watchedPath) + sysPath.sep) === 0) {
+	      watchPath = watchedPath;
+	      cont = FSEventsWatchers.get(watchPath);
+	      watchedParent = true;
+	      break;
+	    }
+	  }
+
+	  if (cont || watchedParent) {
+	    cont.listeners.add(filteredListener);
+	  } else {
+	    cont = {
+	      listeners: new Set([filteredListener]),
+	      rawEmitter,
+	      watcher: createFSEventsInstance(watchPath, (fullPath, flags) => {
+	        if (!cont.listeners.size) return;
+	        const info = fsevents.getInfo(fullPath, flags);
+	        cont.listeners.forEach(list => {
+	          list(fullPath, flags, info);
+	        });
+
+	        cont.rawEmitter(info.event, fullPath, info);
+	      })
+	    };
+	    FSEventsWatchers.set(watchPath, cont);
+	  }
+
+	  // removes this instance's listeners and closes the underlying fsevents
+	  // instance if there are no more listeners left
+	  return () => {
+	    const lst = cont.listeners;
+
+	    lst.delete(filteredListener);
+	    if (!lst.size) {
+	      FSEventsWatchers.delete(watchPath);
+	      if (cont.watcher) return cont.watcher.stop().then(() => {
+	        cont.rawEmitter = cont.watcher = undefined;
+	        Object.freeze(cont);
+	      });
+	    }
+	  };
+	}
+
+	// Decide whether or not we should start a new higher-level
+	// parent watcher
+	const couldConsolidate = (path) => {
+	  let count = 0;
+	  for (const watchPath of FSEventsWatchers.keys()) {
+	    if (watchPath.indexOf(path) === 0) {
+	      count++;
+	      if (count >= consolidateThreshhold) {
+	        return true;
+	      }
+	    }
+	  }
+
+	  return false;
+	};
+
+	// returns boolean indicating whether fsevents can be used
+	const canUse = () => fsevents && FSEventsWatchers.size < 128;
+
+	// determines subdirectory traversal levels from root to path
+	const calcDepth = (path, root) => {
+	  let i = 0;
+	  while (!path.indexOf(root) && (path = sysPath.dirname(path)) !== root) i++;
+	  return i;
+	};
+
+	// returns boolean indicating whether the fsevents' event info has the same type
+	// as the one returned by fs.stat
+	const sameTypes = (info, stats) => (
+	  info.type === FSEVENT_TYPE_DIRECTORY && stats.isDirectory() ||
+	  info.type === FSEVENT_TYPE_SYMLINK && stats.isSymbolicLink() ||
+	  info.type === FSEVENT_TYPE_FILE && stats.isFile()
+	);
+
+	/**
+	 * @mixin
+	 */
+	class FsEventsHandler {
+
+	/**
+	 * @param {import('../index').FSWatcher} fsw
+	 */
+	constructor(fsw) {
+	  this.fsw = fsw;
+	}
+	checkIgnored(path, stats) {
+	  const ipaths = this.fsw._ignoredPaths;
+	  if (this.fsw._isIgnored(path, stats)) {
+	    ipaths.add(path);
+	    if (stats && stats.isDirectory()) {
+	      ipaths.add(path + ROOT_GLOBSTAR);
+	    }
+	    return true;
+	  }
+
+	  ipaths.delete(path);
+	  ipaths.delete(path + ROOT_GLOBSTAR);
+	}
+
+	addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts) {
+	  const event = watchedDir.has(item) ? EV_CHANGE : EV_ADD;
+	  this.handleEvent(event, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	}
+
+	async checkExists(path, fullPath, realPath, parent, watchedDir, item, info, opts) {
+	  try {
+	    const stats = await stat(path);
+	    if (this.fsw.closed) return;
+	    if (sameTypes(info, stats)) {
+	      this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	    } else {
+	      this.handleEvent(EV_UNLINK, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	    }
+	  } catch (error) {
+	    if (error.code === 'EACCES') {
+	      this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	    } else {
+	      this.handleEvent(EV_UNLINK, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	    }
+	  }
+	}
+
+	handleEvent(event, path, fullPath, realPath, parent, watchedDir, item, info, opts) {
+	  if (this.fsw.closed || this.checkIgnored(path)) return;
+
+	  if (event === EV_UNLINK) {
+	    const isDirectory = info.type === FSEVENT_TYPE_DIRECTORY;
+	    // suppress unlink events on never before seen files
+	    if (isDirectory || watchedDir.has(item)) {
+	      this.fsw._remove(parent, item, isDirectory);
+	    }
+	  } else {
+	    if (event === EV_ADD) {
+	      // track new directories
+	      if (info.type === FSEVENT_TYPE_DIRECTORY) this.fsw._getWatchedDir(path);
+
+	      if (info.type === FSEVENT_TYPE_SYMLINK && opts.followSymlinks) {
+	        // push symlinks back to the top of the stack to get handled
+	        const curDepth = opts.depth === undefined ?
+	          undefined : calcDepth(fullPath, realPath) + 1;
+	        return this._addToFsEvents(path, false, true, curDepth);
+	      }
+
+	      // track new paths
+	      // (other than symlinks being followed, which will be tracked soon)
+	      this.fsw._getWatchedDir(parent).add(item);
+	    }
+	    /**
+	     * @type {'add'|'addDir'|'unlink'|'unlinkDir'}
+	     */
+	    const eventName = info.type === FSEVENT_TYPE_DIRECTORY ? event + DIR_SUFFIX : event;
+	    this.fsw._emit(eventName, path);
+	    if (eventName === EV_ADD_DIR) this._addToFsEvents(path, false, true);
+	  }
+	}
+
+	/**
+	 * Handle symlinks encountered during directory scan
+	 * @param {String} watchPath  - file/dir path to be watched with fsevents
+	 * @param {String} realPath   - real path (in case of symlinks)
+	 * @param {Function} transform  - path transformer
+	 * @param {Function} globFilter - path filter in case a glob pattern was provided
+	 * @returns {Function} closer for the watcher instance
+	*/
+	_watchWithFsEvents(watchPath, realPath, transform, globFilter) {
+	  if (this.fsw.closed || this.fsw._isIgnored(watchPath)) return;
+	  const opts = this.fsw.options;
+	  const watchCallback = async (fullPath, flags, info) => {
+	    if (this.fsw.closed) return;
+	    if (
+	      opts.depth !== undefined &&
+	      calcDepth(fullPath, realPath) > opts.depth
+	    ) return;
+	    const path = transform(sysPath.join(
+	      watchPath, sysPath.relative(watchPath, fullPath)
+	    ));
+	    if (globFilter && !globFilter(path)) return;
+	    // ensure directories are tracked
+	    const parent = sysPath.dirname(path);
+	    const item = sysPath.basename(path);
+	    const watchedDir = this.fsw._getWatchedDir(
+	      info.type === FSEVENT_TYPE_DIRECTORY ? path : parent
+	    );
+
+	    // correct for wrong events emitted
+	    if (wrongEventFlags.has(flags) || info.event === FSEVENT_UNKNOWN) {
+	      if (typeof opts.ignored === FUNCTION_TYPE) {
+	        let stats;
+	        try {
+	          stats = await stat(path);
+	        } catch (error) {}
+	        if (this.fsw.closed) return;
+	        if (this.checkIgnored(path, stats)) return;
+	        if (sameTypes(info, stats)) {
+	          this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	        } else {
+	          this.handleEvent(EV_UNLINK, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	        }
+	      } else {
+	        this.checkExists(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	      }
+	    } else {
+	      switch (info.event) {
+	      case FSEVENT_CREATED:
+	      case FSEVENT_MODIFIED:
+	        return this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	      case FSEVENT_DELETED:
+	      case FSEVENT_MOVED:
+	        return this.checkExists(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+	      }
+	    }
+	  };
+
+	  const closer = setFSEventsListener(
+	    watchPath,
+	    realPath,
+	    watchCallback,
+	    this.fsw._emitRaw
+	  );
+
+	  this.fsw._emitReady();
+	  return closer;
+	}
+
+	/**
+	 * Handle symlinks encountered during directory scan
+	 * @param {String} linkPath path to symlink
+	 * @param {String} fullPath absolute path to the symlink
+	 * @param {Function} transform pre-existing path transformer
+	 * @param {Number} curDepth level of subdirectories traversed to where symlink is
+	 * @returns {Promise<void>}
+	 */
+	async _handleFsEventsSymlink(linkPath, fullPath, transform, curDepth) {
+	  // don't follow the same symlink more than once
+	  if (this.fsw.closed || this.fsw._symlinkPaths.has(fullPath)) return;
+
+	  this.fsw._symlinkPaths.set(fullPath, true);
+	  this.fsw._incrReadyCount();
+
+	  try {
+	    const linkTarget = await realpath(linkPath);
+	    if (this.fsw.closed) return;
+	    if (this.fsw._isIgnored(linkTarget)) {
+	      return this.fsw._emitReady();
+	    }
+
+	    this.fsw._incrReadyCount();
+
+	    // add the linkTarget for watching with a wrapper for transform
+	    // that causes emitted paths to incorporate the link's path
+	    this._addToFsEvents(linkTarget || linkPath, (path) => {
+	      let aliasedPath = linkPath;
+	      if (linkTarget && linkTarget !== DOT_SLASH) {
+	        aliasedPath = path.replace(linkTarget, linkPath);
+	      } else if (path !== DOT_SLASH) {
+	        aliasedPath = sysPath.join(linkPath, path);
+	      }
+	      return transform(aliasedPath);
+	    }, false, curDepth);
+	  } catch(error) {
+	    if (this.fsw._handleError(error)) {
+	      return this.fsw._emitReady();
+	    }
+	  }
+	}
+
+	/**
+	 *
+	 * @param {Path} newPath
+	 * @param {fs.Stats} stats
+	 */
+	emitAdd(newPath, stats, processPath, opts, forceAdd) {
+	  const pp = processPath(newPath);
+	  const isDir = stats.isDirectory();
+	  const dirObj = this.fsw._getWatchedDir(sysPath.dirname(pp));
+	  const base = sysPath.basename(pp);
+
+	  // ensure empty dirs get tracked
+	  if (isDir) this.fsw._getWatchedDir(pp);
+	  if (dirObj.has(base)) return;
+	  dirObj.add(base);
+
+	  if (!opts.ignoreInitial || forceAdd === true) {
+	    this.fsw._emit(isDir ? EV_ADD_DIR : EV_ADD, pp, stats);
+	  }
+	}
+
+	initWatch(realPath, path, wh, processPath) {
+	  if (this.fsw.closed) return;
+	  const closer = this._watchWithFsEvents(
+	    wh.watchPath,
+	    sysPath.resolve(realPath || wh.watchPath),
+	    processPath,
+	    wh.globFilter
+	  );
+	  this.fsw._addPathCloser(path, closer);
+	}
+
+	/**
+	 * Handle added path with fsevents
+	 * @param {String} path file/dir path or glob pattern
+	 * @param {Function|Boolean=} transform converts working path to what the user expects
+	 * @param {Boolean=} forceAdd ensure add is emitted
+	 * @param {Number=} priorDepth Level of subdirectories already traversed.
+	 * @returns {Promise<void>}
+	 */
+	async _addToFsEvents(path, transform, forceAdd, priorDepth) {
+	  if (this.fsw.closed) {
+	    return;
+	  }
+	  const opts = this.fsw.options;
+	  const processPath = typeof transform === FUNCTION_TYPE ? transform : IDENTITY_FN;
+
+	  const wh = this.fsw._getWatchHelpers(path);
+
+	  // evaluate what is at the path we're being asked to watch
+	  try {
+	    const stats = await statMethods[wh.statMethod](wh.watchPath);
+	    if (this.fsw.closed) return;
+	    if (this.fsw._isIgnored(wh.watchPath, stats)) {
+	      throw null;
+	    }
+	    if (stats.isDirectory()) {
+	      // emit addDir unless this is a glob parent
+	      if (!wh.globFilter) this.emitAdd(processPath(path), stats, processPath, opts, forceAdd);
+
+	      // don't recurse further if it would exceed depth setting
+	      if (priorDepth && priorDepth > opts.depth) return;
+
+	      // scan the contents of the dir
+	      this.fsw._readdirp(wh.watchPath, {
+	        fileFilter: entry => wh.filterPath(entry),
+	        directoryFilter: entry => wh.filterDir(entry),
+	        ...Depth(opts.depth - (priorDepth || 0))
+	      }).on(STR_DATA, (entry) => {
+	        // need to check filterPath on dirs b/c filterDir is less restrictive
+	        if (this.fsw.closed) {
+	          return;
+	        }
+	        if (entry.stats.isDirectory() && !wh.filterPath(entry)) return;
+
+	        const joinedPath = sysPath.join(wh.watchPath, entry.path);
+	        const {fullPath} = entry;
+
+	        if (wh.followSymlinks && entry.stats.isSymbolicLink()) {
+	          // preserve the current depth here since it can't be derived from
+	          // real paths past the symlink
+	          const curDepth = opts.depth === undefined ?
+	            undefined : calcDepth(joinedPath, sysPath.resolve(wh.watchPath)) + 1;
+
+	          this._handleFsEventsSymlink(joinedPath, fullPath, processPath, curDepth);
+	        } else {
+	          this.emitAdd(joinedPath, entry.stats, processPath, opts, forceAdd);
+	        }
+	      }).on(EV_ERROR, EMPTY_FN).on(STR_END, () => {
+	        this.fsw._emitReady();
+	      });
+	    } else {
+	      this.emitAdd(wh.watchPath, stats, processPath, opts, forceAdd);
+	      this.fsw._emitReady();
+	    }
+	  } catch (error) {
+	    if (!error || this.fsw._handleError(error)) {
+	      // TODO: Strange thing: "should not choke on an ignored watch path" will be failed without 2 ready calls -__-
+	      this.fsw._emitReady();
+	      this.fsw._emitReady();
+	    }
+	  }
+
+	  if (opts.persistent && forceAdd !== true) {
+	    if (typeof transform === FUNCTION_TYPE) {
+	      // realpath has already been resolved
+	      this.initWatch(undefined, path, wh, processPath);
+	    } else {
+	      let realPath;
+	      try {
+	        realPath = await realpath(wh.watchPath);
+	      } catch (e) {}
+	      this.initWatch(realPath, path, wh, processPath);
+	    }
+	  }
+	}
+
+	}
+
+	fseventsHandler.exports = FsEventsHandler;
+	fseventsHandler.exports.canUse = canUse;
+	return fseventsHandler.exports;
+}
+
+var hasRequiredChokidar;
+
+function requireChokidar () {
+	if (hasRequiredChokidar) return chokidar$1;
+	hasRequiredChokidar = 1;
+
+	const { EventEmitter } = require$$0__default$1["default"];
+	const fs = require$$0__default["default"];
+	const sysPath = require$$0__default$2["default"];
+	const { promisify } = require$$2__default["default"];
+	const readdirp = requireReaddirp();
+	const anymatch = requireAnymatch().default;
+	const globParent = requireGlobParent();
+	const isGlob = requireIsGlob();
+	const braces = requireBraces();
+	const normalizePath = requireNormalizePath();
+
+	const NodeFsHandler = requireNodefsHandler();
+	const FsEventsHandler = requireFseventsHandler();
+	const {
+	  EV_ALL,
+	  EV_READY,
+	  EV_ADD,
+	  EV_CHANGE,
+	  EV_UNLINK,
+	  EV_ADD_DIR,
+	  EV_UNLINK_DIR,
+	  EV_RAW,
+	  EV_ERROR,
+
+	  STR_CLOSE,
+	  STR_END,
+
+	  BACK_SLASH_RE,
+	  DOUBLE_SLASH_RE,
+	  SLASH_OR_BACK_SLASH_RE,
+	  DOT_RE,
+	  REPLACER_RE,
+
+	  SLASH,
+	  SLASH_SLASH,
+	  BRACE_START,
+	  BANG,
+	  ONE_DOT,
+	  TWO_DOTS,
+	  GLOBSTAR,
+	  SLASH_GLOBSTAR,
+	  ANYMATCH_OPTS,
+	  STRING_TYPE,
+	  FUNCTION_TYPE,
+	  EMPTY_STR,
+	  EMPTY_FN,
+
+	  isWindows,
+	  isMacos,
+	  isIBMi
+	} = requireConstants();
+
+	const stat = promisify(fs.stat);
+	const readdir = promisify(fs.readdir);
+
+	/**
+	 * @typedef {String} Path
+	 * @typedef {'all'|'add'|'addDir'|'change'|'unlink'|'unlinkDir'|'raw'|'error'|'ready'} EventName
+	 * @typedef {'readdir'|'watch'|'add'|'remove'|'change'} ThrottleType
+	 */
+
+	/**
+	 *
+	 * @typedef {Object} WatchHelpers
+	 * @property {Boolean} followSymlinks
+	 * @property {'stat'|'lstat'} statMethod
+	 * @property {Path} path
+	 * @property {Path} watchPath
+	 * @property {Function} entryPath
+	 * @property {Boolean} hasGlob
+	 * @property {Object} globFilter
+	 * @property {Function} filterPath
+	 * @property {Function} filterDir
+	 */
+
+	const arrify = (value = []) => Array.isArray(value) ? value : [value];
+	const flatten = (list, result = []) => {
+	  list.forEach(item => {
+	    if (Array.isArray(item)) {
+	      flatten(item, result);
+	    } else {
+	      result.push(item);
+	    }
+	  });
+	  return result;
+	};
+
+	const unifyPaths = (paths_) => {
+	  /**
+	   * @type {Array<String>}
+	   */
+	  const paths = flatten(arrify(paths_));
+	  if (!paths.every(p => typeof p === STRING_TYPE)) {
+	    throw new TypeError(`Non-string provided as watch path: ${paths}`);
+	  }
+	  return paths.map(normalizePathToUnix);
+	};
+
+	// If SLASH_SLASH occurs at the beginning of path, it is not replaced
+	//     because "//StoragePC/DrivePool/Movies" is a valid network path
+	const toUnix = (string) => {
+	  let str = string.replace(BACK_SLASH_RE, SLASH);
+	  let prepend = false;
+	  if (str.startsWith(SLASH_SLASH)) {
+	    prepend = true;
+	  }
+	  while (str.match(DOUBLE_SLASH_RE)) {
+	    str = str.replace(DOUBLE_SLASH_RE, SLASH);
+	  }
+	  if (prepend) {
+	    str = SLASH + str;
+	  }
+	  return str;
+	};
+
+	// Our version of upath.normalize
+	// TODO: this is not equal to path-normalize module - investigate why
+	const normalizePathToUnix = (path) => toUnix(sysPath.normalize(toUnix(path)));
+
+	const normalizeIgnored = (cwd = EMPTY_STR) => (path) => {
+	  if (typeof path !== STRING_TYPE) return path;
+	  return normalizePathToUnix(sysPath.isAbsolute(path) ? path : sysPath.join(cwd, path));
+	};
+
+	const getAbsolutePath = (path, cwd) => {
+	  if (sysPath.isAbsolute(path)) {
+	    return path;
+	  }
+	  if (path.startsWith(BANG)) {
+	    return BANG + sysPath.join(cwd, path.slice(1));
+	  }
+	  return sysPath.join(cwd, path);
+	};
+
+	const undef = (opts, key) => opts[key] === undefined;
+
+	/**
+	 * Directory entry.
+	 * @property {Path} path
+	 * @property {Set<Path>} items
+	 */
+	class DirEntry {
+	  /**
+	   * @param {Path} dir
+	   * @param {Function} removeWatcher
+	   */
+	  constructor(dir, removeWatcher) {
+	    this.path = dir;
+	    this._removeWatcher = removeWatcher;
+	    /** @type {Set<Path>} */
+	    this.items = new Set();
+	  }
+
+	  add(item) {
+	    const {items} = this;
+	    if (!items) return;
+	    if (item !== ONE_DOT && item !== TWO_DOTS) items.add(item);
+	  }
+
+	  async remove(item) {
+	    const {items} = this;
+	    if (!items) return;
+	    items.delete(item);
+	    if (items.size > 0) return;
+
+	    const dir = this.path;
+	    try {
+	      await readdir(dir);
+	    } catch (err) {
+	      if (this._removeWatcher) {
+	        this._removeWatcher(sysPath.dirname(dir), sysPath.basename(dir));
+	      }
+	    }
+	  }
+
+	  has(item) {
+	    const {items} = this;
+	    if (!items) return;
+	    return items.has(item);
+	  }
+
+	  /**
+	   * @returns {Array<String>}
+	   */
+	  getChildren() {
+	    const {items} = this;
+	    if (!items) return;
+	    return [...items.values()];
+	  }
+
+	  dispose() {
+	    this.items.clear();
+	    delete this.path;
+	    delete this._removeWatcher;
+	    delete this.items;
+	    Object.freeze(this);
+	  }
+	}
+
+	const STAT_METHOD_F = 'stat';
+	const STAT_METHOD_L = 'lstat';
+	class WatchHelper {
+	  constructor(path, watchPath, follow, fsw) {
+	    this.fsw = fsw;
+	    this.path = path = path.replace(REPLACER_RE, EMPTY_STR);
+	    this.watchPath = watchPath;
+	    this.fullWatchPath = sysPath.resolve(watchPath);
+	    this.hasGlob = watchPath !== path;
+	    /** @type {object|boolean} */
+	    if (path === EMPTY_STR) this.hasGlob = false;
+	    this.globSymlink = this.hasGlob && follow ? undefined : false;
+	    this.globFilter = this.hasGlob ? anymatch(path, undefined, ANYMATCH_OPTS) : false;
+	    this.dirParts = this.getDirParts(path);
+	    this.dirParts.forEach((parts) => {
+	      if (parts.length > 1) parts.pop();
+	    });
+	    this.followSymlinks = follow;
+	    this.statMethod = follow ? STAT_METHOD_F : STAT_METHOD_L;
+	  }
+
+	  checkGlobSymlink(entry) {
+	    // only need to resolve once
+	    // first entry should always have entry.parentDir === EMPTY_STR
+	    if (this.globSymlink === undefined) {
+	      this.globSymlink = entry.fullParentDir === this.fullWatchPath ?
+	        false : {realPath: entry.fullParentDir, linkPath: this.fullWatchPath};
+	    }
+
+	    if (this.globSymlink) {
+	      return entry.fullPath.replace(this.globSymlink.realPath, this.globSymlink.linkPath);
+	    }
+
+	    return entry.fullPath;
+	  }
+
+	  entryPath(entry) {
+	    return sysPath.join(this.watchPath,
+	      sysPath.relative(this.watchPath, this.checkGlobSymlink(entry))
+	    );
+	  }
+
+	  filterPath(entry) {
+	    const {stats} = entry;
+	    if (stats && stats.isSymbolicLink()) return this.filterDir(entry);
+	    const resolvedPath = this.entryPath(entry);
+	    const matchesGlob = this.hasGlob && typeof this.globFilter === FUNCTION_TYPE ?
+	      this.globFilter(resolvedPath) : true;
+	    return matchesGlob &&
+	      this.fsw._isntIgnored(resolvedPath, stats) &&
+	      this.fsw._hasReadPermissions(stats);
+	  }
+
+	  getDirParts(path) {
+	    if (!this.hasGlob) return [];
+	    const parts = [];
+	    const expandedPath = path.includes(BRACE_START) ? braces.expand(path) : [path];
+	    expandedPath.forEach((path) => {
+	      parts.push(sysPath.relative(this.watchPath, path).split(SLASH_OR_BACK_SLASH_RE));
+	    });
+	    return parts;
+	  }
+
+	  filterDir(entry) {
+	    if (this.hasGlob) {
+	      const entryParts = this.getDirParts(this.checkGlobSymlink(entry));
+	      let globstar = false;
+	      this.unmatchedGlob = !this.dirParts.some((parts) => {
+	        return parts.every((part, i) => {
+	          if (part === GLOBSTAR) globstar = true;
+	          return globstar || !entryParts[0][i] || anymatch(part, entryParts[0][i], ANYMATCH_OPTS);
+	        });
+	      });
+	    }
+	    return !this.unmatchedGlob && this.fsw._isntIgnored(this.entryPath(entry), entry.stats);
+	  }
+	}
+
+	/**
+	 * Watches files & directories for changes. Emitted events:
+	 * `add`, `addDir`, `change`, `unlink`, `unlinkDir`, `all`, `error`
+	 *
+	 *     new FSWatcher()
+	 *       .add(directories)
+	 *       .on('add', path => log('File', path, 'was added'))
+	 */
+	class FSWatcher extends EventEmitter {
+	// Not indenting methods for history sake; for now.
+	constructor(_opts) {
+	  super();
+
+	  const opts = {};
+	  if (_opts) Object.assign(opts, _opts); // for frozen objects
+
+	  /** @type {Map<String, DirEntry>} */
+	  this._watched = new Map();
+	  /** @type {Map<String, Array>} */
+	  this._closers = new Map();
+	  /** @type {Set<String>} */
+	  this._ignoredPaths = new Set();
+
+	  /** @type {Map<ThrottleType, Map>} */
+	  this._throttled = new Map();
+
+	  /** @type {Map<Path, String|Boolean>} */
+	  this._symlinkPaths = new Map();
+
+	  this._streams = new Set();
+	  this.closed = false;
+
+	  // Set up default options.
+	  if (undef(opts, 'persistent')) opts.persistent = true;
+	  if (undef(opts, 'ignoreInitial')) opts.ignoreInitial = false;
+	  if (undef(opts, 'ignorePermissionErrors')) opts.ignorePermissionErrors = false;
+	  if (undef(opts, 'interval')) opts.interval = 100;
+	  if (undef(opts, 'binaryInterval')) opts.binaryInterval = 300;
+	  if (undef(opts, 'disableGlobbing')) opts.disableGlobbing = false;
+	  opts.enableBinaryInterval = opts.binaryInterval !== opts.interval;
+
+	  // Enable fsevents on OS X when polling isn't explicitly enabled.
+	  if (undef(opts, 'useFsEvents')) opts.useFsEvents = !opts.usePolling;
+
+	  // If we can't use fsevents, ensure the options reflect it's disabled.
+	  const canUseFsEvents = FsEventsHandler.canUse();
+	  if (!canUseFsEvents) opts.useFsEvents = false;
+
+	  // Use polling on Mac if not using fsevents.
+	  // Other platforms use non-polling fs_watch.
+	  if (undef(opts, 'usePolling') && !opts.useFsEvents) {
+	    opts.usePolling = isMacos;
+	  }
+
+	  // Always default to polling on IBM i because fs.watch() is not available on IBM i.
+	  if(isIBMi) {
+	    opts.usePolling = true;
+	  }
+
+	  // Global override (useful for end-developers that need to force polling for all
+	  // instances of chokidar, regardless of usage/dependency depth)
+	  const envPoll = process.env.CHOKIDAR_USEPOLLING;
+	  if (envPoll !== undefined) {
+	    const envLower = envPoll.toLowerCase();
+
+	    if (envLower === 'false' || envLower === '0') {
+	      opts.usePolling = false;
+	    } else if (envLower === 'true' || envLower === '1') {
+	      opts.usePolling = true;
+	    } else {
+	      opts.usePolling = !!envLower;
+	    }
+	  }
+	  const envInterval = process.env.CHOKIDAR_INTERVAL;
+	  if (envInterval) {
+	    opts.interval = Number.parseInt(envInterval, 10);
+	  }
+
+	  // Editor atomic write normalization enabled by default with fs.watch
+	  if (undef(opts, 'atomic')) opts.atomic = !opts.usePolling && !opts.useFsEvents;
+	  if (opts.atomic) this._pendingUnlinks = new Map();
+
+	  if (undef(opts, 'followSymlinks')) opts.followSymlinks = true;
+
+	  if (undef(opts, 'awaitWriteFinish')) opts.awaitWriteFinish = false;
+	  if (opts.awaitWriteFinish === true) opts.awaitWriteFinish = {};
+	  const awf = opts.awaitWriteFinish;
+	  if (awf) {
+	    if (!awf.stabilityThreshold) awf.stabilityThreshold = 2000;
+	    if (!awf.pollInterval) awf.pollInterval = 100;
+	    this._pendingWrites = new Map();
+	  }
+	  if (opts.ignored) opts.ignored = arrify(opts.ignored);
+
+	  let readyCalls = 0;
+	  this._emitReady = () => {
+	    readyCalls++;
+	    if (readyCalls >= this._readyCount) {
+	      this._emitReady = EMPTY_FN;
+	      this._readyEmitted = true;
+	      // use process.nextTick to allow time for listener to be bound
+	      process.nextTick(() => this.emit(EV_READY));
+	    }
+	  };
+	  this._emitRaw = (...args) => this.emit(EV_RAW, ...args);
+	  this._readyEmitted = false;
+	  this.options = opts;
+
+	  // Initialize with proper watcher.
+	  if (opts.useFsEvents) {
+	    this._fsEventsHandler = new FsEventsHandler(this);
+	  } else {
+	    this._nodeFsHandler = new NodeFsHandler(this);
+	  }
+
+	  // You’re frozen when your heart’s not open.
+	  Object.freeze(opts);
+	}
+
+	// Public methods
+
+	/**
+	 * Adds paths to be watched on an existing FSWatcher instance
+	 * @param {Path|Array<Path>} paths_
+	 * @param {String=} _origAdd private; for handling non-existent paths to be watched
+	 * @param {Boolean=} _internal private; indicates a non-user add
+	 * @returns {FSWatcher} for chaining
+	 */
+	add(paths_, _origAdd, _internal) {
+	  const {cwd, disableGlobbing} = this.options;
+	  this.closed = false;
+	  let paths = unifyPaths(paths_);
+	  if (cwd) {
+	    paths = paths.map((path) => {
+	      const absPath = getAbsolutePath(path, cwd);
+
+	      // Check `path` instead of `absPath` because the cwd portion can't be a glob
+	      if (disableGlobbing || !isGlob(path)) {
+	        return absPath;
+	      }
+	      return normalizePath(absPath);
+	    });
+	  }
+
+	  // set aside negated glob strings
+	  paths = paths.filter((path) => {
+	    if (path.startsWith(BANG)) {
+	      this._ignoredPaths.add(path.slice(1));
+	      return false;
+	    }
+
+	    // if a path is being added that was previously ignored, stop ignoring it
+	    this._ignoredPaths.delete(path);
+	    this._ignoredPaths.delete(path + SLASH_GLOBSTAR);
+
+	    // reset the cached userIgnored anymatch fn
+	    // to make ignoredPaths changes effective
+	    this._userIgnored = undefined;
+
+	    return true;
+	  });
+
+	  if (this.options.useFsEvents && this._fsEventsHandler) {
+	    if (!this._readyCount) this._readyCount = paths.length;
+	    if (this.options.persistent) this._readyCount *= 2;
+	    paths.forEach((path) => this._fsEventsHandler._addToFsEvents(path));
+	  } else {
+	    if (!this._readyCount) this._readyCount = 0;
+	    this._readyCount += paths.length;
+	    Promise.all(
+	      paths.map(async path => {
+	        const res = await this._nodeFsHandler._addToNodeFs(path, !_internal, 0, 0, _origAdd);
+	        if (res) this._emitReady();
+	        return res;
+	      })
+	    ).then(results => {
+	      if (this.closed) return;
+	      results.filter(item => item).forEach(item => {
+	        this.add(sysPath.dirname(item), sysPath.basename(_origAdd || item));
+	      });
+	    });
+	  }
+
+	  return this;
+	}
+
+	/**
+	 * Close watchers or start ignoring events from specified paths.
+	 * @param {Path|Array<Path>} paths_ - string or array of strings, file/directory paths and/or globs
+	 * @returns {FSWatcher} for chaining
+	*/
+	unwatch(paths_) {
+	  if (this.closed) return this;
+	  const paths = unifyPaths(paths_);
+	  const {cwd} = this.options;
+
+	  paths.forEach((path) => {
+	    // convert to absolute path unless relative path already matches
+	    if (!sysPath.isAbsolute(path) && !this._closers.has(path)) {
+	      if (cwd) path = sysPath.join(cwd, path);
+	      path = sysPath.resolve(path);
+	    }
+
+	    this._closePath(path);
+
+	    this._ignoredPaths.add(path);
+	    if (this._watched.has(path)) {
+	      this._ignoredPaths.add(path + SLASH_GLOBSTAR);
+	    }
+
+	    // reset the cached userIgnored anymatch fn
+	    // to make ignoredPaths changes effective
+	    this._userIgnored = undefined;
+	  });
+
+	  return this;
+	}
+
+	/**
+	 * Close watchers and remove all listeners from watched paths.
+	 * @returns {Promise<void>}.
+	*/
+	close() {
+	  if (this.closed) return this._closePromise;
+	  this.closed = true;
+
+	  // Memory management.
+	  this.removeAllListeners();
+	  const closers = [];
+	  this._closers.forEach(closerList => closerList.forEach(closer => {
+	    const promise = closer();
+	    if (promise instanceof Promise) closers.push(promise);
+	  }));
+	  this._streams.forEach(stream => stream.destroy());
+	  this._userIgnored = undefined;
+	  this._readyCount = 0;
+	  this._readyEmitted = false;
+	  this._watched.forEach(dirent => dirent.dispose());
+	  ['closers', 'watched', 'streams', 'symlinkPaths', 'throttled'].forEach(key => {
+	    this[`_${key}`].clear();
+	  });
+
+	  this._closePromise = closers.length ? Promise.all(closers).then(() => undefined) : Promise.resolve();
+	  return this._closePromise;
+	}
+
+	/**
+	 * Expose list of watched paths
+	 * @returns {Object} for chaining
+	*/
+	getWatched() {
+	  const watchList = {};
+	  this._watched.forEach((entry, dir) => {
+	    const key = this.options.cwd ? sysPath.relative(this.options.cwd, dir) : dir;
+	    watchList[key || ONE_DOT] = entry.getChildren().sort();
+	  });
+	  return watchList;
+	}
+
+	emitWithAll(event, args) {
+	  this.emit(...args);
+	  if (event !== EV_ERROR) this.emit(EV_ALL, ...args);
+	}
+
+	// Common helpers
+	// --------------
+
+	/**
+	 * Normalize and emit events.
+	 * Calling _emit DOES NOT MEAN emit() would be called!
+	 * @param {EventName} event Type of event
+	 * @param {Path} path File or directory path
+	 * @param {*=} val1 arguments to be passed with event
+	 * @param {*=} val2
+	 * @param {*=} val3
+	 * @returns the error if defined, otherwise the value of the FSWatcher instance's `closed` flag
+	 */
+	async _emit(event, path, val1, val2, val3) {
+	  if (this.closed) return;
+
+	  const opts = this.options;
+	  if (isWindows) path = sysPath.normalize(path);
+	  if (opts.cwd) path = sysPath.relative(opts.cwd, path);
+	  /** @type Array<any> */
+	  const args = [event, path];
+	  if (val3 !== undefined) args.push(val1, val2, val3);
+	  else if (val2 !== undefined) args.push(val1, val2);
+	  else if (val1 !== undefined) args.push(val1);
+
+	  const awf = opts.awaitWriteFinish;
+	  let pw;
+	  if (awf && (pw = this._pendingWrites.get(path))) {
+	    pw.lastChange = new Date();
+	    return this;
+	  }
+
+	  if (opts.atomic) {
+	    if (event === EV_UNLINK) {
+	      this._pendingUnlinks.set(path, args);
+	      setTimeout(() => {
+	        this._pendingUnlinks.forEach((entry, path) => {
+	          this.emit(...entry);
+	          this.emit(EV_ALL, ...entry);
+	          this._pendingUnlinks.delete(path);
+	        });
+	      }, typeof opts.atomic === 'number' ? opts.atomic : 100);
+	      return this;
+	    }
+	    if (event === EV_ADD && this._pendingUnlinks.has(path)) {
+	      event = args[0] = EV_CHANGE;
+	      this._pendingUnlinks.delete(path);
+	    }
+	  }
+
+	  if (awf && (event === EV_ADD || event === EV_CHANGE) && this._readyEmitted) {
+	    const awfEmit = (err, stats) => {
+	      if (err) {
+	        event = args[0] = EV_ERROR;
+	        args[1] = err;
+	        this.emitWithAll(event, args);
+	      } else if (stats) {
+	        // if stats doesn't exist the file must have been deleted
+	        if (args.length > 2) {
+	          args[2] = stats;
+	        } else {
+	          args.push(stats);
+	        }
+	        this.emitWithAll(event, args);
+	      }
+	    };
+
+	    this._awaitWriteFinish(path, awf.stabilityThreshold, event, awfEmit);
+	    return this;
+	  }
+
+	  if (event === EV_CHANGE) {
+	    const isThrottled = !this._throttle(EV_CHANGE, path, 50);
+	    if (isThrottled) return this;
+	  }
+
+	  if (opts.alwaysStat && val1 === undefined &&
+	    (event === EV_ADD || event === EV_ADD_DIR || event === EV_CHANGE)
+	  ) {
+	    const fullPath = opts.cwd ? sysPath.join(opts.cwd, path) : path;
+	    let stats;
+	    try {
+	      stats = await stat(fullPath);
+	    } catch (err) {}
+	    // Suppress event when fs_stat fails, to avoid sending undefined 'stat'
+	    if (!stats || this.closed) return;
+	    args.push(stats);
+	  }
+	  this.emitWithAll(event, args);
+
+	  return this;
+	}
+
+	/**
+	 * Common handler for errors
+	 * @param {Error} error
+	 * @returns {Error|Boolean} The error if defined, otherwise the value of the FSWatcher instance's `closed` flag
+	 */
+	_handleError(error) {
+	  const code = error && error.code;
+	  if (error && code !== 'ENOENT' && code !== 'ENOTDIR' &&
+	    (!this.options.ignorePermissionErrors || (code !== 'EPERM' && code !== 'EACCES'))
+	  ) {
+	    this.emit(EV_ERROR, error);
+	  }
+	  return error || this.closed;
+	}
+
+	/**
+	 * Helper utility for throttling
+	 * @param {ThrottleType} actionType type being throttled
+	 * @param {Path} path being acted upon
+	 * @param {Number} timeout duration of time to suppress duplicate actions
+	 * @returns {Object|false} tracking object or false if action should be suppressed
+	 */
+	_throttle(actionType, path, timeout) {
+	  if (!this._throttled.has(actionType)) {
+	    this._throttled.set(actionType, new Map());
+	  }
+
+	  /** @type {Map<Path, Object>} */
+	  const action = this._throttled.get(actionType);
+	  /** @type {Object} */
+	  const actionPath = action.get(path);
+
+	  if (actionPath) {
+	    actionPath.count++;
+	    return false;
+	  }
+
+	  let timeoutObject;
+	  const clear = () => {
+	    const item = action.get(path);
+	    const count = item ? item.count : 0;
+	    action.delete(path);
+	    clearTimeout(timeoutObject);
+	    if (item) clearTimeout(item.timeoutObject);
+	    return count;
+	  };
+	  timeoutObject = setTimeout(clear, timeout);
+	  const thr = {timeoutObject, clear, count: 0};
+	  action.set(path, thr);
+	  return thr;
+	}
+
+	_incrReadyCount() {
+	  return this._readyCount++;
+	}
+
+	/**
+	 * Awaits write operation to finish.
+	 * Polls a newly created file for size variations. When files size does not change for 'threshold' milliseconds calls callback.
+	 * @param {Path} path being acted upon
+	 * @param {Number} threshold Time in milliseconds a file size must be fixed before acknowledging write OP is finished
+	 * @param {EventName} event
+	 * @param {Function} awfEmit Callback to be called when ready for event to be emitted.
+	 */
+	_awaitWriteFinish(path, threshold, event, awfEmit) {
+	  let timeoutHandler;
+
+	  let fullPath = path;
+	  if (this.options.cwd && !sysPath.isAbsolute(path)) {
+	    fullPath = sysPath.join(this.options.cwd, path);
+	  }
+
+	  const now = new Date();
+
+	  const awaitWriteFinish = (prevStat) => {
+	    fs.stat(fullPath, (err, curStat) => {
+	      if (err || !this._pendingWrites.has(path)) {
+	        if (err && err.code !== 'ENOENT') awfEmit(err);
+	        return;
+	      }
+
+	      const now = Number(new Date());
+
+	      if (prevStat && curStat.size !== prevStat.size) {
+	        this._pendingWrites.get(path).lastChange = now;
+	      }
+	      const pw = this._pendingWrites.get(path);
+	      const df = now - pw.lastChange;
+
+	      if (df >= threshold) {
+	        this._pendingWrites.delete(path);
+	        awfEmit(undefined, curStat);
+	      } else {
+	        timeoutHandler = setTimeout(
+	          awaitWriteFinish,
+	          this.options.awaitWriteFinish.pollInterval,
+	          curStat
+	        );
+	      }
+	    });
+	  };
+
+	  if (!this._pendingWrites.has(path)) {
+	    this._pendingWrites.set(path, {
+	      lastChange: now,
+	      cancelWait: () => {
+	        this._pendingWrites.delete(path);
+	        clearTimeout(timeoutHandler);
+	        return event;
+	      }
+	    });
+	    timeoutHandler = setTimeout(
+	      awaitWriteFinish,
+	      this.options.awaitWriteFinish.pollInterval
+	    );
+	  }
+	}
+
+	_getGlobIgnored() {
+	  return [...this._ignoredPaths.values()];
+	}
+
+	/**
+	 * Determines whether user has asked to ignore this path.
+	 * @param {Path} path filepath or dir
+	 * @param {fs.Stats=} stats result of fs.stat
+	 * @returns {Boolean}
+	 */
+	_isIgnored(path, stats) {
+	  if (this.options.atomic && DOT_RE.test(path)) return true;
+	  if (!this._userIgnored) {
+	    const {cwd} = this.options;
+	    const ign = this.options.ignored;
+
+	    const ignored = ign && ign.map(normalizeIgnored(cwd));
+	    const paths = arrify(ignored)
+	      .filter((path) => typeof path === STRING_TYPE && !isGlob(path))
+	      .map((path) => path + SLASH_GLOBSTAR);
+	    const list = this._getGlobIgnored().map(normalizeIgnored(cwd)).concat(ignored, paths);
+	    this._userIgnored = anymatch(list, undefined, ANYMATCH_OPTS);
+	  }
+
+	  return this._userIgnored([path, stats]);
+	}
+
+	_isntIgnored(path, stat) {
+	  return !this._isIgnored(path, stat);
+	}
+
+	/**
+	 * Provides a set of common helpers and properties relating to symlink and glob handling.
+	 * @param {Path} path file, directory, or glob pattern being watched
+	 * @param {Number=} depth at any depth > 0, this isn't a glob
+	 * @returns {WatchHelper} object containing helpers for this path
+	 */
+	_getWatchHelpers(path, depth) {
+	  const watchPath = depth || this.options.disableGlobbing || !isGlob(path) ? path : globParent(path);
+	  const follow = this.options.followSymlinks;
+
+	  return new WatchHelper(path, watchPath, follow, this);
+	}
+
+	// Directory helpers
+	// -----------------
+
+	/**
+	 * Provides directory tracking objects
+	 * @param {String} directory path of the directory
+	 * @returns {DirEntry} the directory's tracking object
+	 */
+	_getWatchedDir(directory) {
+	  if (!this._boundRemove) this._boundRemove = this._remove.bind(this);
+	  const dir = sysPath.resolve(directory);
+	  if (!this._watched.has(dir)) this._watched.set(dir, new DirEntry(dir, this._boundRemove));
+	  return this._watched.get(dir);
+	}
+
+	// File helpers
+	// ------------
+
+	/**
+	 * Check for read permissions.
+	 * Based on this answer on SO: https://stackoverflow.com/a/11781404/1358405
+	 * @param {fs.Stats} stats - object, result of fs_stat
+	 * @returns {Boolean} indicates whether the file can be read
+	*/
+	_hasReadPermissions(stats) {
+	  if (this.options.ignorePermissionErrors) return true;
+
+	  // stats.mode may be bigint
+	  const md = stats && Number.parseInt(stats.mode, 10);
+	  const st = md & 0o777;
+	  const it = Number.parseInt(st.toString(8)[0], 10);
+	  return Boolean(4 & it);
+	}
+
+	/**
+	 * Handles emitting unlink events for
+	 * files and directories, and via recursion, for
+	 * files and directories within directories that are unlinked
+	 * @param {String} directory within which the following item is located
+	 * @param {String} item      base path of item/directory
+	 * @returns {void}
+	*/
+	_remove(directory, item, isDirectory) {
+	  // if what is being deleted is a directory, get that directory's paths
+	  // for recursive deleting and cleaning of watched object
+	  // if it is not a directory, nestedDirectoryChildren will be empty array
+	  const path = sysPath.join(directory, item);
+	  const fullPath = sysPath.resolve(path);
+	  isDirectory = isDirectory != null
+	    ? isDirectory
+	    : this._watched.has(path) || this._watched.has(fullPath);
+
+	  // prevent duplicate handling in case of arriving here nearly simultaneously
+	  // via multiple paths (such as _handleFile and _handleDir)
+	  if (!this._throttle('remove', path, 100)) return;
+
+	  // if the only watched file is removed, watch for its return
+	  if (!isDirectory && !this.options.useFsEvents && this._watched.size === 1) {
+	    this.add(directory, item, true);
+	  }
+
+	  // This will create a new entry in the watched object in either case
+	  // so we got to do the directory check beforehand
+	  const wp = this._getWatchedDir(path);
+	  const nestedDirectoryChildren = wp.getChildren();
+
+	  // Recursively remove children directories / files.
+	  nestedDirectoryChildren.forEach(nested => this._remove(path, nested));
+
+	  // Check if item was on the watched list and remove it
+	  const parent = this._getWatchedDir(directory);
+	  const wasTracked = parent.has(item);
+	  parent.remove(item);
+
+	  // Fixes issue #1042 -> Relative paths were detected and added as symlinks
+	  // (https://github.com/paulmillr/chokidar/blob/e1753ddbc9571bdc33b4a4af172d52cb6e611c10/lib/nodefs-handler.js#L612),
+	  // but never removed from the map in case the path was deleted.
+	  // This leads to an incorrect state if the path was recreated:
+	  // https://github.com/paulmillr/chokidar/blob/e1753ddbc9571bdc33b4a4af172d52cb6e611c10/lib/nodefs-handler.js#L553
+	  if (this._symlinkPaths.has(fullPath)) {
+	    this._symlinkPaths.delete(fullPath);
+	  }
+
+	  // If we wait for this file to be fully written, cancel the wait.
+	  let relPath = path;
+	  if (this.options.cwd) relPath = sysPath.relative(this.options.cwd, path);
+	  if (this.options.awaitWriteFinish && this._pendingWrites.has(relPath)) {
+	    const event = this._pendingWrites.get(relPath).cancelWait();
+	    if (event === EV_ADD) return;
+	  }
+
+	  // The Entry will either be a directory that just got removed
+	  // or a bogus entry to a file, in either case we have to remove it
+	  this._watched.delete(path);
+	  this._watched.delete(fullPath);
+	  const eventName = isDirectory ? EV_UNLINK_DIR : EV_UNLINK;
+	  if (wasTracked && !this._isIgnored(path)) this._emit(eventName, path);
+
+	  // Avoid conflicts if we later create another file with the same name
+	  if (!this.options.useFsEvents) {
+	    this._closePath(path);
+	  }
+	}
+
+	/**
+	 * Closes all watchers for a path
+	 * @param {Path} path
+	 */
+	_closePath(path) {
+	  this._closeFile(path);
+	  const dir = sysPath.dirname(path);
+	  this._getWatchedDir(dir).remove(sysPath.basename(path));
+	}
+
+	/**
+	 * Closes only file-specific watchers
+	 * @param {Path} path
+	 */
+	_closeFile(path) {
+	  const closers = this._closers.get(path);
+	  if (!closers) return;
+	  closers.forEach(closer => closer());
+	  this._closers.delete(path);
+	}
+
+	/**
+	 *
+	 * @param {Path} path
+	 * @param {Function} closer
+	 */
+	_addPathCloser(path, closer) {
+	  if (!closer) return;
+	  let list = this._closers.get(path);
+	  if (!list) {
+	    list = [];
+	    this._closers.set(path, list);
+	  }
+	  list.push(closer);
+	}
+
+	_readdirp(root, opts) {
+	  if (this.closed) return;
+	  const options = {type: EV_ALL, alwaysStat: true, lstat: true, ...opts};
+	  let stream = readdirp(root, options);
+	  this._streams.add(stream);
+	  stream.once(STR_CLOSE, () => {
+	    stream = undefined;
+	  });
+	  stream.once(STR_END, () => {
+	    if (stream) {
+	      this._streams.delete(stream);
+	      stream = undefined;
+	    }
+	  });
+	  return stream;
+	}
+
+	}
+
+	// Export FSWatcher class
+	chokidar$1.FSWatcher = FSWatcher;
+
+	/**
+	 * Instantiates watcher with paths to be tracked.
+	 * @param {String|Array<String>} paths file/directory paths and/or globs
+	 * @param {Object=} options chokidar opts
+	 * @returns an instance of FSWatcher for chaining.
+	 */
+	const watch = (paths, options) => {
+	  const watcher = new FSWatcher(options);
+	  watcher.add(paths);
+	  return watcher;
+	};
+
+	chokidar$1.watch = watch;
+	return chokidar$1;
+}
+
+/* eslint-disable no-console */
+
+function _inheritsLoose$1(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf$1(subClass, superClass); }
+
+function _setPrototypeOf$1(o, p) { _setPrototypeOf$1 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$1(o, p); }
+
+var fs$1 = require$$0__default["default"];
+
+var path$2 = require$$0__default$2["default"];
+
+var Loader$1 = loader;
+
+var _require$3 = precompiledLoader,
+    PrecompiledLoader$1 = _require$3.PrecompiledLoader;
+
+var chokidar;
+
+var FileSystemLoader$1 = /*#__PURE__*/function (_Loader) {
+  _inheritsLoose$1(FileSystemLoader, _Loader);
+
+  function FileSystemLoader(searchPaths, opts) {
+    var _this;
+
+    _this = _Loader.call(this) || this;
+
+    if (typeof opts === 'boolean') {
+      console.log('[nunjucks] Warning: you passed a boolean as the second ' + 'argument to FileSystemLoader, but it now takes an options ' + 'object. See http://mozilla.github.io/nunjucks/api.html#filesystemloader');
+    }
+
+    opts = opts || {};
+    _this.pathsToNames = {};
+    _this.noCache = !!opts.noCache;
+
+    if (searchPaths) {
+      searchPaths = Array.isArray(searchPaths) ? searchPaths : [searchPaths]; // For windows, convert to forward slashes
+
+      _this.searchPaths = searchPaths.map(path$2.normalize);
+    } else {
+      _this.searchPaths = ['.'];
+    }
+
+    if (opts.watch) {
+      // Watch all the templates in the paths and fire an event when
+      // they change
+      try {
+        chokidar = requireChokidar(); // eslint-disable-line global-require
+      } catch (e) {
+        throw new Error('watch requires chokidar to be installed');
+      }
+
+      var paths = _this.searchPaths.filter(fs$1.existsSync);
+
+      var watcher = chokidar.watch(paths);
+      watcher.on('all', function (event, fullname) {
+        fullname = path$2.resolve(fullname);
+
+        if (event === 'change' && fullname in _this.pathsToNames) {
+          _this.emit('update', _this.pathsToNames[fullname], fullname);
+        }
+      });
+      watcher.on('error', function (error) {
+        console.log('Watcher error: ' + error);
+      });
+    }
+
+    return _this;
+  }
+
+  var _proto = FileSystemLoader.prototype;
+
+  _proto.getSource = function getSource(name) {
+    var fullpath = null;
+    var paths = this.searchPaths;
+
+    for (var i = 0; i < paths.length; i++) {
+      var basePath = path$2.resolve(paths[i]);
+      var p = path$2.resolve(paths[i], name); // Only allow the current directory and anything
+      // underneath it to be searched
+
+      if (p.indexOf(basePath) === 0 && fs$1.existsSync(p)) {
+        fullpath = p;
+        break;
+      }
+    }
+
+    if (!fullpath) {
+      return null;
+    }
+
+    this.pathsToNames[fullpath] = name;
+    var source = {
+      src: fs$1.readFileSync(fullpath, 'utf-8'),
+      path: fullpath,
+      noCache: this.noCache
+    };
+    this.emit('load', name, source);
+    return source;
+  };
+
+  return FileSystemLoader;
+}(Loader$1);
+
+var NodeResolveLoader = /*#__PURE__*/function (_Loader2) {
+  _inheritsLoose$1(NodeResolveLoader, _Loader2);
+
+  function NodeResolveLoader(opts) {
+    var _this2;
+
+    _this2 = _Loader2.call(this) || this;
+    opts = opts || {};
+    _this2.pathsToNames = {};
+    _this2.noCache = !!opts.noCache;
+
+    if (opts.watch) {
+      try {
+        chokidar = requireChokidar(); // eslint-disable-line global-require
+      } catch (e) {
+        throw new Error('watch requires chokidar to be installed');
+      }
+
+      _this2.watcher = chokidar.watch();
+
+      _this2.watcher.on('change', function (fullname) {
+        _this2.emit('update', _this2.pathsToNames[fullname], fullname);
+      });
+
+      _this2.watcher.on('error', function (error) {
+        console.log('Watcher error: ' + error);
+      });
+
+      _this2.on('load', function (name, source) {
+        _this2.watcher.add(source.path);
+      });
+    }
+
+    return _this2;
+  }
+
+  var _proto2 = NodeResolveLoader.prototype;
+
+  _proto2.getSource = function getSource(name) {
+    // Don't allow file-system traversal
+    if (/^\.?\.?(\/|\\)/.test(name)) {
+      return null;
+    }
+
+    if (/^[A-Z]:/.test(name)) {
+      return null;
+    }
+
+    var fullpath;
+
+    try {
+      fullpath = require.resolve(name);
+    } catch (e) {
+      return null;
+    }
+
+    this.pathsToNames[fullpath] = name;
+    var source = {
+      src: fs$1.readFileSync(fullpath, 'utf-8'),
+      path: fullpath,
+      noCache: this.noCache
+    };
+    this.emit('load', name, source);
+    return source;
+  };
+
+  return NodeResolveLoader;
+}(Loader$1);
+
+var nodeLoaders = {
+  FileSystemLoader: FileSystemLoader$1,
+  PrecompiledLoader: PrecompiledLoader$1,
+  NodeResolveLoader: NodeResolveLoader
+};
+
+(function (module) {
+
+	// This file will automatically be rewired to web-loader.js when
+	// building for the browser
+	module.exports = nodeLoaders;
+} (loaders$1));
+
+var tests$1 = {};
+
+(function (exports) {
+
+	var SafeString = runtime$1.SafeString;
+	/**
+	 * Returns `true` if the object is a function, otherwise `false`.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+
+	function callable(value) {
+	  return typeof value === 'function';
+	}
+
+	exports.callable = callable;
+	/**
+	 * Returns `true` if the object is strictly not `undefined`.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function defined(value) {
+	  return value !== undefined;
+	}
+
+	exports.defined = defined;
+	/**
+	 * Returns `true` if the operand (one) is divisble by the test's argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+
+	function divisibleby(one, two) {
+	  return one % two === 0;
+	}
+
+	exports.divisibleby = divisibleby;
+	/**
+	 * Returns true if the string has been escaped (i.e., is a SafeString).
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function escaped(value) {
+	  return value instanceof SafeString;
+	}
+
+	exports.escaped = escaped;
+	/**
+	 * Returns `true` if the arguments are strictly equal.
+	 * @param { any } one
+	 * @param { any } two
+	 */
+
+	function equalto(one, two) {
+	  return one === two;
+	}
+
+	exports.equalto = equalto; // Aliases
+
+	exports.eq = exports.equalto;
+	exports.sameas = exports.equalto;
+	/**
+	 * Returns `true` if the value is evenly divisible by 2.
+	 * @param { number } value
+	 * @returns { boolean }
+	 */
+
+	function even(value) {
+	  return value % 2 === 0;
+	}
+
+	exports.even = even;
+	/**
+	 * Returns `true` if the value is falsy - if I recall correctly, '', 0, false,
+	 * undefined, NaN or null. I don't know if we should stick to the default JS
+	 * behavior or attempt to replicate what Python believes should be falsy (i.e.,
+	 * empty arrays, empty dicts, not 0...).
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function falsy(value) {
+	  return !value;
+	}
+
+	exports.falsy = falsy;
+	/**
+	 * Returns `true` if the operand (one) is greater or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+
+	function ge(one, two) {
+	  return one >= two;
+	}
+
+	exports.ge = ge;
+	/**
+	 * Returns `true` if the operand (one) is greater than the test's argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+
+	function greaterthan(one, two) {
+	  return one > two;
+	}
+
+	exports.greaterthan = greaterthan; // alias
+
+	exports.gt = exports.greaterthan;
+	/**
+	 * Returns `true` if the operand (one) is less than or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+
+	function le(one, two) {
+	  return one <= two;
+	}
+
+	exports.le = le;
+	/**
+	 * Returns `true` if the operand (one) is less than the test's passed argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+
+	function lessthan(one, two) {
+	  return one < two;
+	}
+
+	exports.lessthan = lessthan; // alias
+
+	exports.lt = exports.lessthan;
+	/**
+	 * Returns `true` if the string is lowercased.
+	 * @param { string } value
+	 * @returns { boolean }
+	 */
+
+	function lower(value) {
+	  return value.toLowerCase() === value;
+	}
+
+	exports.lower = lower;
+	/**
+	 * Returns `true` if the operand (one) is less than or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+
+	function ne(one, two) {
+	  return one !== two;
+	}
+
+	exports.ne = ne;
+	/**
+	 * Returns true if the value is strictly equal to `null`.
+	 * @param { any }
+	 * @returns { boolean }
+	 */
+
+	function nullTest(value) {
+	  return value === null;
+	}
+
+	exports.null = nullTest;
+	/**
+	 * Returns true if value is a number.
+	 * @param { any }
+	 * @returns { boolean }
+	 */
+
+	function number(value) {
+	  return typeof value === 'number';
+	}
+
+	exports.number = number;
+	/**
+	 * Returns `true` if the value is *not* evenly divisible by 2.
+	 * @param { number } value
+	 * @returns { boolean }
+	 */
+
+	function odd(value) {
+	  return value % 2 === 1;
+	}
+
+	exports.odd = odd;
+	/**
+	 * Returns `true` if the value is a string, `false` if not.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function string(value) {
+	  return typeof value === 'string';
+	}
+
+	exports.string = string;
+	/**
+	 * Returns `true` if the value is not in the list of things considered falsy:
+	 * '', null, undefined, 0, NaN and false.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function truthy(value) {
+	  return !!value;
+	}
+
+	exports.truthy = truthy;
+	/**
+	 * Returns `true` if the value is undefined.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function undefinedTest(value) {
+	  return value === undefined;
+	}
+
+	exports.undefined = undefinedTest;
+	/**
+	 * Returns `true` if the string is uppercased.
+	 * @param { string } value
+	 * @returns { boolean }
+	 */
+
+	function upper(value) {
+	  return value.toUpperCase() === value;
+	}
+
+	exports.upper = upper;
+	/**
+	 * If ES6 features are available, returns `true` if the value implements the
+	 * `Symbol.iterator` method. If not, it's a string or Array.
+	 *
+	 * Could potentially cause issues if a browser exists that has Set and Map but
+	 * not Symbol.
+	 *
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function iterable(value) {
+	  if (typeof Symbol !== 'undefined') {
+	    return !!value[Symbol.iterator];
+	  } else {
+	    return Array.isArray(value) || typeof value === 'string';
+	  }
+	}
+
+	exports.iterable = iterable;
+	/**
+	 * If ES6 features are available, returns `true` if the value is an object hash
+	 * or an ES6 Map. Otherwise just return if it's an object hash.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+
+	function mapping(value) {
+	  // only maps and object hashes
+	  var bool = value !== null && value !== undefined && typeof value === 'object' && !Array.isArray(value);
+
+	  if (Set) {
+	    return bool && !(value instanceof Set);
+	  } else {
+	    return bool;
+	  }
+	}
+
+	exports.mapping = mapping;
+} (tests$1));
+
+function _cycler(items) {
+  var index = -1;
+  return {
+    current: null,
+    reset: function reset() {
+      index = -1;
+      this.current = null;
+    },
+    next: function next() {
+      index++;
+
+      if (index >= items.length) {
+        index = 0;
+      }
+
+      this.current = items[index];
+      return this.current;
+    }
+  };
+}
+
+function _joiner(sep) {
+  sep = sep || ',';
+  var first = true;
+  return function () {
+    var val = first ? '' : sep;
+    first = false;
+    return val;
+  };
+} // Making this a function instead so it returns a new object
+// each time it's called. That way, if something like an environment
+// uses it, they will each have their own copy.
+
+
+function globals$1() {
+  return {
+    range: function range(start, stop, step) {
+      if (typeof stop === 'undefined') {
+        stop = start;
+        start = 0;
+        step = 1;
+      } else if (!step) {
+        step = 1;
+      }
+
+      var arr = [];
+
+      if (step > 0) {
+        for (var i = start; i < stop; i += step) {
+          arr.push(i);
+        }
+      } else {
+        for (var _i = start; _i > stop; _i += step) {
+          // eslint-disable-line for-direction
+          arr.push(_i);
+        }
+      }
+
+      return arr;
+    },
+    cycler: function cycler() {
+      return _cycler(Array.prototype.slice.call(arguments));
+    },
+    joiner: function joiner(sep) {
+      return _joiner(sep);
+    }
+  };
+}
+
+var globals_1 = globals$1;
+
+var path$1 = require$$0__default$2["default"];
+
+var expressApp$1 = function express(env, app) {
+  function NunjucksView(name, opts) {
+    this.name = name;
+    this.path = name;
+    this.defaultEngine = opts.defaultEngine;
+    this.ext = path$1.extname(name);
+
+    if (!this.ext && !this.defaultEngine) {
+      throw new Error('No default engine was specified and no extension was provided.');
+    }
+
+    if (!this.ext) {
+      this.name += this.ext = (this.defaultEngine[0] !== '.' ? '.' : '') + this.defaultEngine;
+    }
+  }
+
+  NunjucksView.prototype.render = function render(opts, cb) {
+    env.render(this.name, opts, cb);
+  };
+
+  app.set('view', NunjucksView);
+  app.set('nunjucksEnv', env);
+  return env;
+};
+
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var asap = asap_1;
+
+var _waterfall = aSyncWaterfall.exports;
+
+var lib$2 = lib$9.exports;
+
+var compiler$2 = compiler$3;
+
+var filters = filters$1.exports;
+
+var _require$2 = loaders$1.exports,
+    FileSystemLoader = _require$2.FileSystemLoader,
+    WebLoader = _require$2.WebLoader,
+    PrecompiledLoader = _require$2.PrecompiledLoader;
+
+var tests = tests$1;
+
+var globals = globals_1;
+
+var _require2$1 = object,
+    Obj = _require2$1.Obj,
+    EmitterObj = _require2$1.EmitterObj;
+
+var globalRuntime = runtime$1;
+
+var handleError = globalRuntime.handleError,
+    Frame = globalRuntime.Frame;
+
+var expressApp = expressApp$1; // If the user is using the async API, *always* call it
+// asynchronously even if the template was synchronous.
+
+
+function callbackAsap(cb, err, res) {
+  asap(function () {
+    cb(err, res);
+  });
+}
+/**
+ * A no-op template, for use with {% include ignore missing %}
+ */
+
+
+var noopTmplSrc = {
+  type: 'code',
+  obj: {
+    root: function root(env, context, frame, runtime, cb) {
+      try {
+        cb(null, '');
+      } catch (e) {
+        cb(handleError(e, null, null));
+      }
+    }
+  }
+};
+
+var Environment$2 = /*#__PURE__*/function (_EmitterObj) {
+  _inheritsLoose(Environment, _EmitterObj);
+
+  function Environment() {
+    return _EmitterObj.apply(this, arguments) || this;
+  }
+
+  var _proto = Environment.prototype;
+
+  _proto.init = function init(loaders, opts) {
+    var _this = this;
+
+    // The dev flag determines the trace that'll be shown on errors.
+    // If set to true, returns the full trace from the error point,
+    // otherwise will return trace starting from Template.render
+    // (the full trace from within nunjucks may confuse developers using
+    //  the library)
+    // defaults to false
+    opts = this.opts = opts || {};
+    this.opts.dev = !!opts.dev; // The autoescape flag sets global autoescaping. If true,
+    // every string variable will be escaped by default.
+    // If false, strings can be manually escaped using the `escape` filter.
+    // defaults to true
+
+    this.opts.autoescape = opts.autoescape != null ? opts.autoescape : true; // If true, this will make the system throw errors if trying
+    // to output a null or undefined value
+
+    this.opts.throwOnUndefined = !!opts.throwOnUndefined;
+    this.opts.trimBlocks = !!opts.trimBlocks;
+    this.opts.lstripBlocks = !!opts.lstripBlocks;
+    this.loaders = [];
+
+    if (!loaders) {
+      // The filesystem loader is only available server-side
+      if (FileSystemLoader) {
+        this.loaders = [new FileSystemLoader('views')];
+      } else if (WebLoader) {
+        this.loaders = [new WebLoader('/views')];
+      }
+    } else {
+      this.loaders = lib$2.isArray(loaders) ? loaders : [loaders];
+    } // It's easy to use precompiled templates: just include them
+    // before you configure nunjucks and this will automatically
+    // pick it up and use it
+
+
+    if (typeof window !== 'undefined' && window.nunjucksPrecompiled) {
+      this.loaders.unshift(new PrecompiledLoader(window.nunjucksPrecompiled));
+    }
+
+    this._initLoaders();
+
+    this.globals = globals();
+    this.filters = {};
+    this.tests = {};
+    this.asyncFilters = [];
+    this.extensions = {};
+    this.extensionsList = [];
+
+    lib$2._entries(filters).forEach(function (_ref) {
+      var name = _ref[0],
+          filter = _ref[1];
+      return _this.addFilter(name, filter);
+    });
+
+    lib$2._entries(tests).forEach(function (_ref2) {
+      var name = _ref2[0],
+          test = _ref2[1];
+      return _this.addTest(name, test);
+    });
+  };
+
+  _proto._initLoaders = function _initLoaders() {
+    var _this2 = this;
+
+    this.loaders.forEach(function (loader) {
+      // Caching and cache busting
+      loader.cache = {};
+
+      if (typeof loader.on === 'function') {
+        loader.on('update', function (name, fullname) {
+          loader.cache[name] = null;
+
+          _this2.emit('update', name, fullname, loader);
+        });
+        loader.on('load', function (name, source) {
+          _this2.emit('load', name, source, loader);
+        });
+      }
+    });
+  };
+
+  _proto.invalidateCache = function invalidateCache() {
+    this.loaders.forEach(function (loader) {
+      loader.cache = {};
+    });
+  };
+
+  _proto.addExtension = function addExtension(name, extension) {
+    extension.__name = name;
+    this.extensions[name] = extension;
+    this.extensionsList.push(extension);
+    return this;
+  };
+
+  _proto.removeExtension = function removeExtension(name) {
+    var extension = this.getExtension(name);
+
+    if (!extension) {
+      return;
+    }
+
+    this.extensionsList = lib$2.without(this.extensionsList, extension);
+    delete this.extensions[name];
+  };
+
+  _proto.getExtension = function getExtension(name) {
+    return this.extensions[name];
+  };
+
+  _proto.hasExtension = function hasExtension(name) {
+    return !!this.extensions[name];
+  };
+
+  _proto.addGlobal = function addGlobal(name, value) {
+    this.globals[name] = value;
+    return this;
+  };
+
+  _proto.getGlobal = function getGlobal(name) {
+    if (typeof this.globals[name] === 'undefined') {
+      throw new Error('global not found: ' + name);
+    }
+
+    return this.globals[name];
+  };
+
+  _proto.addFilter = function addFilter(name, func, async) {
+    var wrapped = func;
+
+    if (async) {
+      this.asyncFilters.push(name);
+    }
+
+    this.filters[name] = wrapped;
+    return this;
+  };
+
+  _proto.getFilter = function getFilter(name) {
+    if (!this.filters[name]) {
+      throw new Error('filter not found: ' + name);
+    }
+
+    return this.filters[name];
+  };
+
+  _proto.addTest = function addTest(name, func) {
+    this.tests[name] = func;
+    return this;
+  };
+
+  _proto.getTest = function getTest(name) {
+    if (!this.tests[name]) {
+      throw new Error('test not found: ' + name);
+    }
+
+    return this.tests[name];
+  };
+
+  _proto.resolveTemplate = function resolveTemplate(loader, parentName, filename) {
+    var isRelative = loader.isRelative && parentName ? loader.isRelative(filename) : false;
+    return isRelative && loader.resolve ? loader.resolve(parentName, filename) : filename;
+  };
+
+  _proto.getTemplate = function getTemplate(name, eagerCompile, parentName, ignoreMissing, cb) {
+    var _this3 = this;
+
+    var that = this;
+    var tmpl = null;
+
+    if (name && name.raw) {
+      // this fixes autoescape for templates referenced in symbols
+      name = name.raw;
+    }
+
+    if (lib$2.isFunction(parentName)) {
+      cb = parentName;
+      parentName = null;
+      eagerCompile = eagerCompile || false;
+    }
+
+    if (lib$2.isFunction(eagerCompile)) {
+      cb = eagerCompile;
+      eagerCompile = false;
+    }
+
+    if (name instanceof Template$1) {
+      tmpl = name;
+    } else if (typeof name !== 'string') {
+      throw new Error('template names must be a string: ' + name);
+    } else {
+      for (var i = 0; i < this.loaders.length; i++) {
+        var loader = this.loaders[i];
+        tmpl = loader.cache[this.resolveTemplate(loader, parentName, name)];
+
+        if (tmpl) {
+          break;
+        }
+      }
+    }
+
+    if (tmpl) {
+      if (eagerCompile) {
+        tmpl.compile();
+      }
+
+      if (cb) {
+        cb(null, tmpl);
+        return undefined;
+      } else {
+        return tmpl;
+      }
+    }
+
+    var syncResult;
+
+    var createTemplate = function createTemplate(err, info) {
+      if (!info && !err && !ignoreMissing) {
+        err = new Error('template not found: ' + name);
+      }
+
+      if (err) {
+        if (cb) {
+          cb(err);
+          return;
+        } else {
+          throw err;
+        }
+      }
+
+      var newTmpl;
+
+      if (!info) {
+        newTmpl = new Template$1(noopTmplSrc, _this3, '', eagerCompile);
+      } else {
+        newTmpl = new Template$1(info.src, _this3, info.path, eagerCompile);
+
+        if (!info.noCache) {
+          info.loader.cache[name] = newTmpl;
+        }
+      }
+
+      if (cb) {
+        cb(null, newTmpl);
+      } else {
+        syncResult = newTmpl;
+      }
+    };
+
+    lib$2.asyncIter(this.loaders, function (loader, i, next, done) {
+      function handle(err, src) {
+        if (err) {
+          done(err);
+        } else if (src) {
+          src.loader = loader;
+          done(null, src);
+        } else {
+          next();
+        }
+      } // Resolve name relative to parentName
+
+
+      name = that.resolveTemplate(loader, parentName, name);
+
+      if (loader.async) {
+        loader.getSource(name, handle);
+      } else {
+        handle(null, loader.getSource(name));
+      }
+    }, createTemplate);
+    return syncResult;
+  };
+
+  _proto.express = function express(app) {
+    return expressApp(this, app);
+  };
+
+  _proto.render = function render(name, ctx, cb) {
+    if (lib$2.isFunction(ctx)) {
+      cb = ctx;
+      ctx = null;
+    } // We support a synchronous API to make it easier to migrate
+    // existing code to async. This works because if you don't do
+    // anything async work, the whole thing is actually run
+    // synchronously.
+
+
+    var syncResult = null;
+    this.getTemplate(name, function (err, tmpl) {
+      if (err && cb) {
+        callbackAsap(cb, err);
+      } else if (err) {
+        throw err;
+      } else {
+        syncResult = tmpl.render(ctx, cb);
+      }
+    });
+    return syncResult;
+  };
+
+  _proto.renderString = function renderString(src, ctx, opts, cb) {
+    if (lib$2.isFunction(opts)) {
+      cb = opts;
+      opts = {};
+    }
+
+    opts = opts || {};
+    var tmpl = new Template$1(src, this, opts.path);
+    return tmpl.render(ctx, cb);
+  };
+
+  _proto.waterfall = function waterfall(tasks, callback, forceAsync) {
+    return _waterfall(tasks, callback, forceAsync);
+  };
+
+  return Environment;
+}(EmitterObj);
+
+var Context = /*#__PURE__*/function (_Obj) {
+  _inheritsLoose(Context, _Obj);
+
+  function Context() {
+    return _Obj.apply(this, arguments) || this;
+  }
+
+  var _proto2 = Context.prototype;
+
+  _proto2.init = function init(ctx, blocks, env) {
+    var _this4 = this;
+
+    // Has to be tied to an environment so we can tap into its globals.
+    this.env = env || new Environment$2(); // Make a duplicate of ctx
+
+    this.ctx = lib$2.extend({}, ctx);
+    this.blocks = {};
+    this.exported = [];
+    lib$2.keys(blocks).forEach(function (name) {
+      _this4.addBlock(name, blocks[name]);
+    });
+  };
+
+  _proto2.lookup = function lookup(name) {
+    // This is one of the most called functions, so optimize for
+    // the typical case where the name isn't in the globals
+    if (name in this.env.globals && !(name in this.ctx)) {
+      return this.env.globals[name];
+    } else {
+      return this.ctx[name];
+    }
+  };
+
+  _proto2.setVariable = function setVariable(name, val) {
+    this.ctx[name] = val;
+  };
+
+  _proto2.getVariables = function getVariables() {
+    return this.ctx;
+  };
+
+  _proto2.addBlock = function addBlock(name, block) {
+    this.blocks[name] = this.blocks[name] || [];
+    this.blocks[name].push(block);
+    return this;
+  };
+
+  _proto2.getBlock = function getBlock(name) {
+    if (!this.blocks[name]) {
+      throw new Error('unknown block "' + name + '"');
+    }
+
+    return this.blocks[name][0];
+  };
+
+  _proto2.getSuper = function getSuper(env, name, block, frame, runtime, cb) {
+    var idx = lib$2.indexOf(this.blocks[name] || [], block);
+    var blk = this.blocks[name][idx + 1];
+    var context = this;
+
+    if (idx === -1 || !blk) {
+      throw new Error('no super block available for "' + name + '"');
+    }
+
+    blk(env, context, frame, runtime, cb);
+  };
+
+  _proto2.addExport = function addExport(name) {
+    this.exported.push(name);
+  };
+
+  _proto2.getExported = function getExported() {
+    var _this5 = this;
+
+    var exported = {};
+    this.exported.forEach(function (name) {
+      exported[name] = _this5.ctx[name];
+    });
+    return exported;
+  };
+
+  return Context;
+}(Obj);
+
+var Template$1 = /*#__PURE__*/function (_Obj2) {
+  _inheritsLoose(Template, _Obj2);
+
+  function Template() {
+    return _Obj2.apply(this, arguments) || this;
+  }
+
+  var _proto3 = Template.prototype;
+
+  _proto3.init = function init(src, env, path, eagerCompile) {
+    this.env = env || new Environment$2();
+
+    if (lib$2.isObject(src)) {
+      switch (src.type) {
+        case 'code':
+          this.tmplProps = src.obj;
+          break;
+
+        case 'string':
+          this.tmplStr = src.obj;
+          break;
+
+        default:
+          throw new Error("Unexpected template object type " + src.type + "; expected 'code', or 'string'");
+      }
+    } else if (lib$2.isString(src)) {
+      this.tmplStr = src;
+    } else {
+      throw new Error('src must be a string or an object describing the source');
+    }
+
+    this.path = path;
+
+    if (eagerCompile) {
+      try {
+        this._compile();
+      } catch (err) {
+        throw lib$2._prettifyError(this.path, this.env.opts.dev, err);
+      }
+    } else {
+      this.compiled = false;
+    }
+  };
+
+  _proto3.render = function render(ctx, parentFrame, cb) {
+    var _this6 = this;
+
+    if (typeof ctx === 'function') {
+      cb = ctx;
+      ctx = {};
+    } else if (typeof parentFrame === 'function') {
+      cb = parentFrame;
+      parentFrame = null;
+    } // If there is a parent frame, we are being called from internal
+    // code of another template, and the internal system
+    // depends on the sync/async nature of the parent template
+    // to be inherited, so force an async callback
+
+
+    var forceAsync = !parentFrame; // Catch compile errors for async rendering
+
+    try {
+      this.compile();
+    } catch (e) {
+      var err = lib$2._prettifyError(this.path, this.env.opts.dev, e);
+
+      if (cb) {
+        return callbackAsap(cb, err);
+      } else {
+        throw err;
+      }
+    }
+
+    var context = new Context(ctx || {}, this.blocks, this.env);
+    var frame = parentFrame ? parentFrame.push(true) : new Frame();
+    frame.topLevel = true;
+    var syncResult = null;
+    var didError = false;
+    this.rootRenderFunc(this.env, context, frame, globalRuntime, function (err, res) {
+      // TODO: this is actually a bug in the compiled template (because waterfall
+      // tasks are both not passing errors up the chain of callbacks AND are not
+      // causing a return from the top-most render function). But fixing that
+      // will require a more substantial change to the compiler.
+      if (didError && cb && typeof res !== 'undefined') {
+        // prevent multiple calls to cb
+        return;
+      }
+
+      if (err) {
+        err = lib$2._prettifyError(_this6.path, _this6.env.opts.dev, err);
+        didError = true;
+      }
+
+      if (cb) {
+        if (forceAsync) {
+          callbackAsap(cb, err, res);
+        } else {
+          cb(err, res);
+        }
+      } else {
+        if (err) {
+          throw err;
+        }
+
+        syncResult = res;
+      }
+    });
+    return syncResult;
+  };
+
+  _proto3.getExported = function getExported(ctx, parentFrame, cb) {
+    // eslint-disable-line consistent-return
+    if (typeof ctx === 'function') {
+      cb = ctx;
+      ctx = {};
+    }
+
+    if (typeof parentFrame === 'function') {
+      cb = parentFrame;
+      parentFrame = null;
+    } // Catch compile errors for async rendering
+
+
+    try {
+      this.compile();
+    } catch (e) {
+      if (cb) {
+        return cb(e);
+      } else {
+        throw e;
+      }
+    }
+
+    var frame = parentFrame ? parentFrame.push() : new Frame();
+    frame.topLevel = true; // Run the rootRenderFunc to populate the context with exported vars
+
+    var context = new Context(ctx || {}, this.blocks, this.env);
+    this.rootRenderFunc(this.env, context, frame, globalRuntime, function (err) {
+      if (err) {
+        cb(err, null);
+      } else {
+        cb(null, context.getExported());
+      }
+    });
+  };
+
+  _proto3.compile = function compile() {
+    if (!this.compiled) {
+      this._compile();
+    }
+  };
+
+  _proto3._compile = function _compile() {
+    var props;
+
+    if (this.tmplProps) {
+      props = this.tmplProps;
+    } else {
+      var source = compiler$2.compile(this.tmplStr, this.env.asyncFilters, this.env.extensionsList, this.path, this.env.opts);
+      var func = new Function(source); // eslint-disable-line no-new-func
+
+      props = func();
+    }
+
+    this.blocks = this._getBlocks(props);
+    this.rootRenderFunc = props.root;
+    this.compiled = true;
+  };
+
+  _proto3._getBlocks = function _getBlocks(props) {
+    var blocks = {};
+    lib$2.keys(props).forEach(function (k) {
+      if (k.slice(0, 2) === 'b_') {
+        blocks[k.slice(2)] = props[k];
+      }
+    });
+    return blocks;
+  };
+
+  return Template;
+}(Obj);
+
+var environment = {
+  Environment: Environment$2,
+  Template: Template$1
+};
+
+function precompileGlobal$1(templates, opts) {
+  var out = '';
+  opts = opts || {};
+
+  for (var i = 0; i < templates.length; i++) {
+    var name = JSON.stringify(templates[i].name);
+    var template = templates[i].template;
+    out += '(function() {' + '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' + '[' + name + '] = (function() {\n' + template + '\n})();\n';
+
+    if (opts.asFunction) {
+      out += 'return function(ctx, cb) { return nunjucks.render(' + name + ', ctx, cb); }\n';
+    }
+
+    out += '})();\n';
+  }
+
+  return out;
+}
+
+var precompileGlobal_1 = precompileGlobal$1;
+
+var fs = require$$0__default["default"];
+
+var path = require$$0__default$2["default"];
+
+var _require$1 = lib$9.exports,
+    _prettifyError = _require$1._prettifyError;
+
+var compiler$1 = compiler$3;
+
+var _require2 = environment,
+    Environment$1 = _require2.Environment;
+
+var precompileGlobal = precompileGlobal_1;
+
+function match(filename, patterns) {
+  if (!Array.isArray(patterns)) {
+    return false;
+  }
+
+  return patterns.some(function (pattern) {
+    return filename.match(pattern);
+  });
+}
+
+function precompileString(str, opts) {
+  opts = opts || {};
+  opts.isString = true;
+  var env = opts.env || new Environment$1([]);
+  var wrapper = opts.wrapper || precompileGlobal;
+
+  if (!opts.name) {
+    throw new Error('the "name" option is required when compiling a string');
+  }
+
+  return wrapper([_precompile(str, opts.name, env)], opts);
+}
+
+function precompile$1(input, opts) {
+  // The following options are available:
+  //
+  // * name: name of the template (auto-generated when compiling a directory)
+  // * isString: input is a string, not a file path
+  // * asFunction: generate a callable function
+  // * force: keep compiling on error
+  // * env: the Environment to use (gets extensions and async filters from it)
+  // * include: which file/folders to include (folders are auto-included, files are auto-excluded)
+  // * exclude: which file/folders to exclude (folders are auto-included, files are auto-excluded)
+  // * wrapper: function(templates, opts) {...}
+  //       Customize the output format to store the compiled template.
+  //       By default, templates are stored in a global variable used by the runtime.
+  //       A custom loader will be necessary to load your custom wrapper.
+  opts = opts || {};
+  var env = opts.env || new Environment$1([]);
+  var wrapper = opts.wrapper || precompileGlobal;
+
+  if (opts.isString) {
+    return precompileString(input, opts);
+  }
+
+  var pathStats = fs.existsSync(input) && fs.statSync(input);
+  var precompiled = [];
+  var templates = [];
+
+  function addTemplates(dir) {
+    fs.readdirSync(dir).forEach(function (file) {
+      var filepath = path.join(dir, file);
+      var subpath = filepath.substr(path.join(input, '/').length);
+      var stat = fs.statSync(filepath);
+
+      if (stat && stat.isDirectory()) {
+        subpath += '/';
+
+        if (!match(subpath, opts.exclude)) {
+          addTemplates(filepath);
+        }
+      } else if (match(subpath, opts.include)) {
+        templates.push(filepath);
+      }
+    });
+  }
+
+  if (pathStats.isFile()) {
+    precompiled.push(_precompile(fs.readFileSync(input, 'utf-8'), opts.name || input, env));
+  } else if (pathStats.isDirectory()) {
+    addTemplates(input);
+
+    for (var i = 0; i < templates.length; i++) {
+      var name = templates[i].replace(path.join(input, '/'), '');
+
+      try {
+        precompiled.push(_precompile(fs.readFileSync(templates[i], 'utf-8'), name, env));
+      } catch (e) {
+        if (opts.force) {
+          // Don't stop generating the output if we're
+          // forcing compilation.
+          console.error(e); // eslint-disable-line no-console
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+
+  return wrapper(precompiled, opts);
+}
+
+function _precompile(str, name, env) {
+  env = env || new Environment$1([]);
+  var asyncFilters = env.asyncFilters;
+  var extensions = env.extensionsList;
+  var template;
+  name = name.replace(/\\/g, '/');
+
+  try {
+    template = compiler$1.compile(str, asyncFilters, extensions, name, env.opts);
+  } catch (err) {
+    throw _prettifyError(name, false, err);
+  }
+
+  return {
+    name: name,
+    template: template
+  };
+}
+
+var precompile_1 = {
+  precompile: precompile$1,
+  precompileString: precompileString
+};
+
+function installCompat() {
+  /* eslint-disable camelcase */
+  // This must be called like `nunjucks.installCompat` so that `this`
+  // references the nunjucks instance
+
+  var runtime = this.runtime;
+  var lib = this.lib; // Handle slim case where these 'modules' are excluded from the built source
+
+  var Compiler = this.compiler.Compiler;
+  var Parser = this.parser.Parser;
+  var nodes = this.nodes;
+  var lexer = this.lexer;
+  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
+  var orig_memberLookup = runtime.memberLookup;
+  var orig_Compiler_assertType;
+  var orig_Parser_parseAggregate;
+
+  if (Compiler) {
+    orig_Compiler_assertType = Compiler.prototype.assertType;
+  }
+
+  if (Parser) {
+    orig_Parser_parseAggregate = Parser.prototype.parseAggregate;
+  }
+
+  function uninstall() {
+    runtime.contextOrFrameLookup = orig_contextOrFrameLookup;
+    runtime.memberLookup = orig_memberLookup;
+
+    if (Compiler) {
+      Compiler.prototype.assertType = orig_Compiler_assertType;
+    }
+
+    if (Parser) {
+      Parser.prototype.parseAggregate = orig_Parser_parseAggregate;
+    }
+  }
+
+  runtime.contextOrFrameLookup = function contextOrFrameLookup(context, frame, key) {
+    var val = orig_contextOrFrameLookup.apply(this, arguments);
+
+    if (val !== undefined) {
+      return val;
+    }
+
+    switch (key) {
+      case 'True':
+        return true;
+
+      case 'False':
+        return false;
+
+      case 'None':
+        return null;
+
+      default:
+        return undefined;
+    }
+  };
+
+  function getTokensState(tokens) {
+    return {
+      index: tokens.index,
+      lineno: tokens.lineno,
+      colno: tokens.colno
+    };
+  }
+
+  if (process.env.BUILD_TYPE !== 'SLIM' && nodes && Compiler && Parser) {
+    // i.e., not slim mode
+    var Slice = nodes.Node.extend('Slice', {
+      fields: ['start', 'stop', 'step'],
+      init: function init(lineno, colno, start, stop, step) {
+        start = start || new nodes.Literal(lineno, colno, null);
+        stop = stop || new nodes.Literal(lineno, colno, null);
+        step = step || new nodes.Literal(lineno, colno, 1);
+        this.parent(lineno, colno, start, stop, step);
+      }
+    });
+
+    Compiler.prototype.assertType = function assertType(node) {
+      if (node instanceof Slice) {
+        return;
+      }
+
+      orig_Compiler_assertType.apply(this, arguments);
+    };
+
+    Compiler.prototype.compileSlice = function compileSlice(node, frame) {
+      this._emit('(');
+
+      this._compileExpression(node.start, frame);
+
+      this._emit('),(');
+
+      this._compileExpression(node.stop, frame);
+
+      this._emit('),(');
+
+      this._compileExpression(node.step, frame);
+
+      this._emit(')');
+    };
+
+    Parser.prototype.parseAggregate = function parseAggregate() {
+      var _this = this;
+
+      var origState = getTokensState(this.tokens); // Set back one accounting for opening bracket/parens
+
+      origState.colno--;
+      origState.index--;
+
+      try {
+        return orig_Parser_parseAggregate.apply(this);
+      } catch (e) {
+        var errState = getTokensState(this.tokens);
+
+        var rethrow = function rethrow() {
+          lib._assign(_this.tokens, errState);
+
+          return e;
+        }; // Reset to state before original parseAggregate called
+
+
+        lib._assign(this.tokens, origState);
+
+        this.peeked = false;
+        var tok = this.peekToken();
+
+        if (tok.type !== lexer.TOKEN_LEFT_BRACKET) {
+          throw rethrow();
+        } else {
+          this.nextToken();
+        }
+
+        var node = new Slice(tok.lineno, tok.colno); // If we don't encounter a colon while parsing, this is not a slice,
+        // so re-raise the original exception.
+
+        var isSlice = false;
+
+        for (var i = 0; i <= node.fields.length; i++) {
+          if (this.skip(lexer.TOKEN_RIGHT_BRACKET)) {
+            break;
+          }
+
+          if (i === node.fields.length) {
+            if (isSlice) {
+              this.fail('parseSlice: too many slice components', tok.lineno, tok.colno);
+            } else {
+              break;
+            }
+          }
+
+          if (this.skip(lexer.TOKEN_COLON)) {
+            isSlice = true;
+          } else {
+            var field = node.fields[i];
+            node[field] = this.parseExpression();
+            isSlice = this.skip(lexer.TOKEN_COLON) || isSlice;
+          }
+        }
+
+        if (!isSlice) {
+          throw rethrow();
+        }
+
+        return new nodes.Array(tok.lineno, tok.colno, [node]);
+      }
+    };
+  }
+
+  function sliceLookup(obj, start, stop, step) {
+    obj = obj || [];
+
+    if (start === null) {
+      start = step < 0 ? obj.length - 1 : 0;
+    }
+
+    if (stop === null) {
+      stop = step < 0 ? -1 : obj.length;
+    } else if (stop < 0) {
+      stop += obj.length;
+    }
+
+    if (start < 0) {
+      start += obj.length;
+    }
+
+    var results = [];
+
+    for (var i = start;; i += step) {
+      if (i < 0 || i > obj.length) {
+        break;
+      }
+
+      if (step > 0 && i >= stop) {
+        break;
+      }
+
+      if (step < 0 && i <= stop) {
+        break;
+      }
+
+      results.push(runtime.memberLookup(obj, i));
+    }
+
+    return results;
+  }
+
+  function hasOwnProp(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+
+  var ARRAY_MEMBERS = {
+    pop: function pop(index) {
+      if (index === undefined) {
+        return this.pop();
+      }
+
+      if (index >= this.length || index < 0) {
+        throw new Error('KeyError');
+      }
+
+      return this.splice(index, 1);
+    },
+    append: function append(element) {
+      return this.push(element);
+    },
+    remove: function remove(element) {
+      for (var i = 0; i < this.length; i++) {
+        if (this[i] === element) {
+          return this.splice(i, 1);
+        }
+      }
+
+      throw new Error('ValueError');
+    },
+    count: function count(element) {
+      var count = 0;
+
+      for (var i = 0; i < this.length; i++) {
+        if (this[i] === element) {
+          count++;
+        }
+      }
+
+      return count;
+    },
+    index: function index(element) {
+      var i;
+
+      if ((i = this.indexOf(element)) === -1) {
+        throw new Error('ValueError');
+      }
+
+      return i;
+    },
+    find: function find(element) {
+      return this.indexOf(element);
+    },
+    insert: function insert(index, elem) {
+      return this.splice(index, 0, elem);
+    }
+  };
+  var OBJECT_MEMBERS = {
+    items: function items() {
+      return lib._entries(this);
+    },
+    values: function values() {
+      return lib._values(this);
+    },
+    keys: function keys() {
+      return lib.keys(this);
+    },
+    get: function get(key, def) {
+      var output = this[key];
+
+      if (output === undefined) {
+        output = def;
+      }
+
+      return output;
+    },
+    has_key: function has_key(key) {
+      return hasOwnProp(this, key);
+    },
+    pop: function pop(key, def) {
+      var output = this[key];
+
+      if (output === undefined && def !== undefined) {
+        output = def;
+      } else if (output === undefined) {
+        throw new Error('KeyError');
+      } else {
+        delete this[key];
+      }
+
+      return output;
+    },
+    popitem: function popitem() {
+      var keys = lib.keys(this);
+
+      if (!keys.length) {
+        throw new Error('KeyError');
+      }
+
+      var k = keys[0];
+      var val = this[k];
+      delete this[k];
+      return [k, val];
+    },
+    setdefault: function setdefault(key, def) {
+      if (def === void 0) {
+        def = null;
+      }
+
+      if (!(key in this)) {
+        this[key] = def;
+      }
+
+      return this[key];
+    },
+    update: function update(kwargs) {
+      lib._assign(this, kwargs);
+
+      return null; // Always returns None
+    }
+  };
+  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
+  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
+  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
+
+  runtime.memberLookup = function memberLookup(obj, val, autoescape) {
+    if (arguments.length === 4) {
+      return sliceLookup.apply(this, arguments);
+    }
+
+    obj = obj || {}; // If the object is an object, return any of the methods that Python would
+    // otherwise provide.
+
+    if (lib.isArray(obj) && hasOwnProp(ARRAY_MEMBERS, val)) {
+      return ARRAY_MEMBERS[val].bind(obj);
+    }
+
+    if (lib.isObject(obj) && hasOwnProp(OBJECT_MEMBERS, val)) {
+      return OBJECT_MEMBERS[val].bind(obj);
+    }
+
+    return orig_memberLookup.apply(this, arguments);
+  };
+
+  return uninstall;
+}
+
+var jinjaCompat = installCompat;
+
+var lib$1 = lib$9.exports;
+
+var _require = environment,
+    Environment = _require.Environment,
+    Template = _require.Template;
+
+var Loader = loader;
+
+var loaders = loaders$1.exports;
+
+var precompile = precompile_1;
+
+var compiler = compiler$3;
+
+var parser = parser$2;
+
+var lexer = lexer$2;
+
+var runtime = runtime$1;
+
+var nodes = nodes$4;
+
+var installJinjaCompat = jinjaCompat; // A single instance of an environment, since this is so commonly used
+
+
+var e;
+
+function configure(templatesPath, opts) {
+  opts = opts || {};
+
+  if (lib$1.isObject(templatesPath)) {
+    opts = templatesPath;
+    templatesPath = null;
+  }
+
+  var TemplateLoader;
+
+  if (loaders.FileSystemLoader) {
+    TemplateLoader = new loaders.FileSystemLoader(templatesPath, {
+      watch: opts.watch,
+      noCache: opts.noCache
+    });
+  } else if (loaders.WebLoader) {
+    TemplateLoader = new loaders.WebLoader(templatesPath, {
+      useCache: opts.web && opts.web.useCache,
+      async: opts.web && opts.web.async
+    });
+  }
+
+  e = new Environment(TemplateLoader, opts);
+
+  if (opts && opts.express) {
+    e.express(opts.express);
+  }
+
+  return e;
+}
+
+var nunjucks = {
+  Environment: Environment,
+  Template: Template,
+  Loader: Loader,
+  FileSystemLoader: loaders.FileSystemLoader,
+  NodeResolveLoader: loaders.NodeResolveLoader,
+  PrecompiledLoader: loaders.PrecompiledLoader,
+  WebLoader: loaders.WebLoader,
+  compiler: compiler,
+  parser: parser,
+  lexer: lexer,
+  runtime: runtime,
+  lib: lib$1,
+  nodes: nodes,
+  installJinjaCompat: installJinjaCompat,
+  configure: configure,
+  reset: function reset() {
+    e = undefined;
+  },
+  compile: function compile(src, env, path, eagerCompile) {
+    if (!e) {
+      configure();
+    }
+
+    return new Template(src, env, path, eagerCompile);
+  },
+  render: function render(name, ctx, cb) {
+    if (!e) {
+      configure();
+    }
+
+    return e.render(name, ctx, cb);
+  },
+  renderString: function renderString(src, ctx, cb) {
+    if (!e) {
+      configure();
+    }
+
+    return e.renderString(src, ctx, cb);
+  },
+  precompile: precompile ? precompile.precompile : undefined,
+  precompileString: precompile ? precompile.precompileString : undefined
+};
+
+var markdownIt = {exports: {}};
+
+var utils$1 = {};
+
+var entities$1 = {exports: {}};
+
+var Aacute = "Á";
+var aacute = "á";
+var Abreve = "Ă";
+var abreve = "ă";
+var ac = "∾";
+var acd = "∿";
+var acE = "∾̳";
+var Acirc = "Â";
+var acirc = "â";
+var acute = "´";
+var Acy = "А";
+var acy = "а";
+var AElig = "Æ";
+var aelig = "æ";
+var af = "⁡";
+var Afr = "𝔄";
+var afr = "𝔞";
+var Agrave = "À";
+var agrave = "à";
+var alefsym = "ℵ";
+var aleph = "ℵ";
+var Alpha = "Α";
+var alpha = "α";
+var Amacr = "Ā";
+var amacr = "ā";
+var amalg = "⨿";
+var amp = "&";
+var AMP = "&";
+var andand = "⩕";
+var And = "⩓";
+var and = "∧";
+var andd = "⩜";
+var andslope = "⩘";
+var andv = "⩚";
+var ang = "∠";
+var ange = "⦤";
+var angle = "∠";
+var angmsdaa = "⦨";
+var angmsdab = "⦩";
+var angmsdac = "⦪";
+var angmsdad = "⦫";
+var angmsdae = "⦬";
+var angmsdaf = "⦭";
+var angmsdag = "⦮";
+var angmsdah = "⦯";
+var angmsd = "∡";
+var angrt = "∟";
+var angrtvb = "⊾";
+var angrtvbd = "⦝";
+var angsph = "∢";
+var angst = "Å";
+var angzarr = "⍼";
+var Aogon = "Ą";
+var aogon = "ą";
+var Aopf = "𝔸";
+var aopf = "𝕒";
+var apacir = "⩯";
+var ap = "≈";
+var apE = "⩰";
+var ape = "≊";
+var apid = "≋";
+var apos = "'";
+var ApplyFunction = "⁡";
+var approx = "≈";
+var approxeq = "≊";
+var Aring = "Å";
+var aring = "å";
+var Ascr = "𝒜";
+var ascr = "𝒶";
+var Assign = "≔";
+var ast = "*";
+var asymp = "≈";
+var asympeq = "≍";
+var Atilde = "Ã";
+var atilde = "ã";
+var Auml = "Ä";
+var auml = "ä";
+var awconint = "∳";
+var awint = "⨑";
+var backcong = "≌";
+var backepsilon = "϶";
+var backprime = "‵";
+var backsim = "∽";
+var backsimeq = "⋍";
+var Backslash = "∖";
+var Barv = "⫧";
+var barvee = "⊽";
+var barwed = "⌅";
+var Barwed = "⌆";
+var barwedge = "⌅";
+var bbrk = "⎵";
+var bbrktbrk = "⎶";
+var bcong = "≌";
+var Bcy = "Б";
+var bcy = "б";
+var bdquo = "„";
+var becaus = "∵";
+var because = "∵";
+var Because = "∵";
+var bemptyv = "⦰";
+var bepsi = "϶";
+var bernou = "ℬ";
+var Bernoullis = "ℬ";
+var Beta = "Β";
+var beta = "β";
+var beth = "ℶ";
+var between = "≬";
+var Bfr = "𝔅";
+var bfr = "𝔟";
+var bigcap = "⋂";
+var bigcirc = "◯";
+var bigcup = "⋃";
+var bigodot = "⨀";
+var bigoplus = "⨁";
+var bigotimes = "⨂";
+var bigsqcup = "⨆";
+var bigstar = "★";
+var bigtriangledown = "▽";
+var bigtriangleup = "△";
+var biguplus = "⨄";
+var bigvee = "⋁";
+var bigwedge = "⋀";
+var bkarow = "⤍";
+var blacklozenge = "⧫";
+var blacksquare = "▪";
+var blacktriangle = "▴";
+var blacktriangledown = "▾";
+var blacktriangleleft = "◂";
+var blacktriangleright = "▸";
+var blank = "␣";
+var blk12 = "▒";
+var blk14 = "░";
+var blk34 = "▓";
+var block$1 = "█";
+var bne = "=⃥";
+var bnequiv = "≡⃥";
+var bNot = "⫭";
+var bnot = "⌐";
+var Bopf = "𝔹";
+var bopf = "𝕓";
+var bot = "⊥";
+var bottom = "⊥";
+var bowtie = "⋈";
+var boxbox = "⧉";
+var boxdl = "┐";
+var boxdL = "╕";
+var boxDl = "╖";
+var boxDL = "╗";
+var boxdr = "┌";
+var boxdR = "╒";
+var boxDr = "╓";
+var boxDR = "╔";
+var boxh = "─";
+var boxH = "═";
+var boxhd = "┬";
+var boxHd = "╤";
+var boxhD = "╥";
+var boxHD = "╦";
+var boxhu = "┴";
+var boxHu = "╧";
+var boxhU = "╨";
+var boxHU = "╩";
+var boxminus = "⊟";
+var boxplus = "⊞";
+var boxtimes = "⊠";
+var boxul = "┘";
+var boxuL = "╛";
+var boxUl = "╜";
+var boxUL = "╝";
+var boxur = "└";
+var boxuR = "╘";
+var boxUr = "╙";
+var boxUR = "╚";
+var boxv = "│";
+var boxV = "║";
+var boxvh = "┼";
+var boxvH = "╪";
+var boxVh = "╫";
+var boxVH = "╬";
+var boxvl = "┤";
+var boxvL = "╡";
+var boxVl = "╢";
+var boxVL = "╣";
+var boxvr = "├";
+var boxvR = "╞";
+var boxVr = "╟";
+var boxVR = "╠";
+var bprime = "‵";
+var breve = "˘";
+var Breve = "˘";
+var brvbar = "¦";
+var bscr = "𝒷";
+var Bscr = "ℬ";
+var bsemi = "⁏";
+var bsim = "∽";
+var bsime = "⋍";
+var bsolb = "⧅";
+var bsol = "\\";
+var bsolhsub = "⟈";
+var bull = "•";
+var bullet = "•";
+var bump = "≎";
+var bumpE = "⪮";
+var bumpe = "≏";
+var Bumpeq = "≎";
+var bumpeq = "≏";
+var Cacute = "Ć";
+var cacute = "ć";
+var capand = "⩄";
+var capbrcup = "⩉";
+var capcap = "⩋";
+var cap = "∩";
+var Cap = "⋒";
+var capcup = "⩇";
+var capdot = "⩀";
+var CapitalDifferentialD = "ⅅ";
+var caps = "∩︀";
+var caret = "⁁";
+var caron = "ˇ";
+var Cayleys = "ℭ";
+var ccaps = "⩍";
+var Ccaron = "Č";
+var ccaron = "č";
+var Ccedil = "Ç";
+var ccedil = "ç";
+var Ccirc = "Ĉ";
+var ccirc = "ĉ";
+var Cconint = "∰";
+var ccups = "⩌";
+var ccupssm = "⩐";
+var Cdot = "Ċ";
+var cdot = "ċ";
+var cedil = "¸";
+var Cedilla = "¸";
+var cemptyv = "⦲";
+var cent = "¢";
+var centerdot = "·";
+var CenterDot = "·";
+var cfr = "𝔠";
+var Cfr = "ℭ";
+var CHcy = "Ч";
+var chcy = "ч";
+var check = "✓";
+var checkmark = "✓";
+var Chi = "Χ";
+var chi = "χ";
+var circ = "ˆ";
+var circeq = "≗";
+var circlearrowleft = "↺";
+var circlearrowright = "↻";
+var circledast = "⊛";
+var circledcirc = "⊚";
+var circleddash = "⊝";
+var CircleDot = "⊙";
+var circledR = "®";
+var circledS = "Ⓢ";
+var CircleMinus = "⊖";
+var CirclePlus = "⊕";
+var CircleTimes = "⊗";
+var cir = "○";
+var cirE = "⧃";
+var cire = "≗";
+var cirfnint = "⨐";
+var cirmid = "⫯";
+var cirscir = "⧂";
+var ClockwiseContourIntegral = "∲";
+var CloseCurlyDoubleQuote = "”";
+var CloseCurlyQuote = "’";
+var clubs = "♣";
+var clubsuit = "♣";
+var colon = ":";
+var Colon = "∷";
+var Colone = "⩴";
+var colone = "≔";
+var coloneq = "≔";
+var comma = ",";
+var commat = "@";
+var comp = "∁";
+var compfn = "∘";
+var complement = "∁";
+var complexes = "ℂ";
+var cong = "≅";
+var congdot = "⩭";
+var Congruent = "≡";
+var conint = "∮";
+var Conint = "∯";
+var ContourIntegral = "∮";
+var copf = "𝕔";
+var Copf = "ℂ";
+var coprod = "∐";
+var Coproduct = "∐";
+var copy = "©";
+var COPY = "©";
+var copysr = "℗";
+var CounterClockwiseContourIntegral = "∳";
+var crarr = "↵";
+var cross = "✗";
+var Cross = "⨯";
+var Cscr = "𝒞";
+var cscr = "𝒸";
+var csub = "⫏";
+var csube = "⫑";
+var csup = "⫐";
+var csupe = "⫒";
+var ctdot = "⋯";
+var cudarrl = "⤸";
+var cudarrr = "⤵";
+var cuepr = "⋞";
+var cuesc = "⋟";
+var cularr = "↶";
+var cularrp = "⤽";
+var cupbrcap = "⩈";
+var cupcap = "⩆";
+var CupCap = "≍";
+var cup = "∪";
+var Cup = "⋓";
+var cupcup = "⩊";
+var cupdot = "⊍";
+var cupor = "⩅";
+var cups = "∪︀";
+var curarr = "↷";
+var curarrm = "⤼";
+var curlyeqprec = "⋞";
+var curlyeqsucc = "⋟";
+var curlyvee = "⋎";
+var curlywedge = "⋏";
+var curren = "¤";
+var curvearrowleft = "↶";
+var curvearrowright = "↷";
+var cuvee = "⋎";
+var cuwed = "⋏";
+var cwconint = "∲";
+var cwint = "∱";
+var cylcty = "⌭";
+var dagger = "†";
+var Dagger = "‡";
+var daleth = "ℸ";
+var darr = "↓";
+var Darr = "↡";
+var dArr = "⇓";
+var dash = "‐";
+var Dashv = "⫤";
+var dashv = "⊣";
+var dbkarow = "⤏";
+var dblac = "˝";
+var Dcaron = "Ď";
+var dcaron = "ď";
+var Dcy = "Д";
+var dcy = "д";
+var ddagger = "‡";
+var ddarr = "⇊";
+var DD = "ⅅ";
+var dd = "ⅆ";
+var DDotrahd = "⤑";
+var ddotseq = "⩷";
+var deg = "°";
+var Del = "∇";
+var Delta = "Δ";
+var delta = "δ";
+var demptyv = "⦱";
+var dfisht = "⥿";
+var Dfr = "𝔇";
+var dfr = "𝔡";
+var dHar = "⥥";
+var dharl = "⇃";
+var dharr = "⇂";
+var DiacriticalAcute = "´";
+var DiacriticalDot = "˙";
+var DiacriticalDoubleAcute = "˝";
+var DiacriticalGrave = "`";
+var DiacriticalTilde = "˜";
+var diam = "⋄";
+var diamond = "⋄";
+var Diamond = "⋄";
+var diamondsuit = "♦";
+var diams = "♦";
+var die = "¨";
+var DifferentialD = "ⅆ";
+var digamma = "ϝ";
+var disin = "⋲";
+var div = "÷";
+var divide = "÷";
+var divideontimes = "⋇";
+var divonx = "⋇";
+var DJcy = "Ђ";
+var djcy = "ђ";
+var dlcorn = "⌞";
+var dlcrop = "⌍";
+var dollar = "$";
+var Dopf = "𝔻";
+var dopf = "𝕕";
+var Dot = "¨";
+var dot = "˙";
+var DotDot = "⃜";
+var doteq = "≐";
+var doteqdot = "≑";
+var DotEqual = "≐";
+var dotminus = "∸";
+var dotplus = "∔";
+var dotsquare = "⊡";
+var doublebarwedge = "⌆";
+var DoubleContourIntegral = "∯";
+var DoubleDot = "¨";
+var DoubleDownArrow = "⇓";
+var DoubleLeftArrow = "⇐";
+var DoubleLeftRightArrow = "⇔";
+var DoubleLeftTee = "⫤";
+var DoubleLongLeftArrow = "⟸";
+var DoubleLongLeftRightArrow = "⟺";
+var DoubleLongRightArrow = "⟹";
+var DoubleRightArrow = "⇒";
+var DoubleRightTee = "⊨";
+var DoubleUpArrow = "⇑";
+var DoubleUpDownArrow = "⇕";
+var DoubleVerticalBar = "∥";
+var DownArrowBar = "⤓";
+var downarrow = "↓";
+var DownArrow = "↓";
+var Downarrow = "⇓";
+var DownArrowUpArrow = "⇵";
+var DownBreve = "̑";
+var downdownarrows = "⇊";
+var downharpoonleft = "⇃";
+var downharpoonright = "⇂";
+var DownLeftRightVector = "⥐";
+var DownLeftTeeVector = "⥞";
+var DownLeftVectorBar = "⥖";
+var DownLeftVector = "↽";
+var DownRightTeeVector = "⥟";
+var DownRightVectorBar = "⥗";
+var DownRightVector = "⇁";
+var DownTeeArrow = "↧";
+var DownTee = "⊤";
+var drbkarow = "⤐";
+var drcorn = "⌟";
+var drcrop = "⌌";
+var Dscr = "𝒟";
+var dscr = "𝒹";
+var DScy = "Ѕ";
+var dscy = "ѕ";
+var dsol = "⧶";
+var Dstrok = "Đ";
+var dstrok = "đ";
+var dtdot = "⋱";
+var dtri = "▿";
+var dtrif = "▾";
+var duarr = "⇵";
+var duhar = "⥯";
+var dwangle = "⦦";
+var DZcy = "Џ";
+var dzcy = "џ";
+var dzigrarr = "⟿";
+var Eacute = "É";
+var eacute = "é";
+var easter = "⩮";
+var Ecaron = "Ě";
+var ecaron = "ě";
+var Ecirc = "Ê";
+var ecirc = "ê";
+var ecir = "≖";
+var ecolon = "≕";
+var Ecy = "Э";
+var ecy = "э";
+var eDDot = "⩷";
+var Edot = "Ė";
+var edot = "ė";
+var eDot = "≑";
+var ee = "ⅇ";
+var efDot = "≒";
+var Efr = "𝔈";
+var efr = "𝔢";
+var eg = "⪚";
+var Egrave = "È";
+var egrave = "è";
+var egs = "⪖";
+var egsdot = "⪘";
+var el = "⪙";
+var Element = "∈";
+var elinters = "⏧";
+var ell = "ℓ";
+var els = "⪕";
+var elsdot = "⪗";
+var Emacr = "Ē";
+var emacr = "ē";
+var empty = "∅";
+var emptyset = "∅";
+var EmptySmallSquare = "◻";
+var emptyv = "∅";
+var EmptyVerySmallSquare = "▫";
+var emsp13 = " ";
+var emsp14 = " ";
+var emsp = " ";
+var ENG = "Ŋ";
+var eng = "ŋ";
+var ensp = " ";
+var Eogon = "Ę";
+var eogon = "ę";
+var Eopf = "𝔼";
+var eopf = "𝕖";
+var epar = "⋕";
+var eparsl = "⧣";
+var eplus = "⩱";
+var epsi = "ε";
+var Epsilon = "Ε";
+var epsilon = "ε";
+var epsiv = "ϵ";
+var eqcirc = "≖";
+var eqcolon = "≕";
+var eqsim = "≂";
+var eqslantgtr = "⪖";
+var eqslantless = "⪕";
+var Equal = "⩵";
+var equals = "=";
+var EqualTilde = "≂";
+var equest = "≟";
+var Equilibrium = "⇌";
+var equiv = "≡";
+var equivDD = "⩸";
+var eqvparsl = "⧥";
+var erarr = "⥱";
+var erDot = "≓";
+var escr = "ℯ";
+var Escr = "ℰ";
+var esdot = "≐";
+var Esim = "⩳";
+var esim = "≂";
+var Eta = "Η";
+var eta = "η";
+var ETH = "Ð";
+var eth = "ð";
+var Euml = "Ë";
+var euml = "ë";
+var euro = "€";
+var excl = "!";
+var exist = "∃";
+var Exists = "∃";
+var expectation = "ℰ";
+var exponentiale = "ⅇ";
+var ExponentialE = "ⅇ";
+var fallingdotseq = "≒";
+var Fcy = "Ф";
+var fcy = "ф";
+var female = "♀";
+var ffilig = "ﬃ";
+var fflig = "ﬀ";
+var ffllig = "ﬄ";
+var Ffr = "𝔉";
+var ffr = "𝔣";
+var filig = "ﬁ";
+var FilledSmallSquare = "◼";
+var FilledVerySmallSquare = "▪";
+var fjlig = "fj";
+var flat = "♭";
+var fllig = "ﬂ";
+var fltns = "▱";
+var fnof = "ƒ";
+var Fopf = "𝔽";
+var fopf = "𝕗";
+var forall = "∀";
+var ForAll = "∀";
+var fork = "⋔";
+var forkv = "⫙";
+var Fouriertrf = "ℱ";
+var fpartint = "⨍";
+var frac12 = "½";
+var frac13 = "⅓";
+var frac14 = "¼";
+var frac15 = "⅕";
+var frac16 = "⅙";
+var frac18 = "⅛";
+var frac23 = "⅔";
+var frac25 = "⅖";
+var frac34 = "¾";
+var frac35 = "⅗";
+var frac38 = "⅜";
+var frac45 = "⅘";
+var frac56 = "⅚";
+var frac58 = "⅝";
+var frac78 = "⅞";
+var frasl = "⁄";
+var frown = "⌢";
+var fscr = "𝒻";
+var Fscr = "ℱ";
+var gacute = "ǵ";
+var Gamma = "Γ";
+var gamma = "γ";
+var Gammad = "Ϝ";
+var gammad = "ϝ";
+var gap = "⪆";
+var Gbreve = "Ğ";
+var gbreve = "ğ";
+var Gcedil = "Ģ";
+var Gcirc = "Ĝ";
+var gcirc = "ĝ";
+var Gcy = "Г";
+var gcy = "г";
+var Gdot = "Ġ";
+var gdot = "ġ";
+var ge = "≥";
+var gE = "≧";
+var gEl = "⪌";
+var gel = "⋛";
+var geq = "≥";
+var geqq = "≧";
+var geqslant = "⩾";
+var gescc = "⪩";
+var ges = "⩾";
+var gesdot = "⪀";
+var gesdoto = "⪂";
+var gesdotol = "⪄";
+var gesl = "⋛︀";
+var gesles = "⪔";
+var Gfr = "𝔊";
+var gfr = "𝔤";
+var gg = "≫";
+var Gg = "⋙";
+var ggg = "⋙";
+var gimel = "ℷ";
+var GJcy = "Ѓ";
+var gjcy = "ѓ";
+var gla = "⪥";
+var gl = "≷";
+var glE = "⪒";
+var glj = "⪤";
+var gnap = "⪊";
+var gnapprox = "⪊";
+var gne = "⪈";
+var gnE = "≩";
+var gneq = "⪈";
+var gneqq = "≩";
+var gnsim = "⋧";
+var Gopf = "𝔾";
+var gopf = "𝕘";
+var grave = "`";
+var GreaterEqual = "≥";
+var GreaterEqualLess = "⋛";
+var GreaterFullEqual = "≧";
+var GreaterGreater = "⪢";
+var GreaterLess = "≷";
+var GreaterSlantEqual = "⩾";
+var GreaterTilde = "≳";
+var Gscr = "𝒢";
+var gscr = "ℊ";
+var gsim = "≳";
+var gsime = "⪎";
+var gsiml = "⪐";
+var gtcc = "⪧";
+var gtcir = "⩺";
+var gt = ">";
+var GT = ">";
+var Gt = "≫";
+var gtdot = "⋗";
+var gtlPar = "⦕";
+var gtquest = "⩼";
+var gtrapprox = "⪆";
+var gtrarr = "⥸";
+var gtrdot = "⋗";
+var gtreqless = "⋛";
+var gtreqqless = "⪌";
+var gtrless = "≷";
+var gtrsim = "≳";
+var gvertneqq = "≩︀";
+var gvnE = "≩︀";
+var Hacek = "ˇ";
+var hairsp = " ";
+var half = "½";
+var hamilt = "ℋ";
+var HARDcy = "Ъ";
+var hardcy = "ъ";
+var harrcir = "⥈";
+var harr = "↔";
+var hArr = "⇔";
+var harrw = "↭";
+var Hat = "^";
+var hbar = "ℏ";
+var Hcirc = "Ĥ";
+var hcirc = "ĥ";
+var hearts = "♥";
+var heartsuit = "♥";
+var hellip = "…";
+var hercon = "⊹";
+var hfr = "𝔥";
+var Hfr = "ℌ";
+var HilbertSpace = "ℋ";
+var hksearow = "⤥";
+var hkswarow = "⤦";
+var hoarr = "⇿";
+var homtht = "∻";
+var hookleftarrow = "↩";
+var hookrightarrow = "↪";
+var hopf = "𝕙";
+var Hopf = "ℍ";
+var horbar = "―";
+var HorizontalLine = "─";
+var hscr = "𝒽";
+var Hscr = "ℋ";
+var hslash = "ℏ";
+var Hstrok = "Ħ";
+var hstrok = "ħ";
+var HumpDownHump = "≎";
+var HumpEqual = "≏";
+var hybull = "⁃";
+var hyphen = "‐";
+var Iacute = "Í";
+var iacute = "í";
+var ic = "⁣";
+var Icirc = "Î";
+var icirc = "î";
+var Icy = "И";
+var icy = "и";
+var Idot = "İ";
+var IEcy = "Е";
+var iecy = "е";
+var iexcl = "¡";
+var iff = "⇔";
+var ifr = "𝔦";
+var Ifr = "ℑ";
+var Igrave = "Ì";
+var igrave = "ì";
+var ii = "ⅈ";
+var iiiint = "⨌";
+var iiint = "∭";
+var iinfin = "⧜";
+var iiota = "℩";
+var IJlig = "Ĳ";
+var ijlig = "ĳ";
+var Imacr = "Ī";
+var imacr = "ī";
+var image$1 = "ℑ";
+var ImaginaryI = "ⅈ";
+var imagline = "ℐ";
+var imagpart = "ℑ";
+var imath = "ı";
+var Im = "ℑ";
+var imof = "⊷";
+var imped = "Ƶ";
+var Implies = "⇒";
+var incare = "℅";
+var infin = "∞";
+var infintie = "⧝";
+var inodot = "ı";
+var intcal = "⊺";
+var int = "∫";
+var Int = "∬";
+var integers = "ℤ";
+var Integral = "∫";
+var intercal = "⊺";
+var Intersection = "⋂";
+var intlarhk = "⨗";
+var intprod = "⨼";
+var InvisibleComma = "⁣";
+var InvisibleTimes = "⁢";
+var IOcy = "Ё";
+var iocy = "ё";
+var Iogon = "Į";
+var iogon = "į";
+var Iopf = "𝕀";
+var iopf = "𝕚";
+var Iota = "Ι";
+var iota = "ι";
+var iprod = "⨼";
+var iquest = "¿";
+var iscr = "𝒾";
+var Iscr = "ℐ";
+var isin = "∈";
+var isindot = "⋵";
+var isinE = "⋹";
+var isins = "⋴";
+var isinsv = "⋳";
+var isinv = "∈";
+var it = "⁢";
+var Itilde = "Ĩ";
+var itilde = "ĩ";
+var Iukcy = "І";
+var iukcy = "і";
+var Iuml = "Ï";
+var iuml = "ï";
+var Jcirc = "Ĵ";
+var jcirc = "ĵ";
+var Jcy = "Й";
+var jcy = "й";
+var Jfr = "𝔍";
+var jfr = "𝔧";
+var jmath = "ȷ";
+var Jopf = "𝕁";
+var jopf = "𝕛";
+var Jscr = "𝒥";
+var jscr = "𝒿";
+var Jsercy = "Ј";
+var jsercy = "ј";
+var Jukcy = "Є";
+var jukcy = "є";
+var Kappa = "Κ";
+var kappa = "κ";
+var kappav = "ϰ";
+var Kcedil = "Ķ";
+var kcedil = "ķ";
+var Kcy = "К";
+var kcy = "к";
+var Kfr = "𝔎";
+var kfr = "𝔨";
+var kgreen = "ĸ";
+var KHcy = "Х";
+var khcy = "х";
+var KJcy = "Ќ";
+var kjcy = "ќ";
+var Kopf = "𝕂";
+var kopf = "𝕜";
+var Kscr = "𝒦";
+var kscr = "𝓀";
+var lAarr = "⇚";
+var Lacute = "Ĺ";
+var lacute = "ĺ";
+var laemptyv = "⦴";
+var lagran = "ℒ";
+var Lambda = "Λ";
+var lambda = "λ";
+var lang = "⟨";
+var Lang = "⟪";
+var langd = "⦑";
+var langle = "⟨";
+var lap = "⪅";
+var Laplacetrf = "ℒ";
+var laquo = "«";
+var larrb = "⇤";
+var larrbfs = "⤟";
+var larr = "←";
+var Larr = "↞";
+var lArr = "⇐";
+var larrfs = "⤝";
+var larrhk = "↩";
+var larrlp = "↫";
+var larrpl = "⤹";
+var larrsim = "⥳";
+var larrtl = "↢";
+var latail = "⤙";
+var lAtail = "⤛";
+var lat = "⪫";
+var late = "⪭";
+var lates = "⪭︀";
+var lbarr = "⤌";
+var lBarr = "⤎";
+var lbbrk = "❲";
+var lbrace = "{";
+var lbrack = "[";
+var lbrke = "⦋";
+var lbrksld = "⦏";
+var lbrkslu = "⦍";
+var Lcaron = "Ľ";
+var lcaron = "ľ";
+var Lcedil = "Ļ";
+var lcedil = "ļ";
+var lceil = "⌈";
+var lcub = "{";
+var Lcy = "Л";
+var lcy = "л";
+var ldca = "⤶";
+var ldquo = "“";
+var ldquor = "„";
+var ldrdhar = "⥧";
+var ldrushar = "⥋";
+var ldsh = "↲";
+var le = "≤";
+var lE = "≦";
+var LeftAngleBracket = "⟨";
+var LeftArrowBar = "⇤";
+var leftarrow = "←";
+var LeftArrow = "←";
+var Leftarrow = "⇐";
+var LeftArrowRightArrow = "⇆";
+var leftarrowtail = "↢";
+var LeftCeiling = "⌈";
+var LeftDoubleBracket = "⟦";
+var LeftDownTeeVector = "⥡";
+var LeftDownVectorBar = "⥙";
+var LeftDownVector = "⇃";
+var LeftFloor = "⌊";
+var leftharpoondown = "↽";
+var leftharpoonup = "↼";
+var leftleftarrows = "⇇";
+var leftrightarrow = "↔";
+var LeftRightArrow = "↔";
+var Leftrightarrow = "⇔";
+var leftrightarrows = "⇆";
+var leftrightharpoons = "⇋";
+var leftrightsquigarrow = "↭";
+var LeftRightVector = "⥎";
+var LeftTeeArrow = "↤";
+var LeftTee = "⊣";
+var LeftTeeVector = "⥚";
+var leftthreetimes = "⋋";
+var LeftTriangleBar = "⧏";
+var LeftTriangle = "⊲";
+var LeftTriangleEqual = "⊴";
+var LeftUpDownVector = "⥑";
+var LeftUpTeeVector = "⥠";
+var LeftUpVectorBar = "⥘";
+var LeftUpVector = "↿";
+var LeftVectorBar = "⥒";
+var LeftVector = "↼";
+var lEg = "⪋";
+var leg = "⋚";
+var leq = "≤";
+var leqq = "≦";
+var leqslant = "⩽";
+var lescc = "⪨";
+var les = "⩽";
+var lesdot = "⩿";
+var lesdoto = "⪁";
+var lesdotor = "⪃";
+var lesg = "⋚︀";
+var lesges = "⪓";
+var lessapprox = "⪅";
+var lessdot = "⋖";
+var lesseqgtr = "⋚";
+var lesseqqgtr = "⪋";
+var LessEqualGreater = "⋚";
+var LessFullEqual = "≦";
+var LessGreater = "≶";
+var lessgtr = "≶";
+var LessLess = "⪡";
+var lesssim = "≲";
+var LessSlantEqual = "⩽";
+var LessTilde = "≲";
+var lfisht = "⥼";
+var lfloor = "⌊";
+var Lfr = "𝔏";
+var lfr = "𝔩";
+var lg = "≶";
+var lgE = "⪑";
+var lHar = "⥢";
+var lhard = "↽";
+var lharu = "↼";
+var lharul = "⥪";
+var lhblk = "▄";
+var LJcy = "Љ";
+var ljcy = "љ";
+var llarr = "⇇";
+var ll = "≪";
+var Ll = "⋘";
+var llcorner = "⌞";
+var Lleftarrow = "⇚";
+var llhard = "⥫";
+var lltri = "◺";
+var Lmidot = "Ŀ";
+var lmidot = "ŀ";
+var lmoustache = "⎰";
+var lmoust = "⎰";
+var lnap = "⪉";
+var lnapprox = "⪉";
+var lne = "⪇";
+var lnE = "≨";
+var lneq = "⪇";
+var lneqq = "≨";
+var lnsim = "⋦";
+var loang = "⟬";
+var loarr = "⇽";
+var lobrk = "⟦";
+var longleftarrow = "⟵";
+var LongLeftArrow = "⟵";
+var Longleftarrow = "⟸";
+var longleftrightarrow = "⟷";
+var LongLeftRightArrow = "⟷";
+var Longleftrightarrow = "⟺";
+var longmapsto = "⟼";
+var longrightarrow = "⟶";
+var LongRightArrow = "⟶";
+var Longrightarrow = "⟹";
+var looparrowleft = "↫";
+var looparrowright = "↬";
+var lopar = "⦅";
+var Lopf = "𝕃";
+var lopf = "𝕝";
+var loplus = "⨭";
+var lotimes = "⨴";
+var lowast = "∗";
+var lowbar = "_";
+var LowerLeftArrow = "↙";
+var LowerRightArrow = "↘";
+var loz = "◊";
+var lozenge = "◊";
+var lozf = "⧫";
+var lpar = "(";
+var lparlt = "⦓";
+var lrarr = "⇆";
+var lrcorner = "⌟";
+var lrhar = "⇋";
+var lrhard = "⥭";
+var lrm = "‎";
+var lrtri = "⊿";
+var lsaquo = "‹";
+var lscr = "𝓁";
+var Lscr = "ℒ";
+var lsh = "↰";
+var Lsh = "↰";
+var lsim = "≲";
+var lsime = "⪍";
+var lsimg = "⪏";
+var lsqb = "[";
+var lsquo = "‘";
+var lsquor = "‚";
+var Lstrok = "Ł";
+var lstrok = "ł";
+var ltcc = "⪦";
+var ltcir = "⩹";
+var lt = "<";
+var LT = "<";
+var Lt = "≪";
+var ltdot = "⋖";
+var lthree = "⋋";
+var ltimes = "⋉";
+var ltlarr = "⥶";
+var ltquest = "⩻";
+var ltri = "◃";
+var ltrie = "⊴";
+var ltrif = "◂";
+var ltrPar = "⦖";
+var lurdshar = "⥊";
+var luruhar = "⥦";
+var lvertneqq = "≨︀";
+var lvnE = "≨︀";
+var macr = "¯";
+var male = "♂";
+var malt = "✠";
+var maltese = "✠";
+var map = "↦";
+var mapsto = "↦";
+var mapstodown = "↧";
+var mapstoleft = "↤";
+var mapstoup = "↥";
+var marker = "▮";
+var mcomma = "⨩";
+var Mcy = "М";
+var mcy = "м";
+var mdash = "—";
+var mDDot = "∺";
+var measuredangle = "∡";
+var MediumSpace = " ";
+var Mellintrf = "ℳ";
+var Mfr = "𝔐";
+var mfr = "𝔪";
+var mho = "℧";
+var micro = "µ";
+var midast = "*";
+var midcir = "⫰";
+var mid = "∣";
+var middot = "·";
+var minusb = "⊟";
+var minus = "−";
+var minusd = "∸";
+var minusdu = "⨪";
+var MinusPlus = "∓";
+var mlcp = "⫛";
+var mldr = "…";
+var mnplus = "∓";
+var models = "⊧";
+var Mopf = "𝕄";
+var mopf = "𝕞";
+var mp = "∓";
+var mscr = "𝓂";
+var Mscr = "ℳ";
+var mstpos = "∾";
+var Mu = "Μ";
+var mu = "μ";
+var multimap = "⊸";
+var mumap = "⊸";
+var nabla = "∇";
+var Nacute = "Ń";
+var nacute = "ń";
+var nang = "∠⃒";
+var nap = "≉";
+var napE = "⩰̸";
+var napid = "≋̸";
+var napos = "ŉ";
+var napprox = "≉";
+var natural = "♮";
+var naturals = "ℕ";
+var natur = "♮";
+var nbsp = " ";
+var nbump = "≎̸";
+var nbumpe = "≏̸";
+var ncap = "⩃";
+var Ncaron = "Ň";
+var ncaron = "ň";
+var Ncedil = "Ņ";
+var ncedil = "ņ";
+var ncong = "≇";
+var ncongdot = "⩭̸";
+var ncup = "⩂";
+var Ncy = "Н";
+var ncy = "н";
+var ndash = "–";
+var nearhk = "⤤";
+var nearr = "↗";
+var neArr = "⇗";
+var nearrow = "↗";
+var ne = "≠";
+var nedot = "≐̸";
+var NegativeMediumSpace = "​";
+var NegativeThickSpace = "​";
+var NegativeThinSpace = "​";
+var NegativeVeryThinSpace = "​";
+var nequiv = "≢";
+var nesear = "⤨";
+var nesim = "≂̸";
+var NestedGreaterGreater = "≫";
+var NestedLessLess = "≪";
+var NewLine = "\n";
+var nexist = "∄";
+var nexists = "∄";
+var Nfr = "𝔑";
+var nfr = "𝔫";
+var ngE = "≧̸";
+var nge = "≱";
+var ngeq = "≱";
+var ngeqq = "≧̸";
+var ngeqslant = "⩾̸";
+var nges = "⩾̸";
+var nGg = "⋙̸";
+var ngsim = "≵";
+var nGt = "≫⃒";
+var ngt = "≯";
+var ngtr = "≯";
+var nGtv = "≫̸";
+var nharr = "↮";
+var nhArr = "⇎";
+var nhpar = "⫲";
+var ni = "∋";
+var nis = "⋼";
+var nisd = "⋺";
+var niv = "∋";
+var NJcy = "Њ";
+var njcy = "њ";
+var nlarr = "↚";
+var nlArr = "⇍";
+var nldr = "‥";
+var nlE = "≦̸";
+var nle = "≰";
+var nleftarrow = "↚";
+var nLeftarrow = "⇍";
+var nleftrightarrow = "↮";
+var nLeftrightarrow = "⇎";
+var nleq = "≰";
+var nleqq = "≦̸";
+var nleqslant = "⩽̸";
+var nles = "⩽̸";
+var nless = "≮";
+var nLl = "⋘̸";
+var nlsim = "≴";
+var nLt = "≪⃒";
+var nlt = "≮";
+var nltri = "⋪";
+var nltrie = "⋬";
+var nLtv = "≪̸";
+var nmid = "∤";
+var NoBreak = "⁠";
+var NonBreakingSpace = " ";
+var nopf = "𝕟";
+var Nopf = "ℕ";
+var Not = "⫬";
+var not = "¬";
+var NotCongruent = "≢";
+var NotCupCap = "≭";
+var NotDoubleVerticalBar = "∦";
+var NotElement = "∉";
+var NotEqual = "≠";
+var NotEqualTilde = "≂̸";
+var NotExists = "∄";
+var NotGreater = "≯";
+var NotGreaterEqual = "≱";
+var NotGreaterFullEqual = "≧̸";
+var NotGreaterGreater = "≫̸";
+var NotGreaterLess = "≹";
+var NotGreaterSlantEqual = "⩾̸";
+var NotGreaterTilde = "≵";
+var NotHumpDownHump = "≎̸";
+var NotHumpEqual = "≏̸";
+var notin = "∉";
+var notindot = "⋵̸";
+var notinE = "⋹̸";
+var notinva = "∉";
+var notinvb = "⋷";
+var notinvc = "⋶";
+var NotLeftTriangleBar = "⧏̸";
+var NotLeftTriangle = "⋪";
+var NotLeftTriangleEqual = "⋬";
+var NotLess = "≮";
+var NotLessEqual = "≰";
+var NotLessGreater = "≸";
+var NotLessLess = "≪̸";
+var NotLessSlantEqual = "⩽̸";
+var NotLessTilde = "≴";
+var NotNestedGreaterGreater = "⪢̸";
+var NotNestedLessLess = "⪡̸";
+var notni = "∌";
+var notniva = "∌";
+var notnivb = "⋾";
+var notnivc = "⋽";
+var NotPrecedes = "⊀";
+var NotPrecedesEqual = "⪯̸";
+var NotPrecedesSlantEqual = "⋠";
+var NotReverseElement = "∌";
+var NotRightTriangleBar = "⧐̸";
+var NotRightTriangle = "⋫";
+var NotRightTriangleEqual = "⋭";
+var NotSquareSubset = "⊏̸";
+var NotSquareSubsetEqual = "⋢";
+var NotSquareSuperset = "⊐̸";
+var NotSquareSupersetEqual = "⋣";
+var NotSubset = "⊂⃒";
+var NotSubsetEqual = "⊈";
+var NotSucceeds = "⊁";
+var NotSucceedsEqual = "⪰̸";
+var NotSucceedsSlantEqual = "⋡";
+var NotSucceedsTilde = "≿̸";
+var NotSuperset = "⊃⃒";
+var NotSupersetEqual = "⊉";
+var NotTilde = "≁";
+var NotTildeEqual = "≄";
+var NotTildeFullEqual = "≇";
+var NotTildeTilde = "≉";
+var NotVerticalBar = "∤";
+var nparallel = "∦";
+var npar = "∦";
+var nparsl = "⫽⃥";
+var npart = "∂̸";
+var npolint = "⨔";
+var npr = "⊀";
+var nprcue = "⋠";
+var nprec = "⊀";
+var npreceq = "⪯̸";
+var npre = "⪯̸";
+var nrarrc = "⤳̸";
+var nrarr = "↛";
+var nrArr = "⇏";
+var nrarrw = "↝̸";
+var nrightarrow = "↛";
+var nRightarrow = "⇏";
+var nrtri = "⋫";
+var nrtrie = "⋭";
+var nsc = "⊁";
+var nsccue = "⋡";
+var nsce = "⪰̸";
+var Nscr = "𝒩";
+var nscr = "𝓃";
+var nshortmid = "∤";
+var nshortparallel = "∦";
+var nsim = "≁";
+var nsime = "≄";
+var nsimeq = "≄";
+var nsmid = "∤";
+var nspar = "∦";
+var nsqsube = "⋢";
+var nsqsupe = "⋣";
+var nsub = "⊄";
+var nsubE = "⫅̸";
+var nsube = "⊈";
+var nsubset = "⊂⃒";
+var nsubseteq = "⊈";
+var nsubseteqq = "⫅̸";
+var nsucc = "⊁";
+var nsucceq = "⪰̸";
+var nsup = "⊅";
+var nsupE = "⫆̸";
+var nsupe = "⊉";
+var nsupset = "⊃⃒";
+var nsupseteq = "⊉";
+var nsupseteqq = "⫆̸";
+var ntgl = "≹";
+var Ntilde = "Ñ";
+var ntilde = "ñ";
+var ntlg = "≸";
+var ntriangleleft = "⋪";
+var ntrianglelefteq = "⋬";
+var ntriangleright = "⋫";
+var ntrianglerighteq = "⋭";
+var Nu = "Ν";
+var nu = "ν";
+var num = "#";
+var numero = "№";
+var numsp = " ";
+var nvap = "≍⃒";
+var nvdash = "⊬";
+var nvDash = "⊭";
+var nVdash = "⊮";
+var nVDash = "⊯";
+var nvge = "≥⃒";
+var nvgt = ">⃒";
+var nvHarr = "⤄";
+var nvinfin = "⧞";
+var nvlArr = "⤂";
+var nvle = "≤⃒";
+var nvlt = "<⃒";
+var nvltrie = "⊴⃒";
+var nvrArr = "⤃";
+var nvrtrie = "⊵⃒";
+var nvsim = "∼⃒";
+var nwarhk = "⤣";
+var nwarr = "↖";
+var nwArr = "⇖";
+var nwarrow = "↖";
+var nwnear = "⤧";
+var Oacute = "Ó";
+var oacute = "ó";
+var oast = "⊛";
+var Ocirc = "Ô";
+var ocirc = "ô";
+var ocir = "⊚";
+var Ocy = "О";
+var ocy = "о";
+var odash = "⊝";
+var Odblac = "Ő";
+var odblac = "ő";
+var odiv = "⨸";
+var odot = "⊙";
+var odsold = "⦼";
+var OElig = "Œ";
+var oelig = "œ";
+var ofcir = "⦿";
+var Ofr = "𝔒";
+var ofr = "𝔬";
+var ogon = "˛";
+var Ograve = "Ò";
+var ograve = "ò";
+var ogt = "⧁";
+var ohbar = "⦵";
+var ohm = "Ω";
+var oint = "∮";
+var olarr = "↺";
+var olcir = "⦾";
+var olcross = "⦻";
+var oline = "‾";
+var olt = "⧀";
+var Omacr = "Ō";
+var omacr = "ō";
+var Omega = "Ω";
+var omega = "ω";
+var Omicron = "Ο";
+var omicron = "ο";
+var omid = "⦶";
+var ominus = "⊖";
+var Oopf = "𝕆";
+var oopf = "𝕠";
+var opar = "⦷";
+var OpenCurlyDoubleQuote = "“";
+var OpenCurlyQuote = "‘";
+var operp = "⦹";
+var oplus = "⊕";
+var orarr = "↻";
+var Or = "⩔";
+var or = "∨";
+var ord = "⩝";
+var order = "ℴ";
+var orderof = "ℴ";
+var ordf = "ª";
+var ordm = "º";
+var origof = "⊶";
+var oror = "⩖";
+var orslope = "⩗";
+var orv = "⩛";
+var oS = "Ⓢ";
+var Oscr = "𝒪";
+var oscr = "ℴ";
+var Oslash = "Ø";
+var oslash = "ø";
+var osol = "⊘";
+var Otilde = "Õ";
+var otilde = "õ";
+var otimesas = "⨶";
+var Otimes = "⨷";
+var otimes = "⊗";
+var Ouml = "Ö";
+var ouml = "ö";
+var ovbar = "⌽";
+var OverBar = "‾";
+var OverBrace = "⏞";
+var OverBracket = "⎴";
+var OverParenthesis = "⏜";
+var para = "¶";
+var parallel = "∥";
+var par = "∥";
+var parsim = "⫳";
+var parsl = "⫽";
+var part = "∂";
+var PartialD = "∂";
+var Pcy = "П";
+var pcy = "п";
+var percnt = "%";
+var period = ".";
+var permil = "‰";
+var perp = "⊥";
+var pertenk = "‱";
+var Pfr = "𝔓";
+var pfr = "𝔭";
+var Phi = "Φ";
+var phi = "φ";
+var phiv = "ϕ";
+var phmmat = "ℳ";
+var phone = "☎";
+var Pi = "Π";
+var pi = "π";
+var pitchfork = "⋔";
+var piv = "ϖ";
+var planck = "ℏ";
+var planckh = "ℎ";
+var plankv = "ℏ";
+var plusacir = "⨣";
+var plusb = "⊞";
+var pluscir = "⨢";
+var plus = "+";
+var plusdo = "∔";
+var plusdu = "⨥";
+var pluse = "⩲";
+var PlusMinus = "±";
+var plusmn = "±";
+var plussim = "⨦";
+var plustwo = "⨧";
+var pm = "±";
+var Poincareplane = "ℌ";
+var pointint = "⨕";
+var popf = "𝕡";
+var Popf = "ℙ";
+var pound = "£";
+var prap = "⪷";
+var Pr = "⪻";
+var pr = "≺";
+var prcue = "≼";
+var precapprox = "⪷";
+var prec = "≺";
+var preccurlyeq = "≼";
+var Precedes = "≺";
+var PrecedesEqual = "⪯";
+var PrecedesSlantEqual = "≼";
+var PrecedesTilde = "≾";
+var preceq = "⪯";
+var precnapprox = "⪹";
+var precneqq = "⪵";
+var precnsim = "⋨";
+var pre = "⪯";
+var prE = "⪳";
+var precsim = "≾";
+var prime = "′";
+var Prime = "″";
+var primes = "ℙ";
+var prnap = "⪹";
+var prnE = "⪵";
+var prnsim = "⋨";
+var prod = "∏";
+var Product = "∏";
+var profalar = "⌮";
+var profline = "⌒";
+var profsurf = "⌓";
+var prop = "∝";
+var Proportional = "∝";
+var Proportion = "∷";
+var propto = "∝";
+var prsim = "≾";
+var prurel = "⊰";
+var Pscr = "𝒫";
+var pscr = "𝓅";
+var Psi = "Ψ";
+var psi = "ψ";
+var puncsp = " ";
+var Qfr = "𝔔";
+var qfr = "𝔮";
+var qint = "⨌";
+var qopf = "𝕢";
+var Qopf = "ℚ";
+var qprime = "⁗";
+var Qscr = "𝒬";
+var qscr = "𝓆";
+var quaternions = "ℍ";
+var quatint = "⨖";
+var quest = "?";
+var questeq = "≟";
+var quot = "\"";
+var QUOT = "\"";
+var rAarr = "⇛";
+var race = "∽̱";
+var Racute = "Ŕ";
+var racute = "ŕ";
+var radic = "√";
+var raemptyv = "⦳";
+var rang = "⟩";
+var Rang = "⟫";
+var rangd = "⦒";
+var range = "⦥";
+var rangle = "⟩";
+var raquo = "»";
+var rarrap = "⥵";
+var rarrb = "⇥";
+var rarrbfs = "⤠";
+var rarrc = "⤳";
+var rarr = "→";
+var Rarr = "↠";
+var rArr = "⇒";
+var rarrfs = "⤞";
+var rarrhk = "↪";
+var rarrlp = "↬";
+var rarrpl = "⥅";
+var rarrsim = "⥴";
+var Rarrtl = "⤖";
+var rarrtl = "↣";
+var rarrw = "↝";
+var ratail = "⤚";
+var rAtail = "⤜";
+var ratio = "∶";
+var rationals = "ℚ";
+var rbarr = "⤍";
+var rBarr = "⤏";
+var RBarr = "⤐";
+var rbbrk = "❳";
+var rbrace = "}";
+var rbrack = "]";
+var rbrke = "⦌";
+var rbrksld = "⦎";
+var rbrkslu = "⦐";
+var Rcaron = "Ř";
+var rcaron = "ř";
+var Rcedil = "Ŗ";
+var rcedil = "ŗ";
+var rceil = "⌉";
+var rcub = "}";
+var Rcy = "Р";
+var rcy = "р";
+var rdca = "⤷";
+var rdldhar = "⥩";
+var rdquo = "”";
+var rdquor = "”";
+var rdsh = "↳";
+var real = "ℜ";
+var realine = "ℛ";
+var realpart = "ℜ";
+var reals = "ℝ";
+var Re = "ℜ";
+var rect = "▭";
+var reg = "®";
+var REG = "®";
+var ReverseElement = "∋";
+var ReverseEquilibrium = "⇋";
+var ReverseUpEquilibrium = "⥯";
+var rfisht = "⥽";
+var rfloor = "⌋";
+var rfr = "𝔯";
+var Rfr = "ℜ";
+var rHar = "⥤";
+var rhard = "⇁";
+var rharu = "⇀";
+var rharul = "⥬";
+var Rho = "Ρ";
+var rho = "ρ";
+var rhov = "ϱ";
+var RightAngleBracket = "⟩";
+var RightArrowBar = "⇥";
+var rightarrow = "→";
+var RightArrow = "→";
+var Rightarrow = "⇒";
+var RightArrowLeftArrow = "⇄";
+var rightarrowtail = "↣";
+var RightCeiling = "⌉";
+var RightDoubleBracket = "⟧";
+var RightDownTeeVector = "⥝";
+var RightDownVectorBar = "⥕";
+var RightDownVector = "⇂";
+var RightFloor = "⌋";
+var rightharpoondown = "⇁";
+var rightharpoonup = "⇀";
+var rightleftarrows = "⇄";
+var rightleftharpoons = "⇌";
+var rightrightarrows = "⇉";
+var rightsquigarrow = "↝";
+var RightTeeArrow = "↦";
+var RightTee = "⊢";
+var RightTeeVector = "⥛";
+var rightthreetimes = "⋌";
+var RightTriangleBar = "⧐";
+var RightTriangle = "⊳";
+var RightTriangleEqual = "⊵";
+var RightUpDownVector = "⥏";
+var RightUpTeeVector = "⥜";
+var RightUpVectorBar = "⥔";
+var RightUpVector = "↾";
+var RightVectorBar = "⥓";
+var RightVector = "⇀";
+var ring = "˚";
+var risingdotseq = "≓";
+var rlarr = "⇄";
+var rlhar = "⇌";
+var rlm = "‏";
+var rmoustache = "⎱";
+var rmoust = "⎱";
+var rnmid = "⫮";
+var roang = "⟭";
+var roarr = "⇾";
+var robrk = "⟧";
+var ropar = "⦆";
+var ropf = "𝕣";
+var Ropf = "ℝ";
+var roplus = "⨮";
+var rotimes = "⨵";
+var RoundImplies = "⥰";
+var rpar = ")";
+var rpargt = "⦔";
+var rppolint = "⨒";
+var rrarr = "⇉";
+var Rrightarrow = "⇛";
+var rsaquo = "›";
+var rscr = "𝓇";
+var Rscr = "ℛ";
+var rsh = "↱";
+var Rsh = "↱";
+var rsqb = "]";
+var rsquo = "’";
+var rsquor = "’";
+var rthree = "⋌";
+var rtimes = "⋊";
+var rtri = "▹";
+var rtrie = "⊵";
+var rtrif = "▸";
+var rtriltri = "⧎";
+var RuleDelayed = "⧴";
+var ruluhar = "⥨";
+var rx = "℞";
+var Sacute = "Ś";
+var sacute = "ś";
+var sbquo = "‚";
+var scap = "⪸";
+var Scaron = "Š";
+var scaron = "š";
+var Sc = "⪼";
+var sc = "≻";
+var sccue = "≽";
+var sce = "⪰";
+var scE = "⪴";
+var Scedil = "Ş";
+var scedil = "ş";
+var Scirc = "Ŝ";
+var scirc = "ŝ";
+var scnap = "⪺";
+var scnE = "⪶";
+var scnsim = "⋩";
+var scpolint = "⨓";
+var scsim = "≿";
+var Scy = "С";
+var scy = "с";
+var sdotb = "⊡";
+var sdot = "⋅";
+var sdote = "⩦";
+var searhk = "⤥";
+var searr = "↘";
+var seArr = "⇘";
+var searrow = "↘";
+var sect = "§";
+var semi = ";";
+var seswar = "⤩";
+var setminus = "∖";
+var setmn = "∖";
+var sext = "✶";
+var Sfr = "𝔖";
+var sfr = "𝔰";
+var sfrown = "⌢";
+var sharp = "♯";
+var SHCHcy = "Щ";
+var shchcy = "щ";
+var SHcy = "Ш";
+var shcy = "ш";
+var ShortDownArrow = "↓";
+var ShortLeftArrow = "←";
+var shortmid = "∣";
+var shortparallel = "∥";
+var ShortRightArrow = "→";
+var ShortUpArrow = "↑";
+var shy = "­";
+var Sigma = "Σ";
+var sigma = "σ";
+var sigmaf = "ς";
+var sigmav = "ς";
+var sim = "∼";
+var simdot = "⩪";
+var sime = "≃";
+var simeq = "≃";
+var simg = "⪞";
+var simgE = "⪠";
+var siml = "⪝";
+var simlE = "⪟";
+var simne = "≆";
+var simplus = "⨤";
+var simrarr = "⥲";
+var slarr = "←";
+var SmallCircle = "∘";
+var smallsetminus = "∖";
+var smashp = "⨳";
+var smeparsl = "⧤";
+var smid = "∣";
+var smile = "⌣";
+var smt = "⪪";
+var smte = "⪬";
+var smtes = "⪬︀";
+var SOFTcy = "Ь";
+var softcy = "ь";
+var solbar = "⌿";
+var solb = "⧄";
+var sol = "/";
+var Sopf = "𝕊";
+var sopf = "𝕤";
+var spades = "♠";
+var spadesuit = "♠";
+var spar = "∥";
+var sqcap = "⊓";
+var sqcaps = "⊓︀";
+var sqcup = "⊔";
+var sqcups = "⊔︀";
+var Sqrt = "√";
+var sqsub = "⊏";
+var sqsube = "⊑";
+var sqsubset = "⊏";
+var sqsubseteq = "⊑";
+var sqsup = "⊐";
+var sqsupe = "⊒";
+var sqsupset = "⊐";
+var sqsupseteq = "⊒";
+var square = "□";
+var Square = "□";
+var SquareIntersection = "⊓";
+var SquareSubset = "⊏";
+var SquareSubsetEqual = "⊑";
+var SquareSuperset = "⊐";
+var SquareSupersetEqual = "⊒";
+var SquareUnion = "⊔";
+var squarf = "▪";
+var squ = "□";
+var squf = "▪";
+var srarr = "→";
+var Sscr = "𝒮";
+var sscr = "𝓈";
+var ssetmn = "∖";
+var ssmile = "⌣";
+var sstarf = "⋆";
+var Star = "⋆";
+var star = "☆";
+var starf = "★";
+var straightepsilon = "ϵ";
+var straightphi = "ϕ";
+var strns = "¯";
+var sub = "⊂";
+var Sub = "⋐";
+var subdot = "⪽";
+var subE = "⫅";
+var sube = "⊆";
+var subedot = "⫃";
+var submult = "⫁";
+var subnE = "⫋";
+var subne = "⊊";
+var subplus = "⪿";
+var subrarr = "⥹";
+var subset = "⊂";
+var Subset = "⋐";
+var subseteq = "⊆";
+var subseteqq = "⫅";
+var SubsetEqual = "⊆";
+var subsetneq = "⊊";
+var subsetneqq = "⫋";
+var subsim = "⫇";
+var subsub = "⫕";
+var subsup = "⫓";
+var succapprox = "⪸";
+var succ = "≻";
+var succcurlyeq = "≽";
+var Succeeds = "≻";
+var SucceedsEqual = "⪰";
+var SucceedsSlantEqual = "≽";
+var SucceedsTilde = "≿";
+var succeq = "⪰";
+var succnapprox = "⪺";
+var succneqq = "⪶";
+var succnsim = "⋩";
+var succsim = "≿";
+var SuchThat = "∋";
+var sum = "∑";
+var Sum = "∑";
+var sung = "♪";
+var sup1 = "¹";
+var sup2 = "²";
+var sup3 = "³";
+var sup = "⊃";
+var Sup = "⋑";
+var supdot = "⪾";
+var supdsub = "⫘";
+var supE = "⫆";
+var supe = "⊇";
+var supedot = "⫄";
+var Superset = "⊃";
+var SupersetEqual = "⊇";
+var suphsol = "⟉";
+var suphsub = "⫗";
+var suplarr = "⥻";
+var supmult = "⫂";
+var supnE = "⫌";
+var supne = "⊋";
+var supplus = "⫀";
+var supset = "⊃";
+var Supset = "⋑";
+var supseteq = "⊇";
+var supseteqq = "⫆";
+var supsetneq = "⊋";
+var supsetneqq = "⫌";
+var supsim = "⫈";
+var supsub = "⫔";
+var supsup = "⫖";
+var swarhk = "⤦";
+var swarr = "↙";
+var swArr = "⇙";
+var swarrow = "↙";
+var swnwar = "⤪";
+var szlig = "ß";
+var Tab = "\t";
+var target = "⌖";
+var Tau = "Τ";
+var tau = "τ";
+var tbrk = "⎴";
+var Tcaron = "Ť";
+var tcaron = "ť";
+var Tcedil = "Ţ";
+var tcedil = "ţ";
+var Tcy = "Т";
+var tcy = "т";
+var tdot = "⃛";
+var telrec = "⌕";
+var Tfr = "𝔗";
+var tfr = "𝔱";
+var there4 = "∴";
+var therefore = "∴";
+var Therefore = "∴";
+var Theta = "Θ";
+var theta = "θ";
+var thetasym = "ϑ";
+var thetav = "ϑ";
+var thickapprox = "≈";
+var thicksim = "∼";
+var ThickSpace = "  ";
+var ThinSpace = " ";
+var thinsp = " ";
+var thkap = "≈";
+var thksim = "∼";
+var THORN = "Þ";
+var thorn = "þ";
+var tilde = "˜";
+var Tilde = "∼";
+var TildeEqual = "≃";
+var TildeFullEqual = "≅";
+var TildeTilde = "≈";
+var timesbar = "⨱";
+var timesb = "⊠";
+var times = "×";
+var timesd = "⨰";
+var tint = "∭";
+var toea = "⤨";
+var topbot = "⌶";
+var topcir = "⫱";
+var top = "⊤";
+var Topf = "𝕋";
+var topf = "𝕥";
+var topfork = "⫚";
+var tosa = "⤩";
+var tprime = "‴";
+var trade = "™";
+var TRADE = "™";
+var triangle = "▵";
+var triangledown = "▿";
+var triangleleft = "◃";
+var trianglelefteq = "⊴";
+var triangleq = "≜";
+var triangleright = "▹";
+var trianglerighteq = "⊵";
+var tridot = "◬";
+var trie = "≜";
+var triminus = "⨺";
+var TripleDot = "⃛";
+var triplus = "⨹";
+var trisb = "⧍";
+var tritime = "⨻";
+var trpezium = "⏢";
+var Tscr = "𝒯";
+var tscr = "𝓉";
+var TScy = "Ц";
+var tscy = "ц";
+var TSHcy = "Ћ";
+var tshcy = "ћ";
+var Tstrok = "Ŧ";
+var tstrok = "ŧ";
+var twixt = "≬";
+var twoheadleftarrow = "↞";
+var twoheadrightarrow = "↠";
+var Uacute = "Ú";
+var uacute = "ú";
+var uarr = "↑";
+var Uarr = "↟";
+var uArr = "⇑";
+var Uarrocir = "⥉";
+var Ubrcy = "Ў";
+var ubrcy = "ў";
+var Ubreve = "Ŭ";
+var ubreve = "ŭ";
+var Ucirc = "Û";
+var ucirc = "û";
+var Ucy = "У";
+var ucy = "у";
+var udarr = "⇅";
+var Udblac = "Ű";
+var udblac = "ű";
+var udhar = "⥮";
+var ufisht = "⥾";
+var Ufr = "𝔘";
+var ufr = "𝔲";
+var Ugrave = "Ù";
+var ugrave = "ù";
+var uHar = "⥣";
+var uharl = "↿";
+var uharr = "↾";
+var uhblk = "▀";
+var ulcorn = "⌜";
+var ulcorner = "⌜";
+var ulcrop = "⌏";
+var ultri = "◸";
+var Umacr = "Ū";
+var umacr = "ū";
+var uml = "¨";
+var UnderBar = "_";
+var UnderBrace = "⏟";
+var UnderBracket = "⎵";
+var UnderParenthesis = "⏝";
+var Union = "⋃";
+var UnionPlus = "⊎";
+var Uogon = "Ų";
+var uogon = "ų";
+var Uopf = "𝕌";
+var uopf = "𝕦";
+var UpArrowBar = "⤒";
+var uparrow = "↑";
+var UpArrow = "↑";
+var Uparrow = "⇑";
+var UpArrowDownArrow = "⇅";
+var updownarrow = "↕";
+var UpDownArrow = "↕";
+var Updownarrow = "⇕";
+var UpEquilibrium = "⥮";
+var upharpoonleft = "↿";
+var upharpoonright = "↾";
+var uplus = "⊎";
+var UpperLeftArrow = "↖";
+var UpperRightArrow = "↗";
+var upsi = "υ";
+var Upsi = "ϒ";
+var upsih = "ϒ";
+var Upsilon = "Υ";
+var upsilon = "υ";
+var UpTeeArrow = "↥";
+var UpTee = "⊥";
+var upuparrows = "⇈";
+var urcorn = "⌝";
+var urcorner = "⌝";
+var urcrop = "⌎";
+var Uring = "Ů";
+var uring = "ů";
+var urtri = "◹";
+var Uscr = "𝒰";
+var uscr = "𝓊";
+var utdot = "⋰";
+var Utilde = "Ũ";
+var utilde = "ũ";
+var utri = "▵";
+var utrif = "▴";
+var uuarr = "⇈";
+var Uuml = "Ü";
+var uuml = "ü";
+var uwangle = "⦧";
+var vangrt = "⦜";
+var varepsilon = "ϵ";
+var varkappa = "ϰ";
+var varnothing = "∅";
+var varphi = "ϕ";
+var varpi = "ϖ";
+var varpropto = "∝";
+var varr = "↕";
+var vArr = "⇕";
+var varrho = "ϱ";
+var varsigma = "ς";
+var varsubsetneq = "⊊︀";
+var varsubsetneqq = "⫋︀";
+var varsupsetneq = "⊋︀";
+var varsupsetneqq = "⫌︀";
+var vartheta = "ϑ";
+var vartriangleleft = "⊲";
+var vartriangleright = "⊳";
+var vBar = "⫨";
+var Vbar = "⫫";
+var vBarv = "⫩";
+var Vcy = "В";
+var vcy = "в";
+var vdash = "⊢";
+var vDash = "⊨";
+var Vdash = "⊩";
+var VDash = "⊫";
+var Vdashl = "⫦";
+var veebar = "⊻";
+var vee = "∨";
+var Vee = "⋁";
+var veeeq = "≚";
+var vellip = "⋮";
+var verbar = "|";
+var Verbar = "‖";
+var vert = "|";
+var Vert = "‖";
+var VerticalBar = "∣";
+var VerticalLine = "|";
+var VerticalSeparator = "❘";
+var VerticalTilde = "≀";
+var VeryThinSpace = " ";
+var Vfr = "𝔙";
+var vfr = "𝔳";
+var vltri = "⊲";
+var vnsub = "⊂⃒";
+var vnsup = "⊃⃒";
+var Vopf = "𝕍";
+var vopf = "𝕧";
+var vprop = "∝";
+var vrtri = "⊳";
+var Vscr = "𝒱";
+var vscr = "𝓋";
+var vsubnE = "⫋︀";
+var vsubne = "⊊︀";
+var vsupnE = "⫌︀";
+var vsupne = "⊋︀";
+var Vvdash = "⊪";
+var vzigzag = "⦚";
+var Wcirc = "Ŵ";
+var wcirc = "ŵ";
+var wedbar = "⩟";
+var wedge = "∧";
+var Wedge = "⋀";
+var wedgeq = "≙";
+var weierp = "℘";
+var Wfr = "𝔚";
+var wfr = "𝔴";
+var Wopf = "𝕎";
+var wopf = "𝕨";
+var wp = "℘";
+var wr = "≀";
+var wreath = "≀";
+var Wscr = "𝒲";
+var wscr = "𝓌";
+var xcap = "⋂";
+var xcirc = "◯";
+var xcup = "⋃";
+var xdtri = "▽";
+var Xfr = "𝔛";
+var xfr = "𝔵";
+var xharr = "⟷";
+var xhArr = "⟺";
+var Xi = "Ξ";
+var xi = "ξ";
+var xlarr = "⟵";
+var xlArr = "⟸";
+var xmap = "⟼";
+var xnis = "⋻";
+var xodot = "⨀";
+var Xopf = "𝕏";
+var xopf = "𝕩";
+var xoplus = "⨁";
+var xotime = "⨂";
+var xrarr = "⟶";
+var xrArr = "⟹";
+var Xscr = "𝒳";
+var xscr = "𝓍";
+var xsqcup = "⨆";
+var xuplus = "⨄";
+var xutri = "△";
+var xvee = "⋁";
+var xwedge = "⋀";
+var Yacute = "Ý";
+var yacute = "ý";
+var YAcy = "Я";
+var yacy = "я";
+var Ycirc = "Ŷ";
+var ycirc = "ŷ";
+var Ycy = "Ы";
+var ycy = "ы";
+var yen = "¥";
+var Yfr = "𝔜";
+var yfr = "𝔶";
+var YIcy = "Ї";
+var yicy = "ї";
+var Yopf = "𝕐";
+var yopf = "𝕪";
+var Yscr = "𝒴";
+var yscr = "𝓎";
+var YUcy = "Ю";
+var yucy = "ю";
+var yuml = "ÿ";
+var Yuml = "Ÿ";
+var Zacute = "Ź";
+var zacute = "ź";
+var Zcaron = "Ž";
+var zcaron = "ž";
+var Zcy = "З";
+var zcy = "з";
+var Zdot = "Ż";
+var zdot = "ż";
+var zeetrf = "ℨ";
+var ZeroWidthSpace = "​";
+var Zeta = "Ζ";
+var zeta = "ζ";
+var zfr = "𝔷";
+var Zfr = "ℨ";
+var ZHcy = "Ж";
+var zhcy = "ж";
+var zigrarr = "⇝";
+var zopf = "𝕫";
+var Zopf = "ℤ";
+var Zscr = "𝒵";
+var zscr = "𝓏";
+var zwj = "‍";
+var zwnj = "‌";
+var require$$0 = {
+	Aacute: Aacute,
+	aacute: aacute,
+	Abreve: Abreve,
+	abreve: abreve,
+	ac: ac,
+	acd: acd,
+	acE: acE,
+	Acirc: Acirc,
+	acirc: acirc,
+	acute: acute,
+	Acy: Acy,
+	acy: acy,
+	AElig: AElig,
+	aelig: aelig,
+	af: af,
+	Afr: Afr,
+	afr: afr,
+	Agrave: Agrave,
+	agrave: agrave,
+	alefsym: alefsym,
+	aleph: aleph,
+	Alpha: Alpha,
+	alpha: alpha,
+	Amacr: Amacr,
+	amacr: amacr,
+	amalg: amalg,
+	amp: amp,
+	AMP: AMP,
+	andand: andand,
+	And: And,
+	and: and,
+	andd: andd,
+	andslope: andslope,
+	andv: andv,
+	ang: ang,
+	ange: ange,
+	angle: angle,
+	angmsdaa: angmsdaa,
+	angmsdab: angmsdab,
+	angmsdac: angmsdac,
+	angmsdad: angmsdad,
+	angmsdae: angmsdae,
+	angmsdaf: angmsdaf,
+	angmsdag: angmsdag,
+	angmsdah: angmsdah,
+	angmsd: angmsd,
+	angrt: angrt,
+	angrtvb: angrtvb,
+	angrtvbd: angrtvbd,
+	angsph: angsph,
+	angst: angst,
+	angzarr: angzarr,
+	Aogon: Aogon,
+	aogon: aogon,
+	Aopf: Aopf,
+	aopf: aopf,
+	apacir: apacir,
+	ap: ap,
+	apE: apE,
+	ape: ape,
+	apid: apid,
+	apos: apos,
+	ApplyFunction: ApplyFunction,
+	approx: approx,
+	approxeq: approxeq,
+	Aring: Aring,
+	aring: aring,
+	Ascr: Ascr,
+	ascr: ascr,
+	Assign: Assign,
+	ast: ast,
+	asymp: asymp,
+	asympeq: asympeq,
+	Atilde: Atilde,
+	atilde: atilde,
+	Auml: Auml,
+	auml: auml,
+	awconint: awconint,
+	awint: awint,
+	backcong: backcong,
+	backepsilon: backepsilon,
+	backprime: backprime,
+	backsim: backsim,
+	backsimeq: backsimeq,
+	Backslash: Backslash,
+	Barv: Barv,
+	barvee: barvee,
+	barwed: barwed,
+	Barwed: Barwed,
+	barwedge: barwedge,
+	bbrk: bbrk,
+	bbrktbrk: bbrktbrk,
+	bcong: bcong,
+	Bcy: Bcy,
+	bcy: bcy,
+	bdquo: bdquo,
+	becaus: becaus,
+	because: because,
+	Because: Because,
+	bemptyv: bemptyv,
+	bepsi: bepsi,
+	bernou: bernou,
+	Bernoullis: Bernoullis,
+	Beta: Beta,
+	beta: beta,
+	beth: beth,
+	between: between,
+	Bfr: Bfr,
+	bfr: bfr,
+	bigcap: bigcap,
+	bigcirc: bigcirc,
+	bigcup: bigcup,
+	bigodot: bigodot,
+	bigoplus: bigoplus,
+	bigotimes: bigotimes,
+	bigsqcup: bigsqcup,
+	bigstar: bigstar,
+	bigtriangledown: bigtriangledown,
+	bigtriangleup: bigtriangleup,
+	biguplus: biguplus,
+	bigvee: bigvee,
+	bigwedge: bigwedge,
+	bkarow: bkarow,
+	blacklozenge: blacklozenge,
+	blacksquare: blacksquare,
+	blacktriangle: blacktriangle,
+	blacktriangledown: blacktriangledown,
+	blacktriangleleft: blacktriangleleft,
+	blacktriangleright: blacktriangleright,
+	blank: blank,
+	blk12: blk12,
+	blk14: blk14,
+	blk34: blk34,
+	block: block$1,
+	bne: bne,
+	bnequiv: bnequiv,
+	bNot: bNot,
+	bnot: bnot,
+	Bopf: Bopf,
+	bopf: bopf,
+	bot: bot,
+	bottom: bottom,
+	bowtie: bowtie,
+	boxbox: boxbox,
+	boxdl: boxdl,
+	boxdL: boxdL,
+	boxDl: boxDl,
+	boxDL: boxDL,
+	boxdr: boxdr,
+	boxdR: boxdR,
+	boxDr: boxDr,
+	boxDR: boxDR,
+	boxh: boxh,
+	boxH: boxH,
+	boxhd: boxhd,
+	boxHd: boxHd,
+	boxhD: boxhD,
+	boxHD: boxHD,
+	boxhu: boxhu,
+	boxHu: boxHu,
+	boxhU: boxhU,
+	boxHU: boxHU,
+	boxminus: boxminus,
+	boxplus: boxplus,
+	boxtimes: boxtimes,
+	boxul: boxul,
+	boxuL: boxuL,
+	boxUl: boxUl,
+	boxUL: boxUL,
+	boxur: boxur,
+	boxuR: boxuR,
+	boxUr: boxUr,
+	boxUR: boxUR,
+	boxv: boxv,
+	boxV: boxV,
+	boxvh: boxvh,
+	boxvH: boxvH,
+	boxVh: boxVh,
+	boxVH: boxVH,
+	boxvl: boxvl,
+	boxvL: boxvL,
+	boxVl: boxVl,
+	boxVL: boxVL,
+	boxvr: boxvr,
+	boxvR: boxvR,
+	boxVr: boxVr,
+	boxVR: boxVR,
+	bprime: bprime,
+	breve: breve,
+	Breve: Breve,
+	brvbar: brvbar,
+	bscr: bscr,
+	Bscr: Bscr,
+	bsemi: bsemi,
+	bsim: bsim,
+	bsime: bsime,
+	bsolb: bsolb,
+	bsol: bsol,
+	bsolhsub: bsolhsub,
+	bull: bull,
+	bullet: bullet,
+	bump: bump,
+	bumpE: bumpE,
+	bumpe: bumpe,
+	Bumpeq: Bumpeq,
+	bumpeq: bumpeq,
+	Cacute: Cacute,
+	cacute: cacute,
+	capand: capand,
+	capbrcup: capbrcup,
+	capcap: capcap,
+	cap: cap,
+	Cap: Cap,
+	capcup: capcup,
+	capdot: capdot,
+	CapitalDifferentialD: CapitalDifferentialD,
+	caps: caps,
+	caret: caret,
+	caron: caron,
+	Cayleys: Cayleys,
+	ccaps: ccaps,
+	Ccaron: Ccaron,
+	ccaron: ccaron,
+	Ccedil: Ccedil,
+	ccedil: ccedil,
+	Ccirc: Ccirc,
+	ccirc: ccirc,
+	Cconint: Cconint,
+	ccups: ccups,
+	ccupssm: ccupssm,
+	Cdot: Cdot,
+	cdot: cdot,
+	cedil: cedil,
+	Cedilla: Cedilla,
+	cemptyv: cemptyv,
+	cent: cent,
+	centerdot: centerdot,
+	CenterDot: CenterDot,
+	cfr: cfr,
+	Cfr: Cfr,
+	CHcy: CHcy,
+	chcy: chcy,
+	check: check,
+	checkmark: checkmark,
+	Chi: Chi,
+	chi: chi,
+	circ: circ,
+	circeq: circeq,
+	circlearrowleft: circlearrowleft,
+	circlearrowright: circlearrowright,
+	circledast: circledast,
+	circledcirc: circledcirc,
+	circleddash: circleddash,
+	CircleDot: CircleDot,
+	circledR: circledR,
+	circledS: circledS,
+	CircleMinus: CircleMinus,
+	CirclePlus: CirclePlus,
+	CircleTimes: CircleTimes,
+	cir: cir,
+	cirE: cirE,
+	cire: cire,
+	cirfnint: cirfnint,
+	cirmid: cirmid,
+	cirscir: cirscir,
+	ClockwiseContourIntegral: ClockwiseContourIntegral,
+	CloseCurlyDoubleQuote: CloseCurlyDoubleQuote,
+	CloseCurlyQuote: CloseCurlyQuote,
+	clubs: clubs,
+	clubsuit: clubsuit,
+	colon: colon,
+	Colon: Colon,
+	Colone: Colone,
+	colone: colone,
+	coloneq: coloneq,
+	comma: comma,
+	commat: commat,
+	comp: comp,
+	compfn: compfn,
+	complement: complement,
+	complexes: complexes,
+	cong: cong,
+	congdot: congdot,
+	Congruent: Congruent,
+	conint: conint,
+	Conint: Conint,
+	ContourIntegral: ContourIntegral,
+	copf: copf,
+	Copf: Copf,
+	coprod: coprod,
+	Coproduct: Coproduct,
+	copy: copy,
+	COPY: COPY,
+	copysr: copysr,
+	CounterClockwiseContourIntegral: CounterClockwiseContourIntegral,
+	crarr: crarr,
+	cross: cross,
+	Cross: Cross,
+	Cscr: Cscr,
+	cscr: cscr,
+	csub: csub,
+	csube: csube,
+	csup: csup,
+	csupe: csupe,
+	ctdot: ctdot,
+	cudarrl: cudarrl,
+	cudarrr: cudarrr,
+	cuepr: cuepr,
+	cuesc: cuesc,
+	cularr: cularr,
+	cularrp: cularrp,
+	cupbrcap: cupbrcap,
+	cupcap: cupcap,
+	CupCap: CupCap,
+	cup: cup,
+	Cup: Cup,
+	cupcup: cupcup,
+	cupdot: cupdot,
+	cupor: cupor,
+	cups: cups,
+	curarr: curarr,
+	curarrm: curarrm,
+	curlyeqprec: curlyeqprec,
+	curlyeqsucc: curlyeqsucc,
+	curlyvee: curlyvee,
+	curlywedge: curlywedge,
+	curren: curren,
+	curvearrowleft: curvearrowleft,
+	curvearrowright: curvearrowright,
+	cuvee: cuvee,
+	cuwed: cuwed,
+	cwconint: cwconint,
+	cwint: cwint,
+	cylcty: cylcty,
+	dagger: dagger,
+	Dagger: Dagger,
+	daleth: daleth,
+	darr: darr,
+	Darr: Darr,
+	dArr: dArr,
+	dash: dash,
+	Dashv: Dashv,
+	dashv: dashv,
+	dbkarow: dbkarow,
+	dblac: dblac,
+	Dcaron: Dcaron,
+	dcaron: dcaron,
+	Dcy: Dcy,
+	dcy: dcy,
+	ddagger: ddagger,
+	ddarr: ddarr,
+	DD: DD,
+	dd: dd,
+	DDotrahd: DDotrahd,
+	ddotseq: ddotseq,
+	deg: deg,
+	Del: Del,
+	Delta: Delta,
+	delta: delta,
+	demptyv: demptyv,
+	dfisht: dfisht,
+	Dfr: Dfr,
+	dfr: dfr,
+	dHar: dHar,
+	dharl: dharl,
+	dharr: dharr,
+	DiacriticalAcute: DiacriticalAcute,
+	DiacriticalDot: DiacriticalDot,
+	DiacriticalDoubleAcute: DiacriticalDoubleAcute,
+	DiacriticalGrave: DiacriticalGrave,
+	DiacriticalTilde: DiacriticalTilde,
+	diam: diam,
+	diamond: diamond,
+	Diamond: Diamond,
+	diamondsuit: diamondsuit,
+	diams: diams,
+	die: die,
+	DifferentialD: DifferentialD,
+	digamma: digamma,
+	disin: disin,
+	div: div,
+	divide: divide,
+	divideontimes: divideontimes,
+	divonx: divonx,
+	DJcy: DJcy,
+	djcy: djcy,
+	dlcorn: dlcorn,
+	dlcrop: dlcrop,
+	dollar: dollar,
+	Dopf: Dopf,
+	dopf: dopf,
+	Dot: Dot,
+	dot: dot,
+	DotDot: DotDot,
+	doteq: doteq,
+	doteqdot: doteqdot,
+	DotEqual: DotEqual,
+	dotminus: dotminus,
+	dotplus: dotplus,
+	dotsquare: dotsquare,
+	doublebarwedge: doublebarwedge,
+	DoubleContourIntegral: DoubleContourIntegral,
+	DoubleDot: DoubleDot,
+	DoubleDownArrow: DoubleDownArrow,
+	DoubleLeftArrow: DoubleLeftArrow,
+	DoubleLeftRightArrow: DoubleLeftRightArrow,
+	DoubleLeftTee: DoubleLeftTee,
+	DoubleLongLeftArrow: DoubleLongLeftArrow,
+	DoubleLongLeftRightArrow: DoubleLongLeftRightArrow,
+	DoubleLongRightArrow: DoubleLongRightArrow,
+	DoubleRightArrow: DoubleRightArrow,
+	DoubleRightTee: DoubleRightTee,
+	DoubleUpArrow: DoubleUpArrow,
+	DoubleUpDownArrow: DoubleUpDownArrow,
+	DoubleVerticalBar: DoubleVerticalBar,
+	DownArrowBar: DownArrowBar,
+	downarrow: downarrow,
+	DownArrow: DownArrow,
+	Downarrow: Downarrow,
+	DownArrowUpArrow: DownArrowUpArrow,
+	DownBreve: DownBreve,
+	downdownarrows: downdownarrows,
+	downharpoonleft: downharpoonleft,
+	downharpoonright: downharpoonright,
+	DownLeftRightVector: DownLeftRightVector,
+	DownLeftTeeVector: DownLeftTeeVector,
+	DownLeftVectorBar: DownLeftVectorBar,
+	DownLeftVector: DownLeftVector,
+	DownRightTeeVector: DownRightTeeVector,
+	DownRightVectorBar: DownRightVectorBar,
+	DownRightVector: DownRightVector,
+	DownTeeArrow: DownTeeArrow,
+	DownTee: DownTee,
+	drbkarow: drbkarow,
+	drcorn: drcorn,
+	drcrop: drcrop,
+	Dscr: Dscr,
+	dscr: dscr,
+	DScy: DScy,
+	dscy: dscy,
+	dsol: dsol,
+	Dstrok: Dstrok,
+	dstrok: dstrok,
+	dtdot: dtdot,
+	dtri: dtri,
+	dtrif: dtrif,
+	duarr: duarr,
+	duhar: duhar,
+	dwangle: dwangle,
+	DZcy: DZcy,
+	dzcy: dzcy,
+	dzigrarr: dzigrarr,
+	Eacute: Eacute,
+	eacute: eacute,
+	easter: easter,
+	Ecaron: Ecaron,
+	ecaron: ecaron,
+	Ecirc: Ecirc,
+	ecirc: ecirc,
+	ecir: ecir,
+	ecolon: ecolon,
+	Ecy: Ecy,
+	ecy: ecy,
+	eDDot: eDDot,
+	Edot: Edot,
+	edot: edot,
+	eDot: eDot,
+	ee: ee,
+	efDot: efDot,
+	Efr: Efr,
+	efr: efr,
+	eg: eg,
+	Egrave: Egrave,
+	egrave: egrave,
+	egs: egs,
+	egsdot: egsdot,
+	el: el,
+	Element: Element,
+	elinters: elinters,
+	ell: ell,
+	els: els,
+	elsdot: elsdot,
+	Emacr: Emacr,
+	emacr: emacr,
+	empty: empty,
+	emptyset: emptyset,
+	EmptySmallSquare: EmptySmallSquare,
+	emptyv: emptyv,
+	EmptyVerySmallSquare: EmptyVerySmallSquare,
+	emsp13: emsp13,
+	emsp14: emsp14,
+	emsp: emsp,
+	ENG: ENG,
+	eng: eng,
+	ensp: ensp,
+	Eogon: Eogon,
+	eogon: eogon,
+	Eopf: Eopf,
+	eopf: eopf,
+	epar: epar,
+	eparsl: eparsl,
+	eplus: eplus,
+	epsi: epsi,
+	Epsilon: Epsilon,
+	epsilon: epsilon,
+	epsiv: epsiv,
+	eqcirc: eqcirc,
+	eqcolon: eqcolon,
+	eqsim: eqsim,
+	eqslantgtr: eqslantgtr,
+	eqslantless: eqslantless,
+	Equal: Equal,
+	equals: equals,
+	EqualTilde: EqualTilde,
+	equest: equest,
+	Equilibrium: Equilibrium,
+	equiv: equiv,
+	equivDD: equivDD,
+	eqvparsl: eqvparsl,
+	erarr: erarr,
+	erDot: erDot,
+	escr: escr,
+	Escr: Escr,
+	esdot: esdot,
+	Esim: Esim,
+	esim: esim,
+	Eta: Eta,
+	eta: eta,
+	ETH: ETH,
+	eth: eth,
+	Euml: Euml,
+	euml: euml,
+	euro: euro,
+	excl: excl,
+	exist: exist,
+	Exists: Exists,
+	expectation: expectation,
+	exponentiale: exponentiale,
+	ExponentialE: ExponentialE,
+	fallingdotseq: fallingdotseq,
+	Fcy: Fcy,
+	fcy: fcy,
+	female: female,
+	ffilig: ffilig,
+	fflig: fflig,
+	ffllig: ffllig,
+	Ffr: Ffr,
+	ffr: ffr,
+	filig: filig,
+	FilledSmallSquare: FilledSmallSquare,
+	FilledVerySmallSquare: FilledVerySmallSquare,
+	fjlig: fjlig,
+	flat: flat,
+	fllig: fllig,
+	fltns: fltns,
+	fnof: fnof,
+	Fopf: Fopf,
+	fopf: fopf,
+	forall: forall,
+	ForAll: ForAll,
+	fork: fork,
+	forkv: forkv,
+	Fouriertrf: Fouriertrf,
+	fpartint: fpartint,
+	frac12: frac12,
+	frac13: frac13,
+	frac14: frac14,
+	frac15: frac15,
+	frac16: frac16,
+	frac18: frac18,
+	frac23: frac23,
+	frac25: frac25,
+	frac34: frac34,
+	frac35: frac35,
+	frac38: frac38,
+	frac45: frac45,
+	frac56: frac56,
+	frac58: frac58,
+	frac78: frac78,
+	frasl: frasl,
+	frown: frown,
+	fscr: fscr,
+	Fscr: Fscr,
+	gacute: gacute,
+	Gamma: Gamma,
+	gamma: gamma,
+	Gammad: Gammad,
+	gammad: gammad,
+	gap: gap,
+	Gbreve: Gbreve,
+	gbreve: gbreve,
+	Gcedil: Gcedil,
+	Gcirc: Gcirc,
+	gcirc: gcirc,
+	Gcy: Gcy,
+	gcy: gcy,
+	Gdot: Gdot,
+	gdot: gdot,
+	ge: ge,
+	gE: gE,
+	gEl: gEl,
+	gel: gel,
+	geq: geq,
+	geqq: geqq,
+	geqslant: geqslant,
+	gescc: gescc,
+	ges: ges,
+	gesdot: gesdot,
+	gesdoto: gesdoto,
+	gesdotol: gesdotol,
+	gesl: gesl,
+	gesles: gesles,
+	Gfr: Gfr,
+	gfr: gfr,
+	gg: gg,
+	Gg: Gg,
+	ggg: ggg,
+	gimel: gimel,
+	GJcy: GJcy,
+	gjcy: gjcy,
+	gla: gla,
+	gl: gl,
+	glE: glE,
+	glj: glj,
+	gnap: gnap,
+	gnapprox: gnapprox,
+	gne: gne,
+	gnE: gnE,
+	gneq: gneq,
+	gneqq: gneqq,
+	gnsim: gnsim,
+	Gopf: Gopf,
+	gopf: gopf,
+	grave: grave,
+	GreaterEqual: GreaterEqual,
+	GreaterEqualLess: GreaterEqualLess,
+	GreaterFullEqual: GreaterFullEqual,
+	GreaterGreater: GreaterGreater,
+	GreaterLess: GreaterLess,
+	GreaterSlantEqual: GreaterSlantEqual,
+	GreaterTilde: GreaterTilde,
+	Gscr: Gscr,
+	gscr: gscr,
+	gsim: gsim,
+	gsime: gsime,
+	gsiml: gsiml,
+	gtcc: gtcc,
+	gtcir: gtcir,
+	gt: gt,
+	GT: GT,
+	Gt: Gt,
+	gtdot: gtdot,
+	gtlPar: gtlPar,
+	gtquest: gtquest,
+	gtrapprox: gtrapprox,
+	gtrarr: gtrarr,
+	gtrdot: gtrdot,
+	gtreqless: gtreqless,
+	gtreqqless: gtreqqless,
+	gtrless: gtrless,
+	gtrsim: gtrsim,
+	gvertneqq: gvertneqq,
+	gvnE: gvnE,
+	Hacek: Hacek,
+	hairsp: hairsp,
+	half: half,
+	hamilt: hamilt,
+	HARDcy: HARDcy,
+	hardcy: hardcy,
+	harrcir: harrcir,
+	harr: harr,
+	hArr: hArr,
+	harrw: harrw,
+	Hat: Hat,
+	hbar: hbar,
+	Hcirc: Hcirc,
+	hcirc: hcirc,
+	hearts: hearts,
+	heartsuit: heartsuit,
+	hellip: hellip,
+	hercon: hercon,
+	hfr: hfr,
+	Hfr: Hfr,
+	HilbertSpace: HilbertSpace,
+	hksearow: hksearow,
+	hkswarow: hkswarow,
+	hoarr: hoarr,
+	homtht: homtht,
+	hookleftarrow: hookleftarrow,
+	hookrightarrow: hookrightarrow,
+	hopf: hopf,
+	Hopf: Hopf,
+	horbar: horbar,
+	HorizontalLine: HorizontalLine,
+	hscr: hscr,
+	Hscr: Hscr,
+	hslash: hslash,
+	Hstrok: Hstrok,
+	hstrok: hstrok,
+	HumpDownHump: HumpDownHump,
+	HumpEqual: HumpEqual,
+	hybull: hybull,
+	hyphen: hyphen,
+	Iacute: Iacute,
+	iacute: iacute,
+	ic: ic,
+	Icirc: Icirc,
+	icirc: icirc,
+	Icy: Icy,
+	icy: icy,
+	Idot: Idot,
+	IEcy: IEcy,
+	iecy: iecy,
+	iexcl: iexcl,
+	iff: iff,
+	ifr: ifr,
+	Ifr: Ifr,
+	Igrave: Igrave,
+	igrave: igrave,
+	ii: ii,
+	iiiint: iiiint,
+	iiint: iiint,
+	iinfin: iinfin,
+	iiota: iiota,
+	IJlig: IJlig,
+	ijlig: ijlig,
+	Imacr: Imacr,
+	imacr: imacr,
+	image: image$1,
+	ImaginaryI: ImaginaryI,
+	imagline: imagline,
+	imagpart: imagpart,
+	imath: imath,
+	Im: Im,
+	imof: imof,
+	imped: imped,
+	Implies: Implies,
+	incare: incare,
+	"in": "∈",
+	infin: infin,
+	infintie: infintie,
+	inodot: inodot,
+	intcal: intcal,
+	int: int,
+	Int: Int,
+	integers: integers,
+	Integral: Integral,
+	intercal: intercal,
+	Intersection: Intersection,
+	intlarhk: intlarhk,
+	intprod: intprod,
+	InvisibleComma: InvisibleComma,
+	InvisibleTimes: InvisibleTimes,
+	IOcy: IOcy,
+	iocy: iocy,
+	Iogon: Iogon,
+	iogon: iogon,
+	Iopf: Iopf,
+	iopf: iopf,
+	Iota: Iota,
+	iota: iota,
+	iprod: iprod,
+	iquest: iquest,
+	iscr: iscr,
+	Iscr: Iscr,
+	isin: isin,
+	isindot: isindot,
+	isinE: isinE,
+	isins: isins,
+	isinsv: isinsv,
+	isinv: isinv,
+	it: it,
+	Itilde: Itilde,
+	itilde: itilde,
+	Iukcy: Iukcy,
+	iukcy: iukcy,
+	Iuml: Iuml,
+	iuml: iuml,
+	Jcirc: Jcirc,
+	jcirc: jcirc,
+	Jcy: Jcy,
+	jcy: jcy,
+	Jfr: Jfr,
+	jfr: jfr,
+	jmath: jmath,
+	Jopf: Jopf,
+	jopf: jopf,
+	Jscr: Jscr,
+	jscr: jscr,
+	Jsercy: Jsercy,
+	jsercy: jsercy,
+	Jukcy: Jukcy,
+	jukcy: jukcy,
+	Kappa: Kappa,
+	kappa: kappa,
+	kappav: kappav,
+	Kcedil: Kcedil,
+	kcedil: kcedil,
+	Kcy: Kcy,
+	kcy: kcy,
+	Kfr: Kfr,
+	kfr: kfr,
+	kgreen: kgreen,
+	KHcy: KHcy,
+	khcy: khcy,
+	KJcy: KJcy,
+	kjcy: kjcy,
+	Kopf: Kopf,
+	kopf: kopf,
+	Kscr: Kscr,
+	kscr: kscr,
+	lAarr: lAarr,
+	Lacute: Lacute,
+	lacute: lacute,
+	laemptyv: laemptyv,
+	lagran: lagran,
+	Lambda: Lambda,
+	lambda: lambda,
+	lang: lang,
+	Lang: Lang,
+	langd: langd,
+	langle: langle,
+	lap: lap,
+	Laplacetrf: Laplacetrf,
+	laquo: laquo,
+	larrb: larrb,
+	larrbfs: larrbfs,
+	larr: larr,
+	Larr: Larr,
+	lArr: lArr,
+	larrfs: larrfs,
+	larrhk: larrhk,
+	larrlp: larrlp,
+	larrpl: larrpl,
+	larrsim: larrsim,
+	larrtl: larrtl,
+	latail: latail,
+	lAtail: lAtail,
+	lat: lat,
+	late: late,
+	lates: lates,
+	lbarr: lbarr,
+	lBarr: lBarr,
+	lbbrk: lbbrk,
+	lbrace: lbrace,
+	lbrack: lbrack,
+	lbrke: lbrke,
+	lbrksld: lbrksld,
+	lbrkslu: lbrkslu,
+	Lcaron: Lcaron,
+	lcaron: lcaron,
+	Lcedil: Lcedil,
+	lcedil: lcedil,
+	lceil: lceil,
+	lcub: lcub,
+	Lcy: Lcy,
+	lcy: lcy,
+	ldca: ldca,
+	ldquo: ldquo,
+	ldquor: ldquor,
+	ldrdhar: ldrdhar,
+	ldrushar: ldrushar,
+	ldsh: ldsh,
+	le: le,
+	lE: lE,
+	LeftAngleBracket: LeftAngleBracket,
+	LeftArrowBar: LeftArrowBar,
+	leftarrow: leftarrow,
+	LeftArrow: LeftArrow,
+	Leftarrow: Leftarrow,
+	LeftArrowRightArrow: LeftArrowRightArrow,
+	leftarrowtail: leftarrowtail,
+	LeftCeiling: LeftCeiling,
+	LeftDoubleBracket: LeftDoubleBracket,
+	LeftDownTeeVector: LeftDownTeeVector,
+	LeftDownVectorBar: LeftDownVectorBar,
+	LeftDownVector: LeftDownVector,
+	LeftFloor: LeftFloor,
+	leftharpoondown: leftharpoondown,
+	leftharpoonup: leftharpoonup,
+	leftleftarrows: leftleftarrows,
+	leftrightarrow: leftrightarrow,
+	LeftRightArrow: LeftRightArrow,
+	Leftrightarrow: Leftrightarrow,
+	leftrightarrows: leftrightarrows,
+	leftrightharpoons: leftrightharpoons,
+	leftrightsquigarrow: leftrightsquigarrow,
+	LeftRightVector: LeftRightVector,
+	LeftTeeArrow: LeftTeeArrow,
+	LeftTee: LeftTee,
+	LeftTeeVector: LeftTeeVector,
+	leftthreetimes: leftthreetimes,
+	LeftTriangleBar: LeftTriangleBar,
+	LeftTriangle: LeftTriangle,
+	LeftTriangleEqual: LeftTriangleEqual,
+	LeftUpDownVector: LeftUpDownVector,
+	LeftUpTeeVector: LeftUpTeeVector,
+	LeftUpVectorBar: LeftUpVectorBar,
+	LeftUpVector: LeftUpVector,
+	LeftVectorBar: LeftVectorBar,
+	LeftVector: LeftVector,
+	lEg: lEg,
+	leg: leg,
+	leq: leq,
+	leqq: leqq,
+	leqslant: leqslant,
+	lescc: lescc,
+	les: les,
+	lesdot: lesdot,
+	lesdoto: lesdoto,
+	lesdotor: lesdotor,
+	lesg: lesg,
+	lesges: lesges,
+	lessapprox: lessapprox,
+	lessdot: lessdot,
+	lesseqgtr: lesseqgtr,
+	lesseqqgtr: lesseqqgtr,
+	LessEqualGreater: LessEqualGreater,
+	LessFullEqual: LessFullEqual,
+	LessGreater: LessGreater,
+	lessgtr: lessgtr,
+	LessLess: LessLess,
+	lesssim: lesssim,
+	LessSlantEqual: LessSlantEqual,
+	LessTilde: LessTilde,
+	lfisht: lfisht,
+	lfloor: lfloor,
+	Lfr: Lfr,
+	lfr: lfr,
+	lg: lg,
+	lgE: lgE,
+	lHar: lHar,
+	lhard: lhard,
+	lharu: lharu,
+	lharul: lharul,
+	lhblk: lhblk,
+	LJcy: LJcy,
+	ljcy: ljcy,
+	llarr: llarr,
+	ll: ll,
+	Ll: Ll,
+	llcorner: llcorner,
+	Lleftarrow: Lleftarrow,
+	llhard: llhard,
+	lltri: lltri,
+	Lmidot: Lmidot,
+	lmidot: lmidot,
+	lmoustache: lmoustache,
+	lmoust: lmoust,
+	lnap: lnap,
+	lnapprox: lnapprox,
+	lne: lne,
+	lnE: lnE,
+	lneq: lneq,
+	lneqq: lneqq,
+	lnsim: lnsim,
+	loang: loang,
+	loarr: loarr,
+	lobrk: lobrk,
+	longleftarrow: longleftarrow,
+	LongLeftArrow: LongLeftArrow,
+	Longleftarrow: Longleftarrow,
+	longleftrightarrow: longleftrightarrow,
+	LongLeftRightArrow: LongLeftRightArrow,
+	Longleftrightarrow: Longleftrightarrow,
+	longmapsto: longmapsto,
+	longrightarrow: longrightarrow,
+	LongRightArrow: LongRightArrow,
+	Longrightarrow: Longrightarrow,
+	looparrowleft: looparrowleft,
+	looparrowright: looparrowright,
+	lopar: lopar,
+	Lopf: Lopf,
+	lopf: lopf,
+	loplus: loplus,
+	lotimes: lotimes,
+	lowast: lowast,
+	lowbar: lowbar,
+	LowerLeftArrow: LowerLeftArrow,
+	LowerRightArrow: LowerRightArrow,
+	loz: loz,
+	lozenge: lozenge,
+	lozf: lozf,
+	lpar: lpar,
+	lparlt: lparlt,
+	lrarr: lrarr,
+	lrcorner: lrcorner,
+	lrhar: lrhar,
+	lrhard: lrhard,
+	lrm: lrm,
+	lrtri: lrtri,
+	lsaquo: lsaquo,
+	lscr: lscr,
+	Lscr: Lscr,
+	lsh: lsh,
+	Lsh: Lsh,
+	lsim: lsim,
+	lsime: lsime,
+	lsimg: lsimg,
+	lsqb: lsqb,
+	lsquo: lsquo,
+	lsquor: lsquor,
+	Lstrok: Lstrok,
+	lstrok: lstrok,
+	ltcc: ltcc,
+	ltcir: ltcir,
+	lt: lt,
+	LT: LT,
+	Lt: Lt,
+	ltdot: ltdot,
+	lthree: lthree,
+	ltimes: ltimes,
+	ltlarr: ltlarr,
+	ltquest: ltquest,
+	ltri: ltri,
+	ltrie: ltrie,
+	ltrif: ltrif,
+	ltrPar: ltrPar,
+	lurdshar: lurdshar,
+	luruhar: luruhar,
+	lvertneqq: lvertneqq,
+	lvnE: lvnE,
+	macr: macr,
+	male: male,
+	malt: malt,
+	maltese: maltese,
+	"Map": "⤅",
+	map: map,
+	mapsto: mapsto,
+	mapstodown: mapstodown,
+	mapstoleft: mapstoleft,
+	mapstoup: mapstoup,
+	marker: marker,
+	mcomma: mcomma,
+	Mcy: Mcy,
+	mcy: mcy,
+	mdash: mdash,
+	mDDot: mDDot,
+	measuredangle: measuredangle,
+	MediumSpace: MediumSpace,
+	Mellintrf: Mellintrf,
+	Mfr: Mfr,
+	mfr: mfr,
+	mho: mho,
+	micro: micro,
+	midast: midast,
+	midcir: midcir,
+	mid: mid,
+	middot: middot,
+	minusb: minusb,
+	minus: minus,
+	minusd: minusd,
+	minusdu: minusdu,
+	MinusPlus: MinusPlus,
+	mlcp: mlcp,
+	mldr: mldr,
+	mnplus: mnplus,
+	models: models,
+	Mopf: Mopf,
+	mopf: mopf,
+	mp: mp,
+	mscr: mscr,
+	Mscr: Mscr,
+	mstpos: mstpos,
+	Mu: Mu,
+	mu: mu,
+	multimap: multimap,
+	mumap: mumap,
+	nabla: nabla,
+	Nacute: Nacute,
+	nacute: nacute,
+	nang: nang,
+	nap: nap,
+	napE: napE,
+	napid: napid,
+	napos: napos,
+	napprox: napprox,
+	natural: natural,
+	naturals: naturals,
+	natur: natur,
+	nbsp: nbsp,
+	nbump: nbump,
+	nbumpe: nbumpe,
+	ncap: ncap,
+	Ncaron: Ncaron,
+	ncaron: ncaron,
+	Ncedil: Ncedil,
+	ncedil: ncedil,
+	ncong: ncong,
+	ncongdot: ncongdot,
+	ncup: ncup,
+	Ncy: Ncy,
+	ncy: ncy,
+	ndash: ndash,
+	nearhk: nearhk,
+	nearr: nearr,
+	neArr: neArr,
+	nearrow: nearrow,
+	ne: ne,
+	nedot: nedot,
+	NegativeMediumSpace: NegativeMediumSpace,
+	NegativeThickSpace: NegativeThickSpace,
+	NegativeThinSpace: NegativeThinSpace,
+	NegativeVeryThinSpace: NegativeVeryThinSpace,
+	nequiv: nequiv,
+	nesear: nesear,
+	nesim: nesim,
+	NestedGreaterGreater: NestedGreaterGreater,
+	NestedLessLess: NestedLessLess,
+	NewLine: NewLine,
+	nexist: nexist,
+	nexists: nexists,
+	Nfr: Nfr,
+	nfr: nfr,
+	ngE: ngE,
+	nge: nge,
+	ngeq: ngeq,
+	ngeqq: ngeqq,
+	ngeqslant: ngeqslant,
+	nges: nges,
+	nGg: nGg,
+	ngsim: ngsim,
+	nGt: nGt,
+	ngt: ngt,
+	ngtr: ngtr,
+	nGtv: nGtv,
+	nharr: nharr,
+	nhArr: nhArr,
+	nhpar: nhpar,
+	ni: ni,
+	nis: nis,
+	nisd: nisd,
+	niv: niv,
+	NJcy: NJcy,
+	njcy: njcy,
+	nlarr: nlarr,
+	nlArr: nlArr,
+	nldr: nldr,
+	nlE: nlE,
+	nle: nle,
+	nleftarrow: nleftarrow,
+	nLeftarrow: nLeftarrow,
+	nleftrightarrow: nleftrightarrow,
+	nLeftrightarrow: nLeftrightarrow,
+	nleq: nleq,
+	nleqq: nleqq,
+	nleqslant: nleqslant,
+	nles: nles,
+	nless: nless,
+	nLl: nLl,
+	nlsim: nlsim,
+	nLt: nLt,
+	nlt: nlt,
+	nltri: nltri,
+	nltrie: nltrie,
+	nLtv: nLtv,
+	nmid: nmid,
+	NoBreak: NoBreak,
+	NonBreakingSpace: NonBreakingSpace,
+	nopf: nopf,
+	Nopf: Nopf,
+	Not: Not,
+	not: not,
+	NotCongruent: NotCongruent,
+	NotCupCap: NotCupCap,
+	NotDoubleVerticalBar: NotDoubleVerticalBar,
+	NotElement: NotElement,
+	NotEqual: NotEqual,
+	NotEqualTilde: NotEqualTilde,
+	NotExists: NotExists,
+	NotGreater: NotGreater,
+	NotGreaterEqual: NotGreaterEqual,
+	NotGreaterFullEqual: NotGreaterFullEqual,
+	NotGreaterGreater: NotGreaterGreater,
+	NotGreaterLess: NotGreaterLess,
+	NotGreaterSlantEqual: NotGreaterSlantEqual,
+	NotGreaterTilde: NotGreaterTilde,
+	NotHumpDownHump: NotHumpDownHump,
+	NotHumpEqual: NotHumpEqual,
+	notin: notin,
+	notindot: notindot,
+	notinE: notinE,
+	notinva: notinva,
+	notinvb: notinvb,
+	notinvc: notinvc,
+	NotLeftTriangleBar: NotLeftTriangleBar,
+	NotLeftTriangle: NotLeftTriangle,
+	NotLeftTriangleEqual: NotLeftTriangleEqual,
+	NotLess: NotLess,
+	NotLessEqual: NotLessEqual,
+	NotLessGreater: NotLessGreater,
+	NotLessLess: NotLessLess,
+	NotLessSlantEqual: NotLessSlantEqual,
+	NotLessTilde: NotLessTilde,
+	NotNestedGreaterGreater: NotNestedGreaterGreater,
+	NotNestedLessLess: NotNestedLessLess,
+	notni: notni,
+	notniva: notniva,
+	notnivb: notnivb,
+	notnivc: notnivc,
+	NotPrecedes: NotPrecedes,
+	NotPrecedesEqual: NotPrecedesEqual,
+	NotPrecedesSlantEqual: NotPrecedesSlantEqual,
+	NotReverseElement: NotReverseElement,
+	NotRightTriangleBar: NotRightTriangleBar,
+	NotRightTriangle: NotRightTriangle,
+	NotRightTriangleEqual: NotRightTriangleEqual,
+	NotSquareSubset: NotSquareSubset,
+	NotSquareSubsetEqual: NotSquareSubsetEqual,
+	NotSquareSuperset: NotSquareSuperset,
+	NotSquareSupersetEqual: NotSquareSupersetEqual,
+	NotSubset: NotSubset,
+	NotSubsetEqual: NotSubsetEqual,
+	NotSucceeds: NotSucceeds,
+	NotSucceedsEqual: NotSucceedsEqual,
+	NotSucceedsSlantEqual: NotSucceedsSlantEqual,
+	NotSucceedsTilde: NotSucceedsTilde,
+	NotSuperset: NotSuperset,
+	NotSupersetEqual: NotSupersetEqual,
+	NotTilde: NotTilde,
+	NotTildeEqual: NotTildeEqual,
+	NotTildeFullEqual: NotTildeFullEqual,
+	NotTildeTilde: NotTildeTilde,
+	NotVerticalBar: NotVerticalBar,
+	nparallel: nparallel,
+	npar: npar,
+	nparsl: nparsl,
+	npart: npart,
+	npolint: npolint,
+	npr: npr,
+	nprcue: nprcue,
+	nprec: nprec,
+	npreceq: npreceq,
+	npre: npre,
+	nrarrc: nrarrc,
+	nrarr: nrarr,
+	nrArr: nrArr,
+	nrarrw: nrarrw,
+	nrightarrow: nrightarrow,
+	nRightarrow: nRightarrow,
+	nrtri: nrtri,
+	nrtrie: nrtrie,
+	nsc: nsc,
+	nsccue: nsccue,
+	nsce: nsce,
+	Nscr: Nscr,
+	nscr: nscr,
+	nshortmid: nshortmid,
+	nshortparallel: nshortparallel,
+	nsim: nsim,
+	nsime: nsime,
+	nsimeq: nsimeq,
+	nsmid: nsmid,
+	nspar: nspar,
+	nsqsube: nsqsube,
+	nsqsupe: nsqsupe,
+	nsub: nsub,
+	nsubE: nsubE,
+	nsube: nsube,
+	nsubset: nsubset,
+	nsubseteq: nsubseteq,
+	nsubseteqq: nsubseteqq,
+	nsucc: nsucc,
+	nsucceq: nsucceq,
+	nsup: nsup,
+	nsupE: nsupE,
+	nsupe: nsupe,
+	nsupset: nsupset,
+	nsupseteq: nsupseteq,
+	nsupseteqq: nsupseteqq,
+	ntgl: ntgl,
+	Ntilde: Ntilde,
+	ntilde: ntilde,
+	ntlg: ntlg,
+	ntriangleleft: ntriangleleft,
+	ntrianglelefteq: ntrianglelefteq,
+	ntriangleright: ntriangleright,
+	ntrianglerighteq: ntrianglerighteq,
+	Nu: Nu,
+	nu: nu,
+	num: num,
+	numero: numero,
+	numsp: numsp,
+	nvap: nvap,
+	nvdash: nvdash,
+	nvDash: nvDash,
+	nVdash: nVdash,
+	nVDash: nVDash,
+	nvge: nvge,
+	nvgt: nvgt,
+	nvHarr: nvHarr,
+	nvinfin: nvinfin,
+	nvlArr: nvlArr,
+	nvle: nvle,
+	nvlt: nvlt,
+	nvltrie: nvltrie,
+	nvrArr: nvrArr,
+	nvrtrie: nvrtrie,
+	nvsim: nvsim,
+	nwarhk: nwarhk,
+	nwarr: nwarr,
+	nwArr: nwArr,
+	nwarrow: nwarrow,
+	nwnear: nwnear,
+	Oacute: Oacute,
+	oacute: oacute,
+	oast: oast,
+	Ocirc: Ocirc,
+	ocirc: ocirc,
+	ocir: ocir,
+	Ocy: Ocy,
+	ocy: ocy,
+	odash: odash,
+	Odblac: Odblac,
+	odblac: odblac,
+	odiv: odiv,
+	odot: odot,
+	odsold: odsold,
+	OElig: OElig,
+	oelig: oelig,
+	ofcir: ofcir,
+	Ofr: Ofr,
+	ofr: ofr,
+	ogon: ogon,
+	Ograve: Ograve,
+	ograve: ograve,
+	ogt: ogt,
+	ohbar: ohbar,
+	ohm: ohm,
+	oint: oint,
+	olarr: olarr,
+	olcir: olcir,
+	olcross: olcross,
+	oline: oline,
+	olt: olt,
+	Omacr: Omacr,
+	omacr: omacr,
+	Omega: Omega,
+	omega: omega,
+	Omicron: Omicron,
+	omicron: omicron,
+	omid: omid,
+	ominus: ominus,
+	Oopf: Oopf,
+	oopf: oopf,
+	opar: opar,
+	OpenCurlyDoubleQuote: OpenCurlyDoubleQuote,
+	OpenCurlyQuote: OpenCurlyQuote,
+	operp: operp,
+	oplus: oplus,
+	orarr: orarr,
+	Or: Or,
+	or: or,
+	ord: ord,
+	order: order,
+	orderof: orderof,
+	ordf: ordf,
+	ordm: ordm,
+	origof: origof,
+	oror: oror,
+	orslope: orslope,
+	orv: orv,
+	oS: oS,
+	Oscr: Oscr,
+	oscr: oscr,
+	Oslash: Oslash,
+	oslash: oslash,
+	osol: osol,
+	Otilde: Otilde,
+	otilde: otilde,
+	otimesas: otimesas,
+	Otimes: Otimes,
+	otimes: otimes,
+	Ouml: Ouml,
+	ouml: ouml,
+	ovbar: ovbar,
+	OverBar: OverBar,
+	OverBrace: OverBrace,
+	OverBracket: OverBracket,
+	OverParenthesis: OverParenthesis,
+	para: para,
+	parallel: parallel,
+	par: par,
+	parsim: parsim,
+	parsl: parsl,
+	part: part,
+	PartialD: PartialD,
+	Pcy: Pcy,
+	pcy: pcy,
+	percnt: percnt,
+	period: period,
+	permil: permil,
+	perp: perp,
+	pertenk: pertenk,
+	Pfr: Pfr,
+	pfr: pfr,
+	Phi: Phi,
+	phi: phi,
+	phiv: phiv,
+	phmmat: phmmat,
+	phone: phone,
+	Pi: Pi,
+	pi: pi,
+	pitchfork: pitchfork,
+	piv: piv,
+	planck: planck,
+	planckh: planckh,
+	plankv: plankv,
+	plusacir: plusacir,
+	plusb: plusb,
+	pluscir: pluscir,
+	plus: plus,
+	plusdo: plusdo,
+	plusdu: plusdu,
+	pluse: pluse,
+	PlusMinus: PlusMinus,
+	plusmn: plusmn,
+	plussim: plussim,
+	plustwo: plustwo,
+	pm: pm,
+	Poincareplane: Poincareplane,
+	pointint: pointint,
+	popf: popf,
+	Popf: Popf,
+	pound: pound,
+	prap: prap,
+	Pr: Pr,
+	pr: pr,
+	prcue: prcue,
+	precapprox: precapprox,
+	prec: prec,
+	preccurlyeq: preccurlyeq,
+	Precedes: Precedes,
+	PrecedesEqual: PrecedesEqual,
+	PrecedesSlantEqual: PrecedesSlantEqual,
+	PrecedesTilde: PrecedesTilde,
+	preceq: preceq,
+	precnapprox: precnapprox,
+	precneqq: precneqq,
+	precnsim: precnsim,
+	pre: pre,
+	prE: prE,
+	precsim: precsim,
+	prime: prime,
+	Prime: Prime,
+	primes: primes,
+	prnap: prnap,
+	prnE: prnE,
+	prnsim: prnsim,
+	prod: prod,
+	Product: Product,
+	profalar: profalar,
+	profline: profline,
+	profsurf: profsurf,
+	prop: prop,
+	Proportional: Proportional,
+	Proportion: Proportion,
+	propto: propto,
+	prsim: prsim,
+	prurel: prurel,
+	Pscr: Pscr,
+	pscr: pscr,
+	Psi: Psi,
+	psi: psi,
+	puncsp: puncsp,
+	Qfr: Qfr,
+	qfr: qfr,
+	qint: qint,
+	qopf: qopf,
+	Qopf: Qopf,
+	qprime: qprime,
+	Qscr: Qscr,
+	qscr: qscr,
+	quaternions: quaternions,
+	quatint: quatint,
+	quest: quest,
+	questeq: questeq,
+	quot: quot,
+	QUOT: QUOT,
+	rAarr: rAarr,
+	race: race,
+	Racute: Racute,
+	racute: racute,
+	radic: radic,
+	raemptyv: raemptyv,
+	rang: rang,
+	Rang: Rang,
+	rangd: rangd,
+	range: range,
+	rangle: rangle,
+	raquo: raquo,
+	rarrap: rarrap,
+	rarrb: rarrb,
+	rarrbfs: rarrbfs,
+	rarrc: rarrc,
+	rarr: rarr,
+	Rarr: Rarr,
+	rArr: rArr,
+	rarrfs: rarrfs,
+	rarrhk: rarrhk,
+	rarrlp: rarrlp,
+	rarrpl: rarrpl,
+	rarrsim: rarrsim,
+	Rarrtl: Rarrtl,
+	rarrtl: rarrtl,
+	rarrw: rarrw,
+	ratail: ratail,
+	rAtail: rAtail,
+	ratio: ratio,
+	rationals: rationals,
+	rbarr: rbarr,
+	rBarr: rBarr,
+	RBarr: RBarr,
+	rbbrk: rbbrk,
+	rbrace: rbrace,
+	rbrack: rbrack,
+	rbrke: rbrke,
+	rbrksld: rbrksld,
+	rbrkslu: rbrkslu,
+	Rcaron: Rcaron,
+	rcaron: rcaron,
+	Rcedil: Rcedil,
+	rcedil: rcedil,
+	rceil: rceil,
+	rcub: rcub,
+	Rcy: Rcy,
+	rcy: rcy,
+	rdca: rdca,
+	rdldhar: rdldhar,
+	rdquo: rdquo,
+	rdquor: rdquor,
+	rdsh: rdsh,
+	real: real,
+	realine: realine,
+	realpart: realpart,
+	reals: reals,
+	Re: Re,
+	rect: rect,
+	reg: reg,
+	REG: REG,
+	ReverseElement: ReverseElement,
+	ReverseEquilibrium: ReverseEquilibrium,
+	ReverseUpEquilibrium: ReverseUpEquilibrium,
+	rfisht: rfisht,
+	rfloor: rfloor,
+	rfr: rfr,
+	Rfr: Rfr,
+	rHar: rHar,
+	rhard: rhard,
+	rharu: rharu,
+	rharul: rharul,
+	Rho: Rho,
+	rho: rho,
+	rhov: rhov,
+	RightAngleBracket: RightAngleBracket,
+	RightArrowBar: RightArrowBar,
+	rightarrow: rightarrow,
+	RightArrow: RightArrow,
+	Rightarrow: Rightarrow,
+	RightArrowLeftArrow: RightArrowLeftArrow,
+	rightarrowtail: rightarrowtail,
+	RightCeiling: RightCeiling,
+	RightDoubleBracket: RightDoubleBracket,
+	RightDownTeeVector: RightDownTeeVector,
+	RightDownVectorBar: RightDownVectorBar,
+	RightDownVector: RightDownVector,
+	RightFloor: RightFloor,
+	rightharpoondown: rightharpoondown,
+	rightharpoonup: rightharpoonup,
+	rightleftarrows: rightleftarrows,
+	rightleftharpoons: rightleftharpoons,
+	rightrightarrows: rightrightarrows,
+	rightsquigarrow: rightsquigarrow,
+	RightTeeArrow: RightTeeArrow,
+	RightTee: RightTee,
+	RightTeeVector: RightTeeVector,
+	rightthreetimes: rightthreetimes,
+	RightTriangleBar: RightTriangleBar,
+	RightTriangle: RightTriangle,
+	RightTriangleEqual: RightTriangleEqual,
+	RightUpDownVector: RightUpDownVector,
+	RightUpTeeVector: RightUpTeeVector,
+	RightUpVectorBar: RightUpVectorBar,
+	RightUpVector: RightUpVector,
+	RightVectorBar: RightVectorBar,
+	RightVector: RightVector,
+	ring: ring,
+	risingdotseq: risingdotseq,
+	rlarr: rlarr,
+	rlhar: rlhar,
+	rlm: rlm,
+	rmoustache: rmoustache,
+	rmoust: rmoust,
+	rnmid: rnmid,
+	roang: roang,
+	roarr: roarr,
+	robrk: robrk,
+	ropar: ropar,
+	ropf: ropf,
+	Ropf: Ropf,
+	roplus: roplus,
+	rotimes: rotimes,
+	RoundImplies: RoundImplies,
+	rpar: rpar,
+	rpargt: rpargt,
+	rppolint: rppolint,
+	rrarr: rrarr,
+	Rrightarrow: Rrightarrow,
+	rsaquo: rsaquo,
+	rscr: rscr,
+	Rscr: Rscr,
+	rsh: rsh,
+	Rsh: Rsh,
+	rsqb: rsqb,
+	rsquo: rsquo,
+	rsquor: rsquor,
+	rthree: rthree,
+	rtimes: rtimes,
+	rtri: rtri,
+	rtrie: rtrie,
+	rtrif: rtrif,
+	rtriltri: rtriltri,
+	RuleDelayed: RuleDelayed,
+	ruluhar: ruluhar,
+	rx: rx,
+	Sacute: Sacute,
+	sacute: sacute,
+	sbquo: sbquo,
+	scap: scap,
+	Scaron: Scaron,
+	scaron: scaron,
+	Sc: Sc,
+	sc: sc,
+	sccue: sccue,
+	sce: sce,
+	scE: scE,
+	Scedil: Scedil,
+	scedil: scedil,
+	Scirc: Scirc,
+	scirc: scirc,
+	scnap: scnap,
+	scnE: scnE,
+	scnsim: scnsim,
+	scpolint: scpolint,
+	scsim: scsim,
+	Scy: Scy,
+	scy: scy,
+	sdotb: sdotb,
+	sdot: sdot,
+	sdote: sdote,
+	searhk: searhk,
+	searr: searr,
+	seArr: seArr,
+	searrow: searrow,
+	sect: sect,
+	semi: semi,
+	seswar: seswar,
+	setminus: setminus,
+	setmn: setmn,
+	sext: sext,
+	Sfr: Sfr,
+	sfr: sfr,
+	sfrown: sfrown,
+	sharp: sharp,
+	SHCHcy: SHCHcy,
+	shchcy: shchcy,
+	SHcy: SHcy,
+	shcy: shcy,
+	ShortDownArrow: ShortDownArrow,
+	ShortLeftArrow: ShortLeftArrow,
+	shortmid: shortmid,
+	shortparallel: shortparallel,
+	ShortRightArrow: ShortRightArrow,
+	ShortUpArrow: ShortUpArrow,
+	shy: shy,
+	Sigma: Sigma,
+	sigma: sigma,
+	sigmaf: sigmaf,
+	sigmav: sigmav,
+	sim: sim,
+	simdot: simdot,
+	sime: sime,
+	simeq: simeq,
+	simg: simg,
+	simgE: simgE,
+	siml: siml,
+	simlE: simlE,
+	simne: simne,
+	simplus: simplus,
+	simrarr: simrarr,
+	slarr: slarr,
+	SmallCircle: SmallCircle,
+	smallsetminus: smallsetminus,
+	smashp: smashp,
+	smeparsl: smeparsl,
+	smid: smid,
+	smile: smile,
+	smt: smt,
+	smte: smte,
+	smtes: smtes,
+	SOFTcy: SOFTcy,
+	softcy: softcy,
+	solbar: solbar,
+	solb: solb,
+	sol: sol,
+	Sopf: Sopf,
+	sopf: sopf,
+	spades: spades,
+	spadesuit: spadesuit,
+	spar: spar,
+	sqcap: sqcap,
+	sqcaps: sqcaps,
+	sqcup: sqcup,
+	sqcups: sqcups,
+	Sqrt: Sqrt,
+	sqsub: sqsub,
+	sqsube: sqsube,
+	sqsubset: sqsubset,
+	sqsubseteq: sqsubseteq,
+	sqsup: sqsup,
+	sqsupe: sqsupe,
+	sqsupset: sqsupset,
+	sqsupseteq: sqsupseteq,
+	square: square,
+	Square: Square,
+	SquareIntersection: SquareIntersection,
+	SquareSubset: SquareSubset,
+	SquareSubsetEqual: SquareSubsetEqual,
+	SquareSuperset: SquareSuperset,
+	SquareSupersetEqual: SquareSupersetEqual,
+	SquareUnion: SquareUnion,
+	squarf: squarf,
+	squ: squ,
+	squf: squf,
+	srarr: srarr,
+	Sscr: Sscr,
+	sscr: sscr,
+	ssetmn: ssetmn,
+	ssmile: ssmile,
+	sstarf: sstarf,
+	Star: Star,
+	star: star,
+	starf: starf,
+	straightepsilon: straightepsilon,
+	straightphi: straightphi,
+	strns: strns,
+	sub: sub,
+	Sub: Sub,
+	subdot: subdot,
+	subE: subE,
+	sube: sube,
+	subedot: subedot,
+	submult: submult,
+	subnE: subnE,
+	subne: subne,
+	subplus: subplus,
+	subrarr: subrarr,
+	subset: subset,
+	Subset: Subset,
+	subseteq: subseteq,
+	subseteqq: subseteqq,
+	SubsetEqual: SubsetEqual,
+	subsetneq: subsetneq,
+	subsetneqq: subsetneqq,
+	subsim: subsim,
+	subsub: subsub,
+	subsup: subsup,
+	succapprox: succapprox,
+	succ: succ,
+	succcurlyeq: succcurlyeq,
+	Succeeds: Succeeds,
+	SucceedsEqual: SucceedsEqual,
+	SucceedsSlantEqual: SucceedsSlantEqual,
+	SucceedsTilde: SucceedsTilde,
+	succeq: succeq,
+	succnapprox: succnapprox,
+	succneqq: succneqq,
+	succnsim: succnsim,
+	succsim: succsim,
+	SuchThat: SuchThat,
+	sum: sum,
+	Sum: Sum,
+	sung: sung,
+	sup1: sup1,
+	sup2: sup2,
+	sup3: sup3,
+	sup: sup,
+	Sup: Sup,
+	supdot: supdot,
+	supdsub: supdsub,
+	supE: supE,
+	supe: supe,
+	supedot: supedot,
+	Superset: Superset,
+	SupersetEqual: SupersetEqual,
+	suphsol: suphsol,
+	suphsub: suphsub,
+	suplarr: suplarr,
+	supmult: supmult,
+	supnE: supnE,
+	supne: supne,
+	supplus: supplus,
+	supset: supset,
+	Supset: Supset,
+	supseteq: supseteq,
+	supseteqq: supseteqq,
+	supsetneq: supsetneq,
+	supsetneqq: supsetneqq,
+	supsim: supsim,
+	supsub: supsub,
+	supsup: supsup,
+	swarhk: swarhk,
+	swarr: swarr,
+	swArr: swArr,
+	swarrow: swarrow,
+	swnwar: swnwar,
+	szlig: szlig,
+	Tab: Tab,
+	target: target,
+	Tau: Tau,
+	tau: tau,
+	tbrk: tbrk,
+	Tcaron: Tcaron,
+	tcaron: tcaron,
+	Tcedil: Tcedil,
+	tcedil: tcedil,
+	Tcy: Tcy,
+	tcy: tcy,
+	tdot: tdot,
+	telrec: telrec,
+	Tfr: Tfr,
+	tfr: tfr,
+	there4: there4,
+	therefore: therefore,
+	Therefore: Therefore,
+	Theta: Theta,
+	theta: theta,
+	thetasym: thetasym,
+	thetav: thetav,
+	thickapprox: thickapprox,
+	thicksim: thicksim,
+	ThickSpace: ThickSpace,
+	ThinSpace: ThinSpace,
+	thinsp: thinsp,
+	thkap: thkap,
+	thksim: thksim,
+	THORN: THORN,
+	thorn: thorn,
+	tilde: tilde,
+	Tilde: Tilde,
+	TildeEqual: TildeEqual,
+	TildeFullEqual: TildeFullEqual,
+	TildeTilde: TildeTilde,
+	timesbar: timesbar,
+	timesb: timesb,
+	times: times,
+	timesd: timesd,
+	tint: tint,
+	toea: toea,
+	topbot: topbot,
+	topcir: topcir,
+	top: top,
+	Topf: Topf,
+	topf: topf,
+	topfork: topfork,
+	tosa: tosa,
+	tprime: tprime,
+	trade: trade,
+	TRADE: TRADE,
+	triangle: triangle,
+	triangledown: triangledown,
+	triangleleft: triangleleft,
+	trianglelefteq: trianglelefteq,
+	triangleq: triangleq,
+	triangleright: triangleright,
+	trianglerighteq: trianglerighteq,
+	tridot: tridot,
+	trie: trie,
+	triminus: triminus,
+	TripleDot: TripleDot,
+	triplus: triplus,
+	trisb: trisb,
+	tritime: tritime,
+	trpezium: trpezium,
+	Tscr: Tscr,
+	tscr: tscr,
+	TScy: TScy,
+	tscy: tscy,
+	TSHcy: TSHcy,
+	tshcy: tshcy,
+	Tstrok: Tstrok,
+	tstrok: tstrok,
+	twixt: twixt,
+	twoheadleftarrow: twoheadleftarrow,
+	twoheadrightarrow: twoheadrightarrow,
+	Uacute: Uacute,
+	uacute: uacute,
+	uarr: uarr,
+	Uarr: Uarr,
+	uArr: uArr,
+	Uarrocir: Uarrocir,
+	Ubrcy: Ubrcy,
+	ubrcy: ubrcy,
+	Ubreve: Ubreve,
+	ubreve: ubreve,
+	Ucirc: Ucirc,
+	ucirc: ucirc,
+	Ucy: Ucy,
+	ucy: ucy,
+	udarr: udarr,
+	Udblac: Udblac,
+	udblac: udblac,
+	udhar: udhar,
+	ufisht: ufisht,
+	Ufr: Ufr,
+	ufr: ufr,
+	Ugrave: Ugrave,
+	ugrave: ugrave,
+	uHar: uHar,
+	uharl: uharl,
+	uharr: uharr,
+	uhblk: uhblk,
+	ulcorn: ulcorn,
+	ulcorner: ulcorner,
+	ulcrop: ulcrop,
+	ultri: ultri,
+	Umacr: Umacr,
+	umacr: umacr,
+	uml: uml,
+	UnderBar: UnderBar,
+	UnderBrace: UnderBrace,
+	UnderBracket: UnderBracket,
+	UnderParenthesis: UnderParenthesis,
+	Union: Union,
+	UnionPlus: UnionPlus,
+	Uogon: Uogon,
+	uogon: uogon,
+	Uopf: Uopf,
+	uopf: uopf,
+	UpArrowBar: UpArrowBar,
+	uparrow: uparrow,
+	UpArrow: UpArrow,
+	Uparrow: Uparrow,
+	UpArrowDownArrow: UpArrowDownArrow,
+	updownarrow: updownarrow,
+	UpDownArrow: UpDownArrow,
+	Updownarrow: Updownarrow,
+	UpEquilibrium: UpEquilibrium,
+	upharpoonleft: upharpoonleft,
+	upharpoonright: upharpoonright,
+	uplus: uplus,
+	UpperLeftArrow: UpperLeftArrow,
+	UpperRightArrow: UpperRightArrow,
+	upsi: upsi,
+	Upsi: Upsi,
+	upsih: upsih,
+	Upsilon: Upsilon,
+	upsilon: upsilon,
+	UpTeeArrow: UpTeeArrow,
+	UpTee: UpTee,
+	upuparrows: upuparrows,
+	urcorn: urcorn,
+	urcorner: urcorner,
+	urcrop: urcrop,
+	Uring: Uring,
+	uring: uring,
+	urtri: urtri,
+	Uscr: Uscr,
+	uscr: uscr,
+	utdot: utdot,
+	Utilde: Utilde,
+	utilde: utilde,
+	utri: utri,
+	utrif: utrif,
+	uuarr: uuarr,
+	Uuml: Uuml,
+	uuml: uuml,
+	uwangle: uwangle,
+	vangrt: vangrt,
+	varepsilon: varepsilon,
+	varkappa: varkappa,
+	varnothing: varnothing,
+	varphi: varphi,
+	varpi: varpi,
+	varpropto: varpropto,
+	varr: varr,
+	vArr: vArr,
+	varrho: varrho,
+	varsigma: varsigma,
+	varsubsetneq: varsubsetneq,
+	varsubsetneqq: varsubsetneqq,
+	varsupsetneq: varsupsetneq,
+	varsupsetneqq: varsupsetneqq,
+	vartheta: vartheta,
+	vartriangleleft: vartriangleleft,
+	vartriangleright: vartriangleright,
+	vBar: vBar,
+	Vbar: Vbar,
+	vBarv: vBarv,
+	Vcy: Vcy,
+	vcy: vcy,
+	vdash: vdash,
+	vDash: vDash,
+	Vdash: Vdash,
+	VDash: VDash,
+	Vdashl: Vdashl,
+	veebar: veebar,
+	vee: vee,
+	Vee: Vee,
+	veeeq: veeeq,
+	vellip: vellip,
+	verbar: verbar,
+	Verbar: Verbar,
+	vert: vert,
+	Vert: Vert,
+	VerticalBar: VerticalBar,
+	VerticalLine: VerticalLine,
+	VerticalSeparator: VerticalSeparator,
+	VerticalTilde: VerticalTilde,
+	VeryThinSpace: VeryThinSpace,
+	Vfr: Vfr,
+	vfr: vfr,
+	vltri: vltri,
+	vnsub: vnsub,
+	vnsup: vnsup,
+	Vopf: Vopf,
+	vopf: vopf,
+	vprop: vprop,
+	vrtri: vrtri,
+	Vscr: Vscr,
+	vscr: vscr,
+	vsubnE: vsubnE,
+	vsubne: vsubne,
+	vsupnE: vsupnE,
+	vsupne: vsupne,
+	Vvdash: Vvdash,
+	vzigzag: vzigzag,
+	Wcirc: Wcirc,
+	wcirc: wcirc,
+	wedbar: wedbar,
+	wedge: wedge,
+	Wedge: Wedge,
+	wedgeq: wedgeq,
+	weierp: weierp,
+	Wfr: Wfr,
+	wfr: wfr,
+	Wopf: Wopf,
+	wopf: wopf,
+	wp: wp,
+	wr: wr,
+	wreath: wreath,
+	Wscr: Wscr,
+	wscr: wscr,
+	xcap: xcap,
+	xcirc: xcirc,
+	xcup: xcup,
+	xdtri: xdtri,
+	Xfr: Xfr,
+	xfr: xfr,
+	xharr: xharr,
+	xhArr: xhArr,
+	Xi: Xi,
+	xi: xi,
+	xlarr: xlarr,
+	xlArr: xlArr,
+	xmap: xmap,
+	xnis: xnis,
+	xodot: xodot,
+	Xopf: Xopf,
+	xopf: xopf,
+	xoplus: xoplus,
+	xotime: xotime,
+	xrarr: xrarr,
+	xrArr: xrArr,
+	Xscr: Xscr,
+	xscr: xscr,
+	xsqcup: xsqcup,
+	xuplus: xuplus,
+	xutri: xutri,
+	xvee: xvee,
+	xwedge: xwedge,
+	Yacute: Yacute,
+	yacute: yacute,
+	YAcy: YAcy,
+	yacy: yacy,
+	Ycirc: Ycirc,
+	ycirc: ycirc,
+	Ycy: Ycy,
+	ycy: ycy,
+	yen: yen,
+	Yfr: Yfr,
+	yfr: yfr,
+	YIcy: YIcy,
+	yicy: yicy,
+	Yopf: Yopf,
+	yopf: yopf,
+	Yscr: Yscr,
+	yscr: yscr,
+	YUcy: YUcy,
+	yucy: yucy,
+	yuml: yuml,
+	Yuml: Yuml,
+	Zacute: Zacute,
+	zacute: zacute,
+	Zcaron: Zcaron,
+	zcaron: zcaron,
+	Zcy: Zcy,
+	zcy: zcy,
+	Zdot: Zdot,
+	zdot: zdot,
+	zeetrf: zeetrf,
+	ZeroWidthSpace: ZeroWidthSpace,
+	Zeta: Zeta,
+	zeta: zeta,
+	zfr: zfr,
+	Zfr: Zfr,
+	ZHcy: ZHcy,
+	zhcy: zhcy,
+	zigrarr: zigrarr,
+	zopf: zopf,
+	Zopf: Zopf,
+	Zscr: Zscr,
+	zscr: zscr,
+	zwj: zwj,
+	zwnj: zwnj
+};
+
+(function (module) {
+
+	/*eslint quotes:0*/
+	module.exports = require$$0;
+} (entities$1));
+
+var regex$4=/[!-#%-\*,-\/:;\?@\[-\]_\{\}\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u09FD\u0A76\u0AF0\u0C84\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166D\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E4E\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]|\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD803[\uDF55-\uDF59]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC8\uDDCD\uDDDB\uDDDD-\uDDDF\uDE38-\uDE3D\uDEA9]|\uD805[\uDC4B-\uDC4F\uDC5B\uDC5D\uDCC6\uDDC1-\uDDD7\uDE41-\uDE43\uDE60-\uDE6C\uDF3C-\uDF3E]|\uD806[\uDC3B\uDE3F-\uDE46\uDE9A-\uDE9C\uDE9E-\uDEA2]|\uD807[\uDC41-\uDC45\uDC70\uDC71\uDEF7\uDEF8]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD81B[\uDE97-\uDE9A]|\uD82F\uDC9F|\uD836[\uDE87-\uDE8B]|\uD83A[\uDD5E\uDD5F]/;
+
+var mdurl$1 = {};
+
+var encodeCache = {};
+
+
+// Create a lookup array where anything but characters in `chars` string
+// and alphanumeric chars is percent-encoded.
+//
+function getEncodeCache(exclude) {
+  var i, ch, cache = encodeCache[exclude];
+  if (cache) { return cache; }
+
+  cache = encodeCache[exclude] = [];
+
+  for (i = 0; i < 128; i++) {
+    ch = String.fromCharCode(i);
+
+    if (/^[0-9a-z]$/i.test(ch)) {
+      // always allow unencoded alphanumeric characters
+      cache.push(ch);
+    } else {
+      cache.push('%' + ('0' + i.toString(16).toUpperCase()).slice(-2));
+    }
+  }
+
+  for (i = 0; i < exclude.length; i++) {
+    cache[exclude.charCodeAt(i)] = exclude[i];
+  }
+
+  return cache;
+}
+
+
+// Encode unsafe characters with percent-encoding, skipping already
+// encoded sequences.
+//
+//  - string       - string to encode
+//  - exclude      - list of characters to ignore (in addition to a-zA-Z0-9)
+//  - keepEscaped  - don't encode '%' in a correct escape sequence (default: true)
+//
+function encode(string, exclude, keepEscaped) {
+  var i, l, code, nextCode, cache,
+      result = '';
+
+  if (typeof exclude !== 'string') {
+    // encode(string, keepEscaped)
+    keepEscaped  = exclude;
+    exclude = encode.defaultChars;
+  }
+
+  if (typeof keepEscaped === 'undefined') {
+    keepEscaped = true;
+  }
+
+  cache = getEncodeCache(exclude);
+
+  for (i = 0, l = string.length; i < l; i++) {
+    code = string.charCodeAt(i);
+
+    if (keepEscaped && code === 0x25 /* % */ && i + 2 < l) {
+      if (/^[0-9a-f]{2}$/i.test(string.slice(i + 1, i + 3))) {
+        result += string.slice(i, i + 3);
+        i += 2;
+        continue;
+      }
+    }
+
+    if (code < 128) {
+      result += cache[code];
+      continue;
+    }
+
+    if (code >= 0xD800 && code <= 0xDFFF) {
+      if (code >= 0xD800 && code <= 0xDBFF && i + 1 < l) {
+        nextCode = string.charCodeAt(i + 1);
+        if (nextCode >= 0xDC00 && nextCode <= 0xDFFF) {
+          result += encodeURIComponent(string[i] + string[i + 1]);
+          i++;
+          continue;
+        }
+      }
+      result += '%EF%BF%BD';
+      continue;
+    }
+
+    result += encodeURIComponent(string[i]);
+  }
+
+  return result;
+}
+
+encode.defaultChars   = ";/?:@&=+$,-_.!~*'()#";
+encode.componentChars = "-_.!~*'()";
+
+
+var encode_1 = encode;
+
+/* eslint-disable no-bitwise */
+
+var decodeCache = {};
+
+function getDecodeCache(exclude) {
+  var i, ch, cache = decodeCache[exclude];
+  if (cache) { return cache; }
+
+  cache = decodeCache[exclude] = [];
+
+  for (i = 0; i < 128; i++) {
+    ch = String.fromCharCode(i);
+    cache.push(ch);
+  }
+
+  for (i = 0; i < exclude.length; i++) {
+    ch = exclude.charCodeAt(i);
+    cache[ch] = '%' + ('0' + ch.toString(16).toUpperCase()).slice(-2);
+  }
+
+  return cache;
+}
+
+
+// Decode percent-encoded string.
+//
+function decode(string, exclude) {
+  var cache;
+
+  if (typeof exclude !== 'string') {
+    exclude = decode.defaultChars;
+  }
+
+  cache = getDecodeCache(exclude);
+
+  return string.replace(/(%[a-f0-9]{2})+/gi, function(seq) {
+    var i, l, b1, b2, b3, b4, chr,
+        result = '';
+
+    for (i = 0, l = seq.length; i < l; i += 3) {
+      b1 = parseInt(seq.slice(i + 1, i + 3), 16);
+
+      if (b1 < 0x80) {
+        result += cache[b1];
+        continue;
+      }
+
+      if ((b1 & 0xE0) === 0xC0 && (i + 3 < l)) {
+        // 110xxxxx 10xxxxxx
+        b2 = parseInt(seq.slice(i + 4, i + 6), 16);
+
+        if ((b2 & 0xC0) === 0x80) {
+          chr = ((b1 << 6) & 0x7C0) | (b2 & 0x3F);
+
+          if (chr < 0x80) {
+            result += '\ufffd\ufffd';
+          } else {
+            result += String.fromCharCode(chr);
+          }
+
+          i += 3;
+          continue;
+        }
+      }
+
+      if ((b1 & 0xF0) === 0xE0 && (i + 6 < l)) {
+        // 1110xxxx 10xxxxxx 10xxxxxx
+        b2 = parseInt(seq.slice(i + 4, i + 6), 16);
+        b3 = parseInt(seq.slice(i + 7, i + 9), 16);
+
+        if ((b2 & 0xC0) === 0x80 && (b3 & 0xC0) === 0x80) {
+          chr = ((b1 << 12) & 0xF000) | ((b2 << 6) & 0xFC0) | (b3 & 0x3F);
+
+          if (chr < 0x800 || (chr >= 0xD800 && chr <= 0xDFFF)) {
+            result += '\ufffd\ufffd\ufffd';
+          } else {
+            result += String.fromCharCode(chr);
+          }
+
+          i += 6;
+          continue;
+        }
+      }
+
+      if ((b1 & 0xF8) === 0xF0 && (i + 9 < l)) {
+        // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx
+        b2 = parseInt(seq.slice(i + 4, i + 6), 16);
+        b3 = parseInt(seq.slice(i + 7, i + 9), 16);
+        b4 = parseInt(seq.slice(i + 10, i + 12), 16);
+
+        if ((b2 & 0xC0) === 0x80 && (b3 & 0xC0) === 0x80 && (b4 & 0xC0) === 0x80) {
+          chr = ((b1 << 18) & 0x1C0000) | ((b2 << 12) & 0x3F000) | ((b3 << 6) & 0xFC0) | (b4 & 0x3F);
+
+          if (chr < 0x10000 || chr > 0x10FFFF) {
+            result += '\ufffd\ufffd\ufffd\ufffd';
+          } else {
+            chr -= 0x10000;
+            result += String.fromCharCode(0xD800 + (chr >> 10), 0xDC00 + (chr & 0x3FF));
+          }
+
+          i += 9;
+          continue;
+        }
+      }
+
+      result += '\ufffd';
+    }
+
+    return result;
+  });
+}
+
+
+decode.defaultChars   = ';/?:@&=+$,#';
+decode.componentChars = '';
+
+
+var decode_1 = decode;
+
+var format = function format(url) {
+  var result = '';
+
+  result += url.protocol || '';
+  result += url.slashes ? '//' : '';
+  result += url.auth ? url.auth + '@' : '';
+
+  if (url.hostname && url.hostname.indexOf(':') !== -1) {
+    // ipv6 address
+    result += '[' + url.hostname + ']';
+  } else {
+    result += url.hostname || '';
+  }
+
+  result += url.port ? ':' + url.port : '';
+  result += url.pathname || '';
+  result += url.search || '';
+  result += url.hash || '';
+
+  return result;
+};
+
+//
+// Changes from joyent/node:
+//
+// 1. No leading slash in paths,
+//    e.g. in `url.parse('http://foo?bar')` pathname is ``, not `/`
+//
+// 2. Backslashes are not replaced with slashes,
+//    so `http:\\example.org\` is treated like a relative path
+//
+// 3. Trailing colon is treated like a part of the path,
+//    i.e. in `http://example.org:foo` pathname is `:foo`
+//
+// 4. Nothing is URL-encoded in the resulting object,
+//    (in joyent/node some chars in auth and paths are encoded)
+//
+// 5. `url.parse()` does not have `parseQueryString` argument
+//
+// 6. Removed extraneous result properties: `host`, `path`, `query`, etc.,
+//    which can be constructed using other parts of the url.
+//
+
+
+function Url() {
+  this.protocol = null;
+  this.slashes = null;
+  this.auth = null;
+  this.port = null;
+  this.hostname = null;
+  this.hash = null;
+  this.search = null;
+  this.pathname = null;
+}
+
+// Reference: RFC 3986, RFC 1808, RFC 2396
+
+// define these here so at least they only have to be
+// compiled once on the first module load.
+var protocolPattern = /^([a-z0-9.+-]+:)/i,
+    portPattern = /:[0-9]*$/,
+
+    // Special case for a simple path URL
+    simplePathPattern = /^(\/\/?(?!\/)[^\?\s]*)(\?[^\s]*)?$/,
+
+    // RFC 2396: characters reserved for delimiting URLs.
+    // We actually just auto-escape these.
+    delims = [ '<', '>', '"', '`', ' ', '\r', '\n', '\t' ],
+
+    // RFC 2396: characters not allowed for various reasons.
+    unwise = [ '{', '}', '|', '\\', '^', '`' ].concat(delims),
+
+    // Allowed by RFCs, but cause of XSS attacks.  Always escape these.
+    autoEscape = [ '\'' ].concat(unwise),
+    // Characters that are never ever allowed in a hostname.
+    // Note that any invalid chars are also handled, but these
+    // are the ones that are *expected* to be seen, so we fast-path
+    // them.
+    nonHostChars = [ '%', '/', '?', ';', '#' ].concat(autoEscape),
+    hostEndingChars = [ '/', '?', '#' ],
+    hostnameMaxLen = 255,
+    hostnamePartPattern = /^[+a-z0-9A-Z_-]{0,63}$/,
+    hostnamePartStart = /^([+a-z0-9A-Z_-]{0,63})(.*)$/,
+    // protocols that can allow "unsafe" and "unwise" chars.
+    /* eslint-disable no-script-url */
+    // protocols that never have a hostname.
+    hostlessProtocol = {
+      'javascript': true,
+      'javascript:': true
+    },
+    // protocols that always contain a // bit.
+    slashedProtocol = {
+      'http': true,
+      'https': true,
+      'ftp': true,
+      'gopher': true,
+      'file': true,
+      'http:': true,
+      'https:': true,
+      'ftp:': true,
+      'gopher:': true,
+      'file:': true
+    };
+    /* eslint-enable no-script-url */
+
+function urlParse(url, slashesDenoteHost) {
+  if (url && url instanceof Url) { return url; }
+
+  var u = new Url();
+  u.parse(url, slashesDenoteHost);
+  return u;
+}
+
+Url.prototype.parse = function(url, slashesDenoteHost) {
+  var i, l, lowerProto, hec, slashes,
+      rest = url;
+
+  // trim before proceeding.
+  // This is to support parse stuff like "  http://foo.com  \n"
+  rest = rest.trim();
+
+  if (!slashesDenoteHost && url.split('#').length === 1) {
+    // Try fast path regexp
+    var simplePath = simplePathPattern.exec(rest);
+    if (simplePath) {
+      this.pathname = simplePath[1];
+      if (simplePath[2]) {
+        this.search = simplePath[2];
+      }
+      return this;
+    }
+  }
+
+  var proto = protocolPattern.exec(rest);
+  if (proto) {
+    proto = proto[0];
+    lowerProto = proto.toLowerCase();
+    this.protocol = proto;
+    rest = rest.substr(proto.length);
+  }
+
+  // figure out if it's got a host
+  // user@server is *always* interpreted as a hostname, and url
+  // resolution will treat //foo/bar as host=foo,path=bar because that's
+  // how the browser resolves relative URLs.
+  if (slashesDenoteHost || proto || rest.match(/^\/\/[^@\/]+@[^@\/]+/)) {
+    slashes = rest.substr(0, 2) === '//';
+    if (slashes && !(proto && hostlessProtocol[proto])) {
+      rest = rest.substr(2);
+      this.slashes = true;
+    }
+  }
+
+  if (!hostlessProtocol[proto] &&
+      (slashes || (proto && !slashedProtocol[proto]))) {
+
+    // there's a hostname.
+    // the first instance of /, ?, ;, or # ends the host.
+    //
+    // If there is an @ in the hostname, then non-host chars *are* allowed
+    // to the left of the last @ sign, unless some host-ending character
+    // comes *before* the @-sign.
+    // URLs are obnoxious.
+    //
+    // ex:
+    // http://a@b@c/ => user:a@b host:c
+    // http://a@b?@c => user:a host:c path:/?@c
+
+    // v0.12 TODO(isaacs): This is not quite how Chrome does things.
+    // Review our test case against browsers more comprehensively.
+
+    // find the first instance of any hostEndingChars
+    var hostEnd = -1;
+    for (i = 0; i < hostEndingChars.length; i++) {
+      hec = rest.indexOf(hostEndingChars[i]);
+      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd)) {
+        hostEnd = hec;
+      }
+    }
+
+    // at this point, either we have an explicit point where the
+    // auth portion cannot go past, or the last @ char is the decider.
+    var auth, atSign;
+    if (hostEnd === -1) {
+      // atSign can be anywhere.
+      atSign = rest.lastIndexOf('@');
+    } else {
+      // atSign must be in auth portion.
+      // http://a@b/c@d => host:b auth:a path:/c@d
+      atSign = rest.lastIndexOf('@', hostEnd);
+    }
+
+    // Now we have a portion which is definitely the auth.
+    // Pull that off.
+    if (atSign !== -1) {
+      auth = rest.slice(0, atSign);
+      rest = rest.slice(atSign + 1);
+      this.auth = auth;
+    }
+
+    // the host is the remaining to the left of the first non-host char
+    hostEnd = -1;
+    for (i = 0; i < nonHostChars.length; i++) {
+      hec = rest.indexOf(nonHostChars[i]);
+      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd)) {
+        hostEnd = hec;
+      }
+    }
+    // if we still have not hit it, then the entire thing is a host.
+    if (hostEnd === -1) {
+      hostEnd = rest.length;
+    }
+
+    if (rest[hostEnd - 1] === ':') { hostEnd--; }
+    var host = rest.slice(0, hostEnd);
+    rest = rest.slice(hostEnd);
+
+    // pull out port.
+    this.parseHost(host);
+
+    // we've indicated that there is a hostname,
+    // so even if it's empty, it has to be present.
+    this.hostname = this.hostname || '';
+
+    // if hostname begins with [ and ends with ]
+    // assume that it's an IPv6 address.
+    var ipv6Hostname = this.hostname[0] === '[' &&
+        this.hostname[this.hostname.length - 1] === ']';
+
+    // validate a little.
+    if (!ipv6Hostname) {
+      var hostparts = this.hostname.split(/\./);
+      for (i = 0, l = hostparts.length; i < l; i++) {
+        var part = hostparts[i];
+        if (!part) { continue; }
+        if (!part.match(hostnamePartPattern)) {
+          var newpart = '';
+          for (var j = 0, k = part.length; j < k; j++) {
+            if (part.charCodeAt(j) > 127) {
+              // we replace non-ASCII char with a temporary placeholder
+              // we need this to make sure size of hostname is not
+              // broken by replacing non-ASCII by nothing
+              newpart += 'x';
+            } else {
+              newpart += part[j];
+            }
+          }
+          // we test again with ASCII char only
+          if (!newpart.match(hostnamePartPattern)) {
+            var validParts = hostparts.slice(0, i);
+            var notHost = hostparts.slice(i + 1);
+            var bit = part.match(hostnamePartStart);
+            if (bit) {
+              validParts.push(bit[1]);
+              notHost.unshift(bit[2]);
+            }
+            if (notHost.length) {
+              rest = notHost.join('.') + rest;
+            }
+            this.hostname = validParts.join('.');
+            break;
+          }
+        }
+      }
+    }
+
+    if (this.hostname.length > hostnameMaxLen) {
+      this.hostname = '';
+    }
+
+    // strip [ and ] from the hostname
+    // the host field still retains them, though
+    if (ipv6Hostname) {
+      this.hostname = this.hostname.substr(1, this.hostname.length - 2);
+    }
+  }
+
+  // chop off from the tail first.
+  var hash = rest.indexOf('#');
+  if (hash !== -1) {
+    // got a fragment string.
+    this.hash = rest.substr(hash);
+    rest = rest.slice(0, hash);
+  }
+  var qm = rest.indexOf('?');
+  if (qm !== -1) {
+    this.search = rest.substr(qm);
+    rest = rest.slice(0, qm);
+  }
+  if (rest) { this.pathname = rest; }
+  if (slashedProtocol[lowerProto] &&
+      this.hostname && !this.pathname) {
+    this.pathname = '';
+  }
+
+  return this;
+};
+
+Url.prototype.parseHost = function(host) {
+  var port = portPattern.exec(host);
+  if (port) {
+    port = port[0];
+    if (port !== ':') {
+      this.port = port.substr(1);
+    }
+    host = host.substr(0, host.length - port.length);
+  }
+  if (host) { this.hostname = host; }
+};
+
+var parse = urlParse;
+
+mdurl$1.encode = encode_1;
+mdurl$1.decode = decode_1;
+mdurl$1.format = format;
+mdurl$1.parse  = parse;
+
+var uc_micro = {};
+
+var regex$3;
+var hasRequiredRegex$3;
+
+function requireRegex$3 () {
+	if (hasRequiredRegex$3) return regex$3;
+	hasRequiredRegex$3 = 1;
+	regex$3=/[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
+	return regex$3;
+}
+
+var regex$2;
+var hasRequiredRegex$2;
+
+function requireRegex$2 () {
+	if (hasRequiredRegex$2) return regex$2;
+	hasRequiredRegex$2 = 1;
+	regex$2=/[\0-\x1F\x7F-\x9F]/;
+	return regex$2;
+}
+
+var regex$1;
+var hasRequiredRegex$1;
+
+function requireRegex$1 () {
+	if (hasRequiredRegex$1) return regex$1;
+	hasRequiredRegex$1 = 1;
+	regex$1=/[\xAD\u0600-\u0605\u061C\u06DD\u070F\u08E2\u180E\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206F\uFEFF\uFFF9-\uFFFB]|\uD804[\uDCBD\uDCCD]|\uD82F[\uDCA0-\uDCA3]|\uD834[\uDD73-\uDD7A]|\uDB40[\uDC01\uDC20-\uDC7F]/;
+	return regex$1;
+}
+
+var regex;
+var hasRequiredRegex;
+
+function requireRegex () {
+	if (hasRequiredRegex) return regex;
+	hasRequiredRegex = 1;
+	regex=/[ \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]/;
+	return regex;
+}
+
+var hasRequiredUc_micro;
+
+function requireUc_micro () {
+	if (hasRequiredUc_micro) return uc_micro;
+	hasRequiredUc_micro = 1;
+
+	uc_micro.Any = requireRegex$3();
+	uc_micro.Cc  = requireRegex$2();
+	uc_micro.Cf  = requireRegex$1();
+	uc_micro.P   = regex$4;
+	uc_micro.Z   = requireRegex();
+	return uc_micro;
+}
+
+(function (exports) {
+
+
+	function _class(obj) { return Object.prototype.toString.call(obj); }
+
+	function isString(obj) { return _class(obj) === '[object String]'; }
+
+	var _hasOwnProperty = Object.prototype.hasOwnProperty;
+
+	function has(object, key) {
+	  return _hasOwnProperty.call(object, key);
+	}
+
+	// Merge objects
+	//
+	function assign(obj /*from1, from2, from3, ...*/) {
+	  var sources = Array.prototype.slice.call(arguments, 1);
+
+	  sources.forEach(function (source) {
+	    if (!source) { return; }
+
+	    if (typeof source !== 'object') {
+	      throw new TypeError(source + 'must be object');
+	    }
+
+	    Object.keys(source).forEach(function (key) {
+	      obj[key] = source[key];
+	    });
+	  });
+
+	  return obj;
+	}
+
+	// Remove element from array and put another array at those position.
+	// Useful for some operations with tokens
+	function arrayReplaceAt(src, pos, newElements) {
+	  return [].concat(src.slice(0, pos), newElements, src.slice(pos + 1));
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	function isValidEntityCode(c) {
+	  /*eslint no-bitwise:0*/
+	  // broken sequence
+	  if (c >= 0xD800 && c <= 0xDFFF) { return false; }
+	  // never used
+	  if (c >= 0xFDD0 && c <= 0xFDEF) { return false; }
+	  if ((c & 0xFFFF) === 0xFFFF || (c & 0xFFFF) === 0xFFFE) { return false; }
+	  // control codes
+	  if (c >= 0x00 && c <= 0x08) { return false; }
+	  if (c === 0x0B) { return false; }
+	  if (c >= 0x0E && c <= 0x1F) { return false; }
+	  if (c >= 0x7F && c <= 0x9F) { return false; }
+	  // out of range
+	  if (c > 0x10FFFF) { return false; }
+	  return true;
+	}
+
+	function fromCodePoint(c) {
+	  /*eslint no-bitwise:0*/
+	  if (c > 0xffff) {
+	    c -= 0x10000;
+	    var surrogate1 = 0xd800 + (c >> 10),
+	        surrogate2 = 0xdc00 + (c & 0x3ff);
+
+	    return String.fromCharCode(surrogate1, surrogate2);
+	  }
+	  return String.fromCharCode(c);
+	}
+
+
+	var UNESCAPE_MD_RE  = /\\([!"#$%&'()*+,\-.\/:;<=>?@[\\\]^_`{|}~])/g;
+	var ENTITY_RE       = /&([a-z#][a-z0-9]{1,31});/gi;
+	var UNESCAPE_ALL_RE = new RegExp(UNESCAPE_MD_RE.source + '|' + ENTITY_RE.source, 'gi');
+
+	var DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
+
+	var entities = entities$1.exports;
+
+	function replaceEntityPattern(match, name) {
+	  var code = 0;
+
+	  if (has(entities, name)) {
+	    return entities[name];
+	  }
+
+	  if (name.charCodeAt(0) === 0x23/* # */ && DIGITAL_ENTITY_TEST_RE.test(name)) {
+	    code = name[1].toLowerCase() === 'x' ?
+	      parseInt(name.slice(2), 16) : parseInt(name.slice(1), 10);
+
+	    if (isValidEntityCode(code)) {
+	      return fromCodePoint(code);
+	    }
+	  }
+
+	  return match;
+	}
+
+	/*function replaceEntities(str) {
+	  if (str.indexOf('&') < 0) { return str; }
+
+	  return str.replace(ENTITY_RE, replaceEntityPattern);
+	}*/
+
+	function unescapeMd(str) {
+	  if (str.indexOf('\\') < 0) { return str; }
+	  return str.replace(UNESCAPE_MD_RE, '$1');
+	}
+
+	function unescapeAll(str) {
+	  if (str.indexOf('\\') < 0 && str.indexOf('&') < 0) { return str; }
+
+	  return str.replace(UNESCAPE_ALL_RE, function (match, escaped, entity) {
+	    if (escaped) { return escaped; }
+	    return replaceEntityPattern(match, entity);
+	  });
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	var HTML_ESCAPE_TEST_RE = /[&<>"]/;
+	var HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
+	var HTML_REPLACEMENTS = {
+	  '&': '&amp;',
+	  '<': '&lt;',
+	  '>': '&gt;',
+	  '"': '&quot;'
+	};
+
+	function replaceUnsafeChar(ch) {
+	  return HTML_REPLACEMENTS[ch];
+	}
+
+	function escapeHtml(str) {
+	  if (HTML_ESCAPE_TEST_RE.test(str)) {
+	    return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
+	  }
+	  return str;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	var REGEXP_ESCAPE_RE = /[.?*+^$[\]\\(){}|-]/g;
+
+	function escapeRE(str) {
+	  return str.replace(REGEXP_ESCAPE_RE, '\\$&');
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	function isSpace(code) {
+	  switch (code) {
+	    case 0x09:
+	    case 0x20:
+	      return true;
+	  }
+	  return false;
+	}
+
+	// Zs (unicode class) || [\t\f\v\r\n]
+	function isWhiteSpace(code) {
+	  if (code >= 0x2000 && code <= 0x200A) { return true; }
+	  switch (code) {
+	    case 0x09: // \t
+	    case 0x0A: // \n
+	    case 0x0B: // \v
+	    case 0x0C: // \f
+	    case 0x0D: // \r
+	    case 0x20:
+	    case 0xA0:
+	    case 0x1680:
+	    case 0x202F:
+	    case 0x205F:
+	    case 0x3000:
+	      return true;
+	  }
+	  return false;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	/*eslint-disable max-len*/
+	var UNICODE_PUNCT_RE = regex$4;
+
+	// Currently without astral characters support.
+	function isPunctChar(ch) {
+	  return UNICODE_PUNCT_RE.test(ch);
+	}
+
+
+	// Markdown ASCII punctuation characters.
+	//
+	// !, ", #, $, %, &, ', (, ), *, +, ,, -, ., /, :, ;, <, =, >, ?, @, [, \, ], ^, _, `, {, |, }, or ~
+	// http://spec.commonmark.org/0.15/#ascii-punctuation-character
+	//
+	// Don't confuse with unicode punctuation !!! It lacks some chars in ascii range.
+	//
+	function isMdAsciiPunct(ch) {
+	  switch (ch) {
+	    case 0x21/* ! */:
+	    case 0x22/* " */:
+	    case 0x23/* # */:
+	    case 0x24/* $ */:
+	    case 0x25/* % */:
+	    case 0x26/* & */:
+	    case 0x27/* ' */:
+	    case 0x28/* ( */:
+	    case 0x29/* ) */:
+	    case 0x2A/* * */:
+	    case 0x2B/* + */:
+	    case 0x2C/* , */:
+	    case 0x2D/* - */:
+	    case 0x2E/* . */:
+	    case 0x2F/* / */:
+	    case 0x3A/* : */:
+	    case 0x3B/* ; */:
+	    case 0x3C/* < */:
+	    case 0x3D/* = */:
+	    case 0x3E/* > */:
+	    case 0x3F/* ? */:
+	    case 0x40/* @ */:
+	    case 0x5B/* [ */:
+	    case 0x5C/* \ */:
+	    case 0x5D/* ] */:
+	    case 0x5E/* ^ */:
+	    case 0x5F/* _ */:
+	    case 0x60/* ` */:
+	    case 0x7B/* { */:
+	    case 0x7C/* | */:
+	    case 0x7D/* } */:
+	    case 0x7E/* ~ */:
+	      return true;
+	    default:
+	      return false;
+	  }
+	}
+
+	// Hepler to unify [reference labels].
+	//
+	function normalizeReference(str) {
+	  // Trim and collapse whitespace
+	  //
+	  str = str.trim().replace(/\s+/g, ' ');
+
+	  // In node v10 'ẞ'.toLowerCase() === 'Ṿ', which is presumed to be a bug
+	  // fixed in v12 (couldn't find any details).
+	  //
+	  // So treat this one as a special case
+	  // (remove this when node v10 is no longer supported).
+	  //
+	  if ('ẞ'.toLowerCase() === 'Ṿ') {
+	    str = str.replace(/ẞ/g, 'ß');
+	  }
+
+	  // .toLowerCase().toUpperCase() should get rid of all differences
+	  // between letter variants.
+	  //
+	  // Simple .toLowerCase() doesn't normalize 125 code points correctly,
+	  // and .toUpperCase doesn't normalize 6 of them (list of exceptions:
+	  // İ, ϴ, ẞ, Ω, K, Å - those are already uppercased, but have differently
+	  // uppercased versions).
+	  //
+	  // Here's an example showing how it happens. Lets take greek letter omega:
+	  // uppercase U+0398 (Θ), U+03f4 (ϴ) and lowercase U+03b8 (θ), U+03d1 (ϑ)
+	  //
+	  // Unicode entries:
+	  // 0398;GREEK CAPITAL LETTER THETA;Lu;0;L;;;;;N;;;;03B8;
+	  // 03B8;GREEK SMALL LETTER THETA;Ll;0;L;;;;;N;;;0398;;0398
+	  // 03D1;GREEK THETA SYMBOL;Ll;0;L;<compat> 03B8;;;;N;GREEK SMALL LETTER SCRIPT THETA;;0398;;0398
+	  // 03F4;GREEK CAPITAL THETA SYMBOL;Lu;0;L;<compat> 0398;;;;N;;;;03B8;
+	  //
+	  // Case-insensitive comparison should treat all of them as equivalent.
+	  //
+	  // But .toLowerCase() doesn't change ϑ (it's already lowercase),
+	  // and .toUpperCase() doesn't change ϴ (already uppercase).
+	  //
+	  // Applying first lower then upper case normalizes any character:
+	  // '\u0398\u03f4\u03b8\u03d1'.toLowerCase().toUpperCase() === '\u0398\u0398\u0398\u0398'
+	  //
+	  // Note: this is equivalent to unicode case folding; unicode normalization
+	  // is a different step that is not required here.
+	  //
+	  // Final result should be uppercased, because it's later stored in an object
+	  // (this avoid a conflict with Object.prototype members,
+	  // most notably, `__proto__`)
+	  //
+	  return str.toLowerCase().toUpperCase();
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	// Re-export libraries commonly used in both markdown-it and its plugins,
+	// so plugins won't have to depend on them explicitly, which reduces their
+	// bundled size (e.g. a browser build).
+	//
+	exports.lib                 = {};
+	exports.lib.mdurl           = mdurl$1;
+	exports.lib.ucmicro         = requireUc_micro();
+
+	exports.assign              = assign;
+	exports.isString            = isString;
+	exports.has                 = has;
+	exports.unescapeMd          = unescapeMd;
+	exports.unescapeAll         = unescapeAll;
+	exports.isValidEntityCode   = isValidEntityCode;
+	exports.fromCodePoint       = fromCodePoint;
+	// exports.replaceEntities     = replaceEntities;
+	exports.escapeHtml          = escapeHtml;
+	exports.arrayReplaceAt      = arrayReplaceAt;
+	exports.isSpace             = isSpace;
+	exports.isWhiteSpace        = isWhiteSpace;
+	exports.isMdAsciiPunct      = isMdAsciiPunct;
+	exports.isPunctChar         = isPunctChar;
+	exports.escapeRE            = escapeRE;
+	exports.normalizeReference  = normalizeReference;
+} (utils$1));
+
+var helpers$1 = {};
+
+var parse_link_label = function parseLinkLabel(state, start, disableNested) {
+  var level, found, marker, prevPos,
+      labelEnd = -1,
+      max = state.posMax,
+      oldPos = state.pos;
+
+  state.pos = start + 1;
+  level = 1;
+
+  while (state.pos < max) {
+    marker = state.src.charCodeAt(state.pos);
+    if (marker === 0x5D /* ] */) {
+      level--;
+      if (level === 0) {
+        found = true;
+        break;
+      }
+    }
+
+    prevPos = state.pos;
+    state.md.inline.skipToken(state);
+    if (marker === 0x5B /* [ */) {
+      if (prevPos === state.pos - 1) {
+        // increase level if we find text `[`, which is not a part of any token
+        level++;
+      } else if (disableNested) {
+        state.pos = oldPos;
+        return -1;
+      }
+    }
+  }
+
+  if (found) {
+    labelEnd = state.pos;
+  }
+
+  // restore old state
+  state.pos = oldPos;
+
+  return labelEnd;
+};
+
+var unescapeAll$2 = utils$1.unescapeAll;
+
+
+var parse_link_destination = function parseLinkDestination(str, pos, max) {
+  var code, level,
+      lines = 0,
+      start = pos,
+      result = {
+        ok: false,
+        pos: 0,
+        lines: 0,
+        str: ''
+      };
+
+  if (str.charCodeAt(pos) === 0x3C /* < */) {
+    pos++;
+    while (pos < max) {
+      code = str.charCodeAt(pos);
+      if (code === 0x0A /* \n */) { return result; }
+      if (code === 0x3C /* < */) { return result; }
+      if (code === 0x3E /* > */) {
+        result.pos = pos + 1;
+        result.str = unescapeAll$2(str.slice(start + 1, pos));
+        result.ok = true;
+        return result;
+      }
+      if (code === 0x5C /* \ */ && pos + 1 < max) {
+        pos += 2;
+        continue;
+      }
+
+      pos++;
+    }
+
+    // no closing '>'
+    return result;
+  }
+
+  // this should be ... } else { ... branch
+
+  level = 0;
+  while (pos < max) {
+    code = str.charCodeAt(pos);
+
+    if (code === 0x20) { break; }
+
+    // ascii control characters
+    if (code < 0x20 || code === 0x7F) { break; }
+
+    if (code === 0x5C /* \ */ && pos + 1 < max) {
+      if (str.charCodeAt(pos + 1) === 0x20) { break; }
+      pos += 2;
+      continue;
+    }
+
+    if (code === 0x28 /* ( */) {
+      level++;
+      if (level > 32) { return result; }
+    }
+
+    if (code === 0x29 /* ) */) {
+      if (level === 0) { break; }
+      level--;
+    }
+
+    pos++;
+  }
+
+  if (start === pos) { return result; }
+  if (level !== 0) { return result; }
+
+  result.str = unescapeAll$2(str.slice(start, pos));
+  result.lines = lines;
+  result.pos = pos;
+  result.ok = true;
+  return result;
+};
+
+var unescapeAll$1 = utils$1.unescapeAll;
+
+
+var parse_link_title = function parseLinkTitle(str, pos, max) {
+  var code,
+      marker,
+      lines = 0,
+      start = pos,
+      result = {
+        ok: false,
+        pos: 0,
+        lines: 0,
+        str: ''
+      };
+
+  if (pos >= max) { return result; }
+
+  marker = str.charCodeAt(pos);
+
+  if (marker !== 0x22 /* " */ && marker !== 0x27 /* ' */ && marker !== 0x28 /* ( */) { return result; }
+
+  pos++;
+
+  // if opening marker is "(", switch it to closing marker ")"
+  if (marker === 0x28) { marker = 0x29; }
+
+  while (pos < max) {
+    code = str.charCodeAt(pos);
+    if (code === marker) {
+      result.pos = pos + 1;
+      result.lines = lines;
+      result.str = unescapeAll$1(str.slice(start + 1, pos));
+      result.ok = true;
+      return result;
+    } else if (code === 0x28 /* ( */ && marker === 0x29 /* ) */) {
+      return result;
+    } else if (code === 0x0A) {
+      lines++;
+    } else if (code === 0x5C /* \ */ && pos + 1 < max) {
+      pos++;
+      if (str.charCodeAt(pos) === 0x0A) {
+        lines++;
+      }
+    }
+
+    pos++;
+  }
+
+  return result;
+};
+
+helpers$1.parseLinkLabel       = parse_link_label;
+helpers$1.parseLinkDestination = parse_link_destination;
+helpers$1.parseLinkTitle       = parse_link_title;
+
+/**
+ * class Renderer
+ *
+ * Generates HTML from parsed token stream. Each instance has independent
+ * copy of rules. Those can be rewritten with ease. Also, you can add new
+ * rules if you create plugin and adds new token types.
+ **/
+
+
+var assign$1          = utils$1.assign;
+var unescapeAll     = utils$1.unescapeAll;
+var escapeHtml      = utils$1.escapeHtml;
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+var default_rules = {};
+
+
+default_rules.code_inline = function (tokens, idx, options, env, slf) {
+  var token = tokens[idx];
+
+  return  '<code' + slf.renderAttrs(token) + '>' +
+          escapeHtml(tokens[idx].content) +
+          '</code>';
+};
+
+
+default_rules.code_block = function (tokens, idx, options, env, slf) {
+  var token = tokens[idx];
+
+  return  '<pre' + slf.renderAttrs(token) + '><code>' +
+          escapeHtml(tokens[idx].content) +
+          '</code></pre>\n';
+};
+
+
+default_rules.fence = function (tokens, idx, options, env, slf) {
+  var token = tokens[idx],
+      info = token.info ? unescapeAll(token.info).trim() : '',
+      langName = '',
+      langAttrs = '',
+      highlighted, i, arr, tmpAttrs, tmpToken;
+
+  if (info) {
+    arr = info.split(/(\s+)/g);
+    langName = arr[0];
+    langAttrs = arr.slice(2).join('');
+  }
+
+  if (options.highlight) {
+    highlighted = options.highlight(token.content, langName, langAttrs) || escapeHtml(token.content);
+  } else {
+    highlighted = escapeHtml(token.content);
+  }
+
+  if (highlighted.indexOf('<pre') === 0) {
+    return highlighted + '\n';
+  }
+
+  // If language exists, inject class gently, without modifying original token.
+  // May be, one day we will add .deepClone() for token and simplify this part, but
+  // now we prefer to keep things local.
+  if (info) {
+    i        = token.attrIndex('class');
+    tmpAttrs = token.attrs ? token.attrs.slice() : [];
+
+    if (i < 0) {
+      tmpAttrs.push([ 'class', options.langPrefix + langName ]);
+    } else {
+      tmpAttrs[i] = tmpAttrs[i].slice();
+      tmpAttrs[i][1] += ' ' + options.langPrefix + langName;
+    }
+
+    // Fake token just to render attributes
+    tmpToken = {
+      attrs: tmpAttrs
+    };
+
+    return  '<pre><code' + slf.renderAttrs(tmpToken) + '>'
+          + highlighted
+          + '</code></pre>\n';
+  }
+
+
+  return  '<pre><code' + slf.renderAttrs(token) + '>'
+        + highlighted
+        + '</code></pre>\n';
+};
+
+
+default_rules.image = function (tokens, idx, options, env, slf) {
+  var token = tokens[idx];
+
+  // "alt" attr MUST be set, even if empty. Because it's mandatory and
+  // should be placed on proper position for tests.
+  //
+  // Replace content with actual value
+
+  token.attrs[token.attrIndex('alt')][1] =
+    slf.renderInlineAsText(token.children, options, env);
+
+  return slf.renderToken(tokens, idx, options);
+};
+
+
+default_rules.hardbreak = function (tokens, idx, options /*, env */) {
+  return options.xhtmlOut ? '<br />\n' : '<br>\n';
+};
+default_rules.softbreak = function (tokens, idx, options /*, env */) {
+  return options.breaks ? (options.xhtmlOut ? '<br />\n' : '<br>\n') : '\n';
+};
+
+
+default_rules.text = function (tokens, idx /*, options, env */) {
+  return escapeHtml(tokens[idx].content);
+};
+
+
+default_rules.html_block = function (tokens, idx /*, options, env */) {
+  return tokens[idx].content;
+};
+default_rules.html_inline = function (tokens, idx /*, options, env */) {
+  return tokens[idx].content;
+};
+
+
+/**
+ * new Renderer()
+ *
+ * Creates new [[Renderer]] instance and fill [[Renderer#rules]] with defaults.
+ **/
+function Renderer$1() {
+
+  /**
+   * Renderer#rules -> Object
+   *
+   * Contains render rules for tokens. Can be updated and extended.
+   *
+   * ##### Example
+   *
+   * ```javascript
+   * var md = require('markdown-it')();
+   *
+   * md.renderer.rules.strong_open  = function () { return '<b>'; };
+   * md.renderer.rules.strong_close = function () { return '</b>'; };
+   *
+   * var result = md.renderInline(...);
+   * ```
+   *
+   * Each rule is called as independent static function with fixed signature:
+   *
+   * ```javascript
+   * function my_token_render(tokens, idx, options, env, renderer) {
+   *   // ...
+   *   return renderedHTML;
+   * }
+   * ```
+   *
+   * See [source code](https://github.com/markdown-it/markdown-it/blob/master/lib/renderer.js)
+   * for more details and examples.
+   **/
+  this.rules = assign$1({}, default_rules);
+}
+
+
+/**
+ * Renderer.renderAttrs(token) -> String
+ *
+ * Render token attributes to string.
+ **/
+Renderer$1.prototype.renderAttrs = function renderAttrs(token) {
+  var i, l, result;
+
+  if (!token.attrs) { return ''; }
+
+  result = '';
+
+  for (i = 0, l = token.attrs.length; i < l; i++) {
+    result += ' ' + escapeHtml(token.attrs[i][0]) + '="' + escapeHtml(token.attrs[i][1]) + '"';
+  }
+
+  return result;
+};
+
+
+/**
+ * Renderer.renderToken(tokens, idx, options) -> String
+ * - tokens (Array): list of tokens
+ * - idx (Numbed): token index to render
+ * - options (Object): params of parser instance
+ *
+ * Default token renderer. Can be overriden by custom function
+ * in [[Renderer#rules]].
+ **/
+Renderer$1.prototype.renderToken = function renderToken(tokens, idx, options) {
+  var nextToken,
+      result = '',
+      needLf = false,
+      token = tokens[idx];
+
+  // Tight list paragraphs
+  if (token.hidden) {
+    return '';
+  }
+
+  // Insert a newline between hidden paragraph and subsequent opening
+  // block-level tag.
+  //
+  // For example, here we should insert a newline before blockquote:
+  //  - a
+  //    >
+  //
+  if (token.block && token.nesting !== -1 && idx && tokens[idx - 1].hidden) {
+    result += '\n';
+  }
+
+  // Add token name, e.g. `<img`
+  result += (token.nesting === -1 ? '</' : '<') + token.tag;
+
+  // Encode attributes, e.g. `<img src="foo"`
+  result += this.renderAttrs(token);
+
+  // Add a slash for self-closing tags, e.g. `<img src="foo" /`
+  if (token.nesting === 0 && options.xhtmlOut) {
+    result += ' /';
+  }
+
+  // Check if we need to add a newline after this tag
+  if (token.block) {
+    needLf = true;
+
+    if (token.nesting === 1) {
+      if (idx + 1 < tokens.length) {
+        nextToken = tokens[idx + 1];
+
+        if (nextToken.type === 'inline' || nextToken.hidden) {
+          // Block-level tag containing an inline tag.
+          //
+          needLf = false;
+
+        } else if (nextToken.nesting === -1 && nextToken.tag === token.tag) {
+          // Opening tag + closing tag of the same type. E.g. `<li></li>`.
+          //
+          needLf = false;
+        }
+      }
+    }
+  }
+
+  result += needLf ? '>\n' : '>';
+
+  return result;
+};
+
+
+/**
+ * Renderer.renderInline(tokens, options, env) -> String
+ * - tokens (Array): list on block tokens to render
+ * - options (Object): params of parser instance
+ * - env (Object): additional data from parsed input (references, for example)
+ *
+ * The same as [[Renderer.render]], but for single token of `inline` type.
+ **/
+Renderer$1.prototype.renderInline = function (tokens, options, env) {
+  var type,
+      result = '',
+      rules = this.rules;
+
+  for (var i = 0, len = tokens.length; i < len; i++) {
+    type = tokens[i].type;
+
+    if (typeof rules[type] !== 'undefined') {
+      result += rules[type](tokens, i, options, env, this);
+    } else {
+      result += this.renderToken(tokens, i, options);
+    }
+  }
+
+  return result;
+};
+
+
+/** internal
+ * Renderer.renderInlineAsText(tokens, options, env) -> String
+ * - tokens (Array): list on block tokens to render
+ * - options (Object): params of parser instance
+ * - env (Object): additional data from parsed input (references, for example)
+ *
+ * Special kludge for image `alt` attributes to conform CommonMark spec.
+ * Don't try to use it! Spec requires to show `alt` content with stripped markup,
+ * instead of simple escaping.
+ **/
+Renderer$1.prototype.renderInlineAsText = function (tokens, options, env) {
+  var result = '';
+
+  for (var i = 0, len = tokens.length; i < len; i++) {
+    if (tokens[i].type === 'text') {
+      result += tokens[i].content;
+    } else if (tokens[i].type === 'image') {
+      result += this.renderInlineAsText(tokens[i].children, options, env);
+    } else if (tokens[i].type === 'softbreak') {
+      result += '\n';
+    }
+  }
+
+  return result;
+};
+
+
+/**
+ * Renderer.render(tokens, options, env) -> String
+ * - tokens (Array): list on block tokens to render
+ * - options (Object): params of parser instance
+ * - env (Object): additional data from parsed input (references, for example)
+ *
+ * Takes token stream and generates HTML. Probably, you will never need to call
+ * this method directly.
+ **/
+Renderer$1.prototype.render = function (tokens, options, env) {
+  var i, len, type,
+      result = '',
+      rules = this.rules;
+
+  for (i = 0, len = tokens.length; i < len; i++) {
+    type = tokens[i].type;
+
+    if (type === 'inline') {
+      result += this.renderInline(tokens[i].children, options, env);
+    } else if (typeof rules[type] !== 'undefined') {
+      result += rules[tokens[i].type](tokens, i, options, env, this);
+    } else {
+      result += this.renderToken(tokens, i, options, env);
+    }
+  }
+
+  return result;
+};
+
+var renderer$1 = Renderer$1;
+
+/**
+ * class Ruler
+ *
+ * Helper class, used by [[MarkdownIt#core]], [[MarkdownIt#block]] and
+ * [[MarkdownIt#inline]] to manage sequences of functions (rules):
+ *
+ * - keep rules in defined order
+ * - assign the name to each rule
+ * - enable/disable rules
+ * - add/replace rules
+ * - allow assign rules to additional named chains (in the same)
+ * - cacheing lists of active rules
+ *
+ * You will not need use this class directly until write plugins. For simple
+ * rules control use [[MarkdownIt.disable]], [[MarkdownIt.enable]] and
+ * [[MarkdownIt.use]].
+ **/
+
+
+/**
+ * new Ruler()
+ **/
+function Ruler$3() {
+  // List of added rules. Each element is:
+  //
+  // {
+  //   name: XXX,
+  //   enabled: Boolean,
+  //   fn: Function(),
+  //   alt: [ name2, name3 ]
+  // }
+  //
+  this.__rules__ = [];
+
+  // Cached rule chains.
+  //
+  // First level - chain name, '' for default.
+  // Second level - diginal anchor for fast filtering by charcodes.
+  //
+  this.__cache__ = null;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Helper methods, should not be used directly
+
+
+// Find rule index by name
+//
+Ruler$3.prototype.__find__ = function (name) {
+  for (var i = 0; i < this.__rules__.length; i++) {
+    if (this.__rules__[i].name === name) {
+      return i;
+    }
+  }
+  return -1;
+};
+
+
+// Build rules lookup cache
+//
+Ruler$3.prototype.__compile__ = function () {
+  var self = this;
+  var chains = [ '' ];
+
+  // collect unique names
+  self.__rules__.forEach(function (rule) {
+    if (!rule.enabled) { return; }
+
+    rule.alt.forEach(function (altName) {
+      if (chains.indexOf(altName) < 0) {
+        chains.push(altName);
+      }
+    });
+  });
+
+  self.__cache__ = {};
+
+  chains.forEach(function (chain) {
+    self.__cache__[chain] = [];
+    self.__rules__.forEach(function (rule) {
+      if (!rule.enabled) { return; }
+
+      if (chain && rule.alt.indexOf(chain) < 0) { return; }
+
+      self.__cache__[chain].push(rule.fn);
+    });
+  });
+};
+
+
+/**
+ * Ruler.at(name, fn [, options])
+ * - name (String): rule name to replace.
+ * - fn (Function): new rule function.
+ * - options (Object): new rule options (not mandatory).
+ *
+ * Replace rule by name with new function & options. Throws error if name not
+ * found.
+ *
+ * ##### Options:
+ *
+ * - __alt__ - array with names of "alternate" chains.
+ *
+ * ##### Example
+ *
+ * Replace existing typographer replacement rule with new one:
+ *
+ * ```javascript
+ * var md = require('markdown-it')();
+ *
+ * md.core.ruler.at('replacements', function replace(state) {
+ *   //...
+ * });
+ * ```
+ **/
+Ruler$3.prototype.at = function (name, fn, options) {
+  var index = this.__find__(name);
+  var opt = options || {};
+
+  if (index === -1) { throw new Error('Parser rule not found: ' + name); }
+
+  this.__rules__[index].fn = fn;
+  this.__rules__[index].alt = opt.alt || [];
+  this.__cache__ = null;
+};
+
+
+/**
+ * Ruler.before(beforeName, ruleName, fn [, options])
+ * - beforeName (String): new rule will be added before this one.
+ * - ruleName (String): name of added rule.
+ * - fn (Function): rule function.
+ * - options (Object): rule options (not mandatory).
+ *
+ * Add new rule to chain before one with given name. See also
+ * [[Ruler.after]], [[Ruler.push]].
+ *
+ * ##### Options:
+ *
+ * - __alt__ - array with names of "alternate" chains.
+ *
+ * ##### Example
+ *
+ * ```javascript
+ * var md = require('markdown-it')();
+ *
+ * md.block.ruler.before('paragraph', 'my_rule', function replace(state) {
+ *   //...
+ * });
+ * ```
+ **/
+Ruler$3.prototype.before = function (beforeName, ruleName, fn, options) {
+  var index = this.__find__(beforeName);
+  var opt = options || {};
+
+  if (index === -1) { throw new Error('Parser rule not found: ' + beforeName); }
+
+  this.__rules__.splice(index, 0, {
+    name: ruleName,
+    enabled: true,
+    fn: fn,
+    alt: opt.alt || []
+  });
+
+  this.__cache__ = null;
+};
+
+
+/**
+ * Ruler.after(afterName, ruleName, fn [, options])
+ * - afterName (String): new rule will be added after this one.
+ * - ruleName (String): name of added rule.
+ * - fn (Function): rule function.
+ * - options (Object): rule options (not mandatory).
+ *
+ * Add new rule to chain after one with given name. See also
+ * [[Ruler.before]], [[Ruler.push]].
+ *
+ * ##### Options:
+ *
+ * - __alt__ - array with names of "alternate" chains.
+ *
+ * ##### Example
+ *
+ * ```javascript
+ * var md = require('markdown-it')();
+ *
+ * md.inline.ruler.after('text', 'my_rule', function replace(state) {
+ *   //...
+ * });
+ * ```
+ **/
+Ruler$3.prototype.after = function (afterName, ruleName, fn, options) {
+  var index = this.__find__(afterName);
+  var opt = options || {};
+
+  if (index === -1) { throw new Error('Parser rule not found: ' + afterName); }
+
+  this.__rules__.splice(index + 1, 0, {
+    name: ruleName,
+    enabled: true,
+    fn: fn,
+    alt: opt.alt || []
+  });
+
+  this.__cache__ = null;
+};
+
+/**
+ * Ruler.push(ruleName, fn [, options])
+ * - ruleName (String): name of added rule.
+ * - fn (Function): rule function.
+ * - options (Object): rule options (not mandatory).
+ *
+ * Push new rule to the end of chain. See also
+ * [[Ruler.before]], [[Ruler.after]].
+ *
+ * ##### Options:
+ *
+ * - __alt__ - array with names of "alternate" chains.
+ *
+ * ##### Example
+ *
+ * ```javascript
+ * var md = require('markdown-it')();
+ *
+ * md.core.ruler.push('my_rule', function replace(state) {
+ *   //...
+ * });
+ * ```
+ **/
+Ruler$3.prototype.push = function (ruleName, fn, options) {
+  var opt = options || {};
+
+  this.__rules__.push({
+    name: ruleName,
+    enabled: true,
+    fn: fn,
+    alt: opt.alt || []
+  });
+
+  this.__cache__ = null;
+};
+
+
+/**
+ * Ruler.enable(list [, ignoreInvalid]) -> Array
+ * - list (String|Array): list of rule names to enable.
+ * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+ *
+ * Enable rules with given names. If any rule name not found - throw Error.
+ * Errors can be disabled by second param.
+ *
+ * Returns list of found rule names (if no exception happened).
+ *
+ * See also [[Ruler.disable]], [[Ruler.enableOnly]].
+ **/
+Ruler$3.prototype.enable = function (list, ignoreInvalid) {
+  if (!Array.isArray(list)) { list = [ list ]; }
+
+  var result = [];
+
+  // Search by name and enable
+  list.forEach(function (name) {
+    var idx = this.__find__(name);
+
+    if (idx < 0) {
+      if (ignoreInvalid) { return; }
+      throw new Error('Rules manager: invalid rule name ' + name);
+    }
+    this.__rules__[idx].enabled = true;
+    result.push(name);
+  }, this);
+
+  this.__cache__ = null;
+  return result;
+};
+
+
+/**
+ * Ruler.enableOnly(list [, ignoreInvalid])
+ * - list (String|Array): list of rule names to enable (whitelist).
+ * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+ *
+ * Enable rules with given names, and disable everything else. If any rule name
+ * not found - throw Error. Errors can be disabled by second param.
+ *
+ * See also [[Ruler.disable]], [[Ruler.enable]].
+ **/
+Ruler$3.prototype.enableOnly = function (list, ignoreInvalid) {
+  if (!Array.isArray(list)) { list = [ list ]; }
+
+  this.__rules__.forEach(function (rule) { rule.enabled = false; });
+
+  this.enable(list, ignoreInvalid);
+};
+
+
+/**
+ * Ruler.disable(list [, ignoreInvalid]) -> Array
+ * - list (String|Array): list of rule names to disable.
+ * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+ *
+ * Disable rules with given names. If any rule name not found - throw Error.
+ * Errors can be disabled by second param.
+ *
+ * Returns list of found rule names (if no exception happened).
+ *
+ * See also [[Ruler.enable]], [[Ruler.enableOnly]].
+ **/
+Ruler$3.prototype.disable = function (list, ignoreInvalid) {
+  if (!Array.isArray(list)) { list = [ list ]; }
+
+  var result = [];
+
+  // Search by name and disable
+  list.forEach(function (name) {
+    var idx = this.__find__(name);
+
+    if (idx < 0) {
+      if (ignoreInvalid) { return; }
+      throw new Error('Rules manager: invalid rule name ' + name);
+    }
+    this.__rules__[idx].enabled = false;
+    result.push(name);
+  }, this);
+
+  this.__cache__ = null;
+  return result;
+};
+
+
+/**
+ * Ruler.getRules(chainName) -> Array
+ *
+ * Return array of active functions (rules) for given chain name. It analyzes
+ * rules configuration, compiles caches if not exists and returns result.
+ *
+ * Default chain name is `''` (empty string). It can't be skipped. That's
+ * done intentionally, to keep signature monomorphic for high speed.
+ **/
+Ruler$3.prototype.getRules = function (chainName) {
+  if (this.__cache__ === null) {
+    this.__compile__();
+  }
+
+  // Chain can be empty, if rules disabled. But we still have to return Array.
+  return this.__cache__[chainName] || [];
+};
+
+var ruler = Ruler$3;
+
+// https://spec.commonmark.org/0.29/#line-ending
+var NEWLINES_RE  = /\r\n?|\n/g;
+var NULL_RE      = /\0/g;
+
+
+var normalize = function normalize(state) {
+  var str;
+
+  // Normalize newlines
+  str = state.src.replace(NEWLINES_RE, '\n');
+
+  // Replace NULL characters
+  str = str.replace(NULL_RE, '\uFFFD');
+
+  state.src = str;
+};
+
+var block = function block(state) {
+  var token;
+
+  if (state.inlineMode) {
+    token          = new state.Token('inline', '', 0);
+    token.content  = state.src;
+    token.map      = [ 0, 1 ];
+    token.children = [];
+    state.tokens.push(token);
+  } else {
+    state.md.block.parse(state.src, state.md, state.env, state.tokens);
+  }
+};
+
+var inline = function inline(state) {
+  var tokens = state.tokens, tok, i, l;
+
+  // Parse inlines
+  for (i = 0, l = tokens.length; i < l; i++) {
+    tok = tokens[i];
+    if (tok.type === 'inline') {
+      state.md.inline.parse(tok.content, state.md, state.env, tok.children);
+    }
+  }
+};
+
+var arrayReplaceAt = utils$1.arrayReplaceAt;
+
+
+function isLinkOpen(str) {
+  return /^<a[>\s]/i.test(str);
+}
+function isLinkClose(str) {
+  return /^<\/a\s*>/i.test(str);
+}
+
+
+var linkify = function linkify(state) {
+  var i, j, l, tokens, token, currentToken, nodes, ln, text, pos, lastPos,
+      level, htmlLinkLevel, url, fullUrl, urlText,
+      blockTokens = state.tokens,
+      links;
+
+  if (!state.md.options.linkify) { return; }
+
+  for (j = 0, l = blockTokens.length; j < l; j++) {
+    if (blockTokens[j].type !== 'inline' ||
+        !state.md.linkify.pretest(blockTokens[j].content)) {
+      continue;
+    }
+
+    tokens = blockTokens[j].children;
+
+    htmlLinkLevel = 0;
+
+    // We scan from the end, to keep position when new tags added.
+    // Use reversed logic in links start/end match
+    for (i = tokens.length - 1; i >= 0; i--) {
+      currentToken = tokens[i];
+
+      // Skip content of markdown links
+      if (currentToken.type === 'link_close') {
+        i--;
+        while (tokens[i].level !== currentToken.level && tokens[i].type !== 'link_open') {
+          i--;
+        }
+        continue;
+      }
+
+      // Skip content of html tag links
+      if (currentToken.type === 'html_inline') {
+        if (isLinkOpen(currentToken.content) && htmlLinkLevel > 0) {
+          htmlLinkLevel--;
+        }
+        if (isLinkClose(currentToken.content)) {
+          htmlLinkLevel++;
+        }
+      }
+      if (htmlLinkLevel > 0) { continue; }
+
+      if (currentToken.type === 'text' && state.md.linkify.test(currentToken.content)) {
+
+        text = currentToken.content;
+        links = state.md.linkify.match(text);
+
+        // Now split string to nodes
+        nodes = [];
+        level = currentToken.level;
+        lastPos = 0;
+
+        for (ln = 0; ln < links.length; ln++) {
+
+          url = links[ln].url;
+          fullUrl = state.md.normalizeLink(url);
+          if (!state.md.validateLink(fullUrl)) { continue; }
+
+          urlText = links[ln].text;
+
+          // Linkifier might send raw hostnames like "example.com", where url
+          // starts with domain name. So we prepend http:// in those cases,
+          // and remove it afterwards.
+          //
+          if (!links[ln].schema) {
+            urlText = state.md.normalizeLinkText('http://' + urlText).replace(/^http:\/\//, '');
+          } else if (links[ln].schema === 'mailto:' && !/^mailto:/i.test(urlText)) {
+            urlText = state.md.normalizeLinkText('mailto:' + urlText).replace(/^mailto:/, '');
+          } else {
+            urlText = state.md.normalizeLinkText(urlText);
+          }
+
+          pos = links[ln].index;
+
+          if (pos > lastPos) {
+            token         = new state.Token('text', '', 0);
+            token.content = text.slice(lastPos, pos);
+            token.level   = level;
+            nodes.push(token);
+          }
+
+          token         = new state.Token('link_open', 'a', 1);
+          token.attrs   = [ [ 'href', fullUrl ] ];
+          token.level   = level++;
+          token.markup  = 'linkify';
+          token.info    = 'auto';
+          nodes.push(token);
+
+          token         = new state.Token('text', '', 0);
+          token.content = urlText;
+          token.level   = level;
+          nodes.push(token);
+
+          token         = new state.Token('link_close', 'a', -1);
+          token.level   = --level;
+          token.markup  = 'linkify';
+          token.info    = 'auto';
+          nodes.push(token);
+
+          lastPos = links[ln].lastIndex;
+        }
+        if (lastPos < text.length) {
+          token         = new state.Token('text', '', 0);
+          token.content = text.slice(lastPos);
+          token.level   = level;
+          nodes.push(token);
+        }
+
+        // replace current node
+        blockTokens[j].children = tokens = arrayReplaceAt(tokens, i, nodes);
+      }
+    }
+  }
+};
+
+// TODO:
+// - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
+// - miltiplication 2 x 4 -> 2 × 4
+
+var RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--/;
+
+// Workaround for phantomjs - need regex without /g flag,
+// or root check will fail every second time
+var SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
+
+var SCOPED_ABBR_RE = /\((c|tm|r|p)\)/ig;
+var SCOPED_ABBR = {
+  c: '©',
+  r: '®',
+  p: '§',
+  tm: '™'
+};
+
+function replaceFn(match, name) {
+  return SCOPED_ABBR[name.toLowerCase()];
+}
+
+function replace_scoped(inlineTokens) {
+  var i, token, inside_autolink = 0;
+
+  for (i = inlineTokens.length - 1; i >= 0; i--) {
+    token = inlineTokens[i];
+
+    if (token.type === 'text' && !inside_autolink) {
+      token.content = token.content.replace(SCOPED_ABBR_RE, replaceFn);
+    }
+
+    if (token.type === 'link_open' && token.info === 'auto') {
+      inside_autolink--;
+    }
+
+    if (token.type === 'link_close' && token.info === 'auto') {
+      inside_autolink++;
+    }
+  }
+}
+
+function replace_rare(inlineTokens) {
+  var i, token, inside_autolink = 0;
+
+  for (i = inlineTokens.length - 1; i >= 0; i--) {
+    token = inlineTokens[i];
+
+    if (token.type === 'text' && !inside_autolink) {
+      if (RARE_RE.test(token.content)) {
+        token.content = token.content
+          .replace(/\+-/g, '±')
+          // .., ..., ....... -> …
+          // but ?..... & !..... -> ?.. & !..
+          .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
+          .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
+          // em-dash
+          .replace(/(^|[^-])---(?=[^-]|$)/mg, '$1\u2014')
+          // en-dash
+          .replace(/(^|\s)--(?=\s|$)/mg, '$1\u2013')
+          .replace(/(^|[^-\s])--(?=[^-\s]|$)/mg, '$1\u2013');
+      }
+    }
+
+    if (token.type === 'link_open' && token.info === 'auto') {
+      inside_autolink--;
+    }
+
+    if (token.type === 'link_close' && token.info === 'auto') {
+      inside_autolink++;
+    }
+  }
+}
+
+
+var replacements = function replace(state) {
+  var blkIdx;
+
+  if (!state.md.options.typographer) { return; }
+
+  for (blkIdx = state.tokens.length - 1; blkIdx >= 0; blkIdx--) {
+
+    if (state.tokens[blkIdx].type !== 'inline') { continue; }
+
+    if (SCOPED_ABBR_TEST_RE.test(state.tokens[blkIdx].content)) {
+      replace_scoped(state.tokens[blkIdx].children);
+    }
+
+    if (RARE_RE.test(state.tokens[blkIdx].content)) {
+      replace_rare(state.tokens[blkIdx].children);
+    }
+
+  }
+};
+
+var isWhiteSpace$1   = utils$1.isWhiteSpace;
+var isPunctChar$1    = utils$1.isPunctChar;
+var isMdAsciiPunct$1 = utils$1.isMdAsciiPunct;
+
+var QUOTE_TEST_RE = /['"]/;
+var QUOTE_RE = /['"]/g;
+var APOSTROPHE = '\u2019'; /* ’ */
+
+
+function replaceAt(str, index, ch) {
+  return str.substr(0, index) + ch + str.substr(index + 1);
+}
+
+function process_inlines(tokens, state) {
+  var i, token, text, t, pos, max, thisLevel, item, lastChar, nextChar,
+      isLastPunctChar, isNextPunctChar, isLastWhiteSpace, isNextWhiteSpace,
+      canOpen, canClose, j, isSingle, stack, openQuote, closeQuote;
+
+  stack = [];
+
+  for (i = 0; i < tokens.length; i++) {
+    token = tokens[i];
+
+    thisLevel = tokens[i].level;
+
+    for (j = stack.length - 1; j >= 0; j--) {
+      if (stack[j].level <= thisLevel) { break; }
+    }
+    stack.length = j + 1;
+
+    if (token.type !== 'text') { continue; }
+
+    text = token.content;
+    pos = 0;
+    max = text.length;
+
+    /*eslint no-labels:0,block-scoped-var:0*/
+    OUTER:
+    while (pos < max) {
+      QUOTE_RE.lastIndex = pos;
+      t = QUOTE_RE.exec(text);
+      if (!t) { break; }
+
+      canOpen = canClose = true;
+      pos = t.index + 1;
+      isSingle = (t[0] === "'");
+
+      // Find previous character,
+      // default to space if it's the beginning of the line
+      //
+      lastChar = 0x20;
+
+      if (t.index - 1 >= 0) {
+        lastChar = text.charCodeAt(t.index - 1);
+      } else {
+        for (j = i - 1; j >= 0; j--) {
+          if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // lastChar defaults to 0x20
+          if (!tokens[j].content) continue; // should skip all tokens except 'text', 'html_inline' or 'code_inline'
+
+          lastChar = tokens[j].content.charCodeAt(tokens[j].content.length - 1);
+          break;
+        }
+      }
+
+      // Find next character,
+      // default to space if it's the end of the line
+      //
+      nextChar = 0x20;
+
+      if (pos < max) {
+        nextChar = text.charCodeAt(pos);
+      } else {
+        for (j = i + 1; j < tokens.length; j++) {
+          if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // nextChar defaults to 0x20
+          if (!tokens[j].content) continue; // should skip all tokens except 'text', 'html_inline' or 'code_inline'
+
+          nextChar = tokens[j].content.charCodeAt(0);
+          break;
+        }
+      }
+
+      isLastPunctChar = isMdAsciiPunct$1(lastChar) || isPunctChar$1(String.fromCharCode(lastChar));
+      isNextPunctChar = isMdAsciiPunct$1(nextChar) || isPunctChar$1(String.fromCharCode(nextChar));
+
+      isLastWhiteSpace = isWhiteSpace$1(lastChar);
+      isNextWhiteSpace = isWhiteSpace$1(nextChar);
+
+      if (isNextWhiteSpace) {
+        canOpen = false;
+      } else if (isNextPunctChar) {
+        if (!(isLastWhiteSpace || isLastPunctChar)) {
+          canOpen = false;
+        }
+      }
+
+      if (isLastWhiteSpace) {
+        canClose = false;
+      } else if (isLastPunctChar) {
+        if (!(isNextWhiteSpace || isNextPunctChar)) {
+          canClose = false;
+        }
+      }
+
+      if (nextChar === 0x22 /* " */ && t[0] === '"') {
+        if (lastChar >= 0x30 /* 0 */ && lastChar <= 0x39 /* 9 */) {
+          // special case: 1"" - count first quote as an inch
+          canClose = canOpen = false;
+        }
+      }
+
+      if (canOpen && canClose) {
+        // Replace quotes in the middle of punctuation sequence, but not
+        // in the middle of the words, i.e.:
+        //
+        // 1. foo " bar " baz - not replaced
+        // 2. foo-"-bar-"-baz - replaced
+        // 3. foo"bar"baz     - not replaced
+        //
+        canOpen = isLastPunctChar;
+        canClose = isNextPunctChar;
+      }
+
+      if (!canOpen && !canClose) {
+        // middle of word
+        if (isSingle) {
+          token.content = replaceAt(token.content, t.index, APOSTROPHE);
+        }
+        continue;
+      }
+
+      if (canClose) {
+        // this could be a closing quote, rewind the stack to get a match
+        for (j = stack.length - 1; j >= 0; j--) {
+          item = stack[j];
+          if (stack[j].level < thisLevel) { break; }
+          if (item.single === isSingle && stack[j].level === thisLevel) {
+            item = stack[j];
+
+            if (isSingle) {
+              openQuote = state.md.options.quotes[2];
+              closeQuote = state.md.options.quotes[3];
+            } else {
+              openQuote = state.md.options.quotes[0];
+              closeQuote = state.md.options.quotes[1];
+            }
+
+            // replace token.content *before* tokens[item.token].content,
+            // because, if they are pointing at the same token, replaceAt
+            // could mess up indices when quote length != 1
+            token.content = replaceAt(token.content, t.index, closeQuote);
+            tokens[item.token].content = replaceAt(
+              tokens[item.token].content, item.pos, openQuote);
+
+            pos += closeQuote.length - 1;
+            if (item.token === i) { pos += openQuote.length - 1; }
+
+            text = token.content;
+            max = text.length;
+
+            stack.length = j;
+            continue OUTER;
+          }
+        }
+      }
+
+      if (canOpen) {
+        stack.push({
+          token: i,
+          pos: t.index,
+          single: isSingle,
+          level: thisLevel
+        });
+      } else if (canClose && isSingle) {
+        token.content = replaceAt(token.content, t.index, APOSTROPHE);
+      }
+    }
+  }
+}
+
+
+var smartquotes = function smartquotes(state) {
+  /*eslint max-depth:0*/
+  var blkIdx;
+
+  if (!state.md.options.typographer) { return; }
+
+  for (blkIdx = state.tokens.length - 1; blkIdx >= 0; blkIdx--) {
+
+    if (state.tokens[blkIdx].type !== 'inline' ||
+        !QUOTE_TEST_RE.test(state.tokens[blkIdx].content)) {
+      continue;
+    }
+
+    process_inlines(state.tokens[blkIdx].children, state);
+  }
+};
+
+/**
+ * class Token
+ **/
+
+/**
+ * new Token(type, tag, nesting)
+ *
+ * Create new token and fill passed properties.
+ **/
+function Token$3(type, tag, nesting) {
+  /**
+   * Token#type -> String
+   *
+   * Type of the token (string, e.g. "paragraph_open")
+   **/
+  this.type     = type;
+
+  /**
+   * Token#tag -> String
+   *
+   * html tag name, e.g. "p"
+   **/
+  this.tag      = tag;
+
+  /**
+   * Token#attrs -> Array
+   *
+   * Html attributes. Format: `[ [ name1, value1 ], [ name2, value2 ] ]`
+   **/
+  this.attrs    = null;
+
+  /**
+   * Token#map -> Array
+   *
+   * Source map info. Format: `[ line_begin, line_end ]`
+   **/
+  this.map      = null;
+
+  /**
+   * Token#nesting -> Number
+   *
+   * Level change (number in {-1, 0, 1} set), where:
+   *
+   * -  `1` means the tag is opening
+   * -  `0` means the tag is self-closing
+   * - `-1` means the tag is closing
+   **/
+  this.nesting  = nesting;
+
+  /**
+   * Token#level -> Number
+   *
+   * nesting level, the same as `state.level`
+   **/
+  this.level    = 0;
+
+  /**
+   * Token#children -> Array
+   *
+   * An array of child nodes (inline and img tokens)
+   **/
+  this.children = null;
+
+  /**
+   * Token#content -> String
+   *
+   * In a case of self-closing tag (code, html, fence, etc.),
+   * it has contents of this tag.
+   **/
+  this.content  = '';
+
+  /**
+   * Token#markup -> String
+   *
+   * '*' or '_' for emphasis, fence string for fence, etc.
+   **/
+  this.markup   = '';
+
+  /**
+   * Token#info -> String
+   *
+   * Additional information:
+   *
+   * - Info string for "fence" tokens
+   * - The value "auto" for autolink "link_open" and "link_close" tokens
+   * - The string value of the item marker for ordered-list "list_item_open" tokens
+   **/
+  this.info     = '';
+
+  /**
+   * Token#meta -> Object
+   *
+   * A place for plugins to store an arbitrary data
+   **/
+  this.meta     = null;
+
+  /**
+   * Token#block -> Boolean
+   *
+   * True for block-level tokens, false for inline tokens.
+   * Used in renderer to calculate line breaks
+   **/
+  this.block    = false;
+
+  /**
+   * Token#hidden -> Boolean
+   *
+   * If it's true, ignore this element when rendering. Used for tight lists
+   * to hide paragraphs.
+   **/
+  this.hidden   = false;
+}
+
+
+/**
+ * Token.attrIndex(name) -> Number
+ *
+ * Search attribute index by name.
+ **/
+Token$3.prototype.attrIndex = function attrIndex(name) {
+  var attrs, i, len;
+
+  if (!this.attrs) { return -1; }
+
+  attrs = this.attrs;
+
+  for (i = 0, len = attrs.length; i < len; i++) {
+    if (attrs[i][0] === name) { return i; }
+  }
+  return -1;
+};
+
+
+/**
+ * Token.attrPush(attrData)
+ *
+ * Add `[ name, value ]` attribute to list. Init attrs if necessary
+ **/
+Token$3.prototype.attrPush = function attrPush(attrData) {
+  if (this.attrs) {
+    this.attrs.push(attrData);
+  } else {
+    this.attrs = [ attrData ];
+  }
+};
+
+
+/**
+ * Token.attrSet(name, value)
+ *
+ * Set `name` attribute to `value`. Override old value if exists.
+ **/
+Token$3.prototype.attrSet = function attrSet(name, value) {
+  var idx = this.attrIndex(name),
+      attrData = [ name, value ];
+
+  if (idx < 0) {
+    this.attrPush(attrData);
+  } else {
+    this.attrs[idx] = attrData;
+  }
+};
+
+
+/**
+ * Token.attrGet(name)
+ *
+ * Get the value of attribute `name`, or null if it does not exist.
+ **/
+Token$3.prototype.attrGet = function attrGet(name) {
+  var idx = this.attrIndex(name), value = null;
+  if (idx >= 0) {
+    value = this.attrs[idx][1];
+  }
+  return value;
+};
+
+
+/**
+ * Token.attrJoin(name, value)
+ *
+ * Join value to existing attribute via space. Or create new attribute if not
+ * exists. Useful to operate with token classes.
+ **/
+Token$3.prototype.attrJoin = function attrJoin(name, value) {
+  var idx = this.attrIndex(name);
+
+  if (idx < 0) {
+    this.attrPush([ name, value ]);
+  } else {
+    this.attrs[idx][1] = this.attrs[idx][1] + ' ' + value;
+  }
+};
+
+
+var token = Token$3;
+
+var Token$2 = token;
+
+
+function StateCore(src, md, env) {
+  this.src = src;
+  this.env = env;
+  this.tokens = [];
+  this.inlineMode = false;
+  this.md = md; // link to parser instance
+}
+
+// re-export Token class to use in core rules
+StateCore.prototype.Token = Token$2;
+
+
+var state_core = StateCore;
+
+/** internal
+ * class Core
+ *
+ * Top-level rules executor. Glues block/inline parsers and does intermediate
+ * transformations.
+ **/
+
+
+var Ruler$2  = ruler;
+
+
+var _rules$2 = [
+  [ 'normalize',      normalize      ],
+  [ 'block',          block          ],
+  [ 'inline',         inline         ],
+  [ 'linkify',        linkify        ],
+  [ 'replacements',   replacements   ],
+  [ 'smartquotes',    smartquotes    ]
+];
+
+
+/**
+ * new Core()
+ **/
+function Core() {
+  /**
+   * Core#ruler -> Ruler
+   *
+   * [[Ruler]] instance. Keep configuration of core rules.
+   **/
+  this.ruler = new Ruler$2();
+
+  for (var i = 0; i < _rules$2.length; i++) {
+    this.ruler.push(_rules$2[i][0], _rules$2[i][1]);
+  }
+}
+
+
+/**
+ * Core.process(state)
+ *
+ * Executes core chain rules.
+ **/
+Core.prototype.process = function (state) {
+  var i, l, rules;
+
+  rules = this.ruler.getRules('');
+
+  for (i = 0, l = rules.length; i < l; i++) {
+    rules[i](state);
+  }
+};
+
+Core.prototype.State = state_core;
+
+
+var parser_core = Core;
+
+var isSpace$a = utils$1.isSpace;
+
+
+function getLine(state, line) {
+  var pos = state.bMarks[line] + state.tShift[line],
+      max = state.eMarks[line];
+
+  return state.src.substr(pos, max - pos);
+}
+
+function escapedSplit(str) {
+  var result = [],
+      pos = 0,
+      max = str.length,
+      ch,
+      isEscaped = false,
+      lastPos = 0,
+      current = '';
+
+  ch  = str.charCodeAt(pos);
+
+  while (pos < max) {
+    if (ch === 0x7c/* | */) {
+      if (!isEscaped) {
+        // pipe separating cells, '|'
+        result.push(current + str.substring(lastPos, pos));
+        current = '';
+        lastPos = pos + 1;
+      } else {
+        // escaped pipe, '\|'
+        current += str.substring(lastPos, pos - 1);
+        lastPos = pos;
+      }
+    }
+
+    isEscaped = (ch === 0x5c/* \ */);
+    pos++;
+
+    ch = str.charCodeAt(pos);
+  }
+
+  result.push(current + str.substring(lastPos));
+
+  return result;
+}
+
+
+var table = function table(state, startLine, endLine, silent) {
+  var ch, lineText, pos, i, l, nextLine, columns, columnCount, token,
+      aligns, t, tableLines, tbodyLines, oldParentType, terminate,
+      terminatorRules, firstCh, secondCh;
+
+  // should have at least two lines
+  if (startLine + 2 > endLine) { return false; }
+
+  nextLine = startLine + 1;
+
+  if (state.sCount[nextLine] < state.blkIndent) { return false; }
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[nextLine] - state.blkIndent >= 4) { return false; }
+
+  // first character of the second line should be '|', '-', ':',
+  // and no other characters are allowed but spaces;
+  // basically, this is the equivalent of /^[-:|][-:|\s]*$/ regexp
+
+  pos = state.bMarks[nextLine] + state.tShift[nextLine];
+  if (pos >= state.eMarks[nextLine]) { return false; }
+
+  firstCh = state.src.charCodeAt(pos++);
+  if (firstCh !== 0x7C/* | */ && firstCh !== 0x2D/* - */ && firstCh !== 0x3A/* : */) { return false; }
+
+  if (pos >= state.eMarks[nextLine]) { return false; }
+
+  secondCh = state.src.charCodeAt(pos++);
+  if (secondCh !== 0x7C/* | */ && secondCh !== 0x2D/* - */ && secondCh !== 0x3A/* : */ && !isSpace$a(secondCh)) {
+    return false;
+  }
+
+  // if first character is '-', then second character must not be a space
+  // (due to parsing ambiguity with list)
+  if (firstCh === 0x2D/* - */ && isSpace$a(secondCh)) { return false; }
+
+  while (pos < state.eMarks[nextLine]) {
+    ch = state.src.charCodeAt(pos);
+
+    if (ch !== 0x7C/* | */ && ch !== 0x2D/* - */ && ch !== 0x3A/* : */ && !isSpace$a(ch)) { return false; }
+
+    pos++;
+  }
+
+  lineText = getLine(state, startLine + 1);
+
+  columns = lineText.split('|');
+  aligns = [];
+  for (i = 0; i < columns.length; i++) {
+    t = columns[i].trim();
+    if (!t) {
+      // allow empty columns before and after table, but not in between columns;
+      // e.g. allow ` |---| `, disallow ` ---||--- `
+      if (i === 0 || i === columns.length - 1) {
+        continue;
+      } else {
+        return false;
+      }
+    }
+
+    if (!/^:?-+:?$/.test(t)) { return false; }
+    if (t.charCodeAt(t.length - 1) === 0x3A/* : */) {
+      aligns.push(t.charCodeAt(0) === 0x3A/* : */ ? 'center' : 'right');
+    } else if (t.charCodeAt(0) === 0x3A/* : */) {
+      aligns.push('left');
+    } else {
+      aligns.push('');
+    }
+  }
+
+  lineText = getLine(state, startLine).trim();
+  if (lineText.indexOf('|') === -1) { return false; }
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+  columns = escapedSplit(lineText);
+  if (columns.length && columns[0] === '') columns.shift();
+  if (columns.length && columns[columns.length - 1] === '') columns.pop();
+
+  // header row will define an amount of columns in the entire table,
+  // and align row should be exactly the same (the rest of the rows can differ)
+  columnCount = columns.length;
+  if (columnCount === 0 || columnCount !== aligns.length) { return false; }
+
+  if (silent) { return true; }
+
+  oldParentType = state.parentType;
+  state.parentType = 'table';
+
+  // use 'blockquote' lists for termination because it's
+  // the most similar to tables
+  terminatorRules = state.md.block.ruler.getRules('blockquote');
+
+  token     = state.push('table_open', 'table', 1);
+  token.map = tableLines = [ startLine, 0 ];
+
+  token     = state.push('thead_open', 'thead', 1);
+  token.map = [ startLine, startLine + 1 ];
+
+  token     = state.push('tr_open', 'tr', 1);
+  token.map = [ startLine, startLine + 1 ];
+
+  for (i = 0; i < columns.length; i++) {
+    token          = state.push('th_open', 'th', 1);
+    if (aligns[i]) {
+      token.attrs  = [ [ 'style', 'text-align:' + aligns[i] ] ];
+    }
+
+    token          = state.push('inline', '', 0);
+    token.content  = columns[i].trim();
+    token.children = [];
+
+    token          = state.push('th_close', 'th', -1);
+  }
+
+  token     = state.push('tr_close', 'tr', -1);
+  token     = state.push('thead_close', 'thead', -1);
+
+  for (nextLine = startLine + 2; nextLine < endLine; nextLine++) {
+    if (state.sCount[nextLine] < state.blkIndent) { break; }
+
+    terminate = false;
+    for (i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+
+    if (terminate) { break; }
+    lineText = getLine(state, nextLine).trim();
+    if (!lineText) { break; }
+    if (state.sCount[nextLine] - state.blkIndent >= 4) { break; }
+    columns = escapedSplit(lineText);
+    if (columns.length && columns[0] === '') columns.shift();
+    if (columns.length && columns[columns.length - 1] === '') columns.pop();
+
+    if (nextLine === startLine + 2) {
+      token     = state.push('tbody_open', 'tbody', 1);
+      token.map = tbodyLines = [ startLine + 2, 0 ];
+    }
+
+    token     = state.push('tr_open', 'tr', 1);
+    token.map = [ nextLine, nextLine + 1 ];
+
+    for (i = 0; i < columnCount; i++) {
+      token          = state.push('td_open', 'td', 1);
+      if (aligns[i]) {
+        token.attrs  = [ [ 'style', 'text-align:' + aligns[i] ] ];
+      }
+
+      token          = state.push('inline', '', 0);
+      token.content  = columns[i] ? columns[i].trim() : '';
+      token.children = [];
+
+      token          = state.push('td_close', 'td', -1);
+    }
+    token = state.push('tr_close', 'tr', -1);
+  }
+
+  if (tbodyLines) {
+    token = state.push('tbody_close', 'tbody', -1);
+    tbodyLines[1] = nextLine;
+  }
+
+  token = state.push('table_close', 'table', -1);
+  tableLines[1] = nextLine;
+
+  state.parentType = oldParentType;
+  state.line = nextLine;
+  return true;
+};
+
+var code = function code(state, startLine, endLine/*, silent*/) {
+  var nextLine, last, token;
+
+  if (state.sCount[startLine] - state.blkIndent < 4) { return false; }
+
+  last = nextLine = startLine + 1;
+
+  while (nextLine < endLine) {
+    if (state.isEmpty(nextLine)) {
+      nextLine++;
+      continue;
+    }
+
+    if (state.sCount[nextLine] - state.blkIndent >= 4) {
+      nextLine++;
+      last = nextLine;
+      continue;
+    }
+    break;
+  }
+
+  state.line = last;
+
+  token         = state.push('code_block', 'code', 0);
+  token.content = state.getLines(startLine, last, 4 + state.blkIndent, false) + '\n';
+  token.map     = [ startLine, state.line ];
+
+  return true;
+};
+
+var fence = function fence(state, startLine, endLine, silent) {
+  var marker, len, params, nextLine, mem, token, markup,
+      haveEndMarker = false,
+      pos = state.bMarks[startLine] + state.tShift[startLine],
+      max = state.eMarks[startLine];
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  if (pos + 3 > max) { return false; }
+
+  marker = state.src.charCodeAt(pos);
+
+  if (marker !== 0x7E/* ~ */ && marker !== 0x60 /* ` */) {
+    return false;
+  }
+
+  // scan marker length
+  mem = pos;
+  pos = state.skipChars(pos, marker);
+
+  len = pos - mem;
+
+  if (len < 3) { return false; }
+
+  markup = state.src.slice(mem, pos);
+  params = state.src.slice(pos, max);
+
+  if (marker === 0x60 /* ` */) {
+    if (params.indexOf(String.fromCharCode(marker)) >= 0) {
+      return false;
+    }
+  }
+
+  // Since start is found, we can report success here in validation mode
+  if (silent) { return true; }
+
+  // search end of block
+  nextLine = startLine;
+
+  for (;;) {
+    nextLine++;
+    if (nextLine >= endLine) {
+      // unclosed block should be autoclosed by end of document.
+      // also block seems to be autoclosed by end of parent
+      break;
+    }
+
+    pos = mem = state.bMarks[nextLine] + state.tShift[nextLine];
+    max = state.eMarks[nextLine];
+
+    if (pos < max && state.sCount[nextLine] < state.blkIndent) {
+      // non-empty line with negative indent should stop the list:
+      // - ```
+      //  test
+      break;
+    }
+
+    if (state.src.charCodeAt(pos) !== marker) { continue; }
+
+    if (state.sCount[nextLine] - state.blkIndent >= 4) {
+      // closing fence should be indented less than 4 spaces
+      continue;
+    }
+
+    pos = state.skipChars(pos, marker);
+
+    // closing code fence must be at least as long as the opening one
+    if (pos - mem < len) { continue; }
+
+    // make sure tail has spaces only
+    pos = state.skipSpaces(pos);
+
+    if (pos < max) { continue; }
+
+    haveEndMarker = true;
+    // found!
+    break;
+  }
+
+  // If a fence has heading spaces, they should be removed from its inner block
+  len = state.sCount[startLine];
+
+  state.line = nextLine + (haveEndMarker ? 1 : 0);
+
+  token         = state.push('fence', 'code', 0);
+  token.info    = params;
+  token.content = state.getLines(startLine + 1, nextLine, len, true);
+  token.markup  = markup;
+  token.map     = [ startLine, state.line ];
+
+  return true;
+};
+
+var isSpace$9 = utils$1.isSpace;
+
+
+var blockquote = function blockquote(state, startLine, endLine, silent) {
+  var adjustTab,
+      ch,
+      i,
+      initial,
+      l,
+      lastLineEmpty,
+      lines,
+      nextLine,
+      offset,
+      oldBMarks,
+      oldBSCount,
+      oldIndent,
+      oldParentType,
+      oldSCount,
+      oldTShift,
+      spaceAfterMarker,
+      terminate,
+      terminatorRules,
+      token,
+      isOutdented,
+      oldLineMax = state.lineMax,
+      pos = state.bMarks[startLine] + state.tShift[startLine],
+      max = state.eMarks[startLine];
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  // check the block quote marker
+  if (state.src.charCodeAt(pos++) !== 0x3E/* > */) { return false; }
+
+  // we know that it's going to be a valid blockquote,
+  // so no point trying to find the end of it in silent mode
+  if (silent) { return true; }
+
+  // set offset past spaces and ">"
+  initial = offset = state.sCount[startLine] + 1;
+
+  // skip one optional space after '>'
+  if (state.src.charCodeAt(pos) === 0x20 /* space */) {
+    // ' >   test '
+    //     ^ -- position start of line here:
+    pos++;
+    initial++;
+    offset++;
+    adjustTab = false;
+    spaceAfterMarker = true;
+  } else if (state.src.charCodeAt(pos) === 0x09 /* tab */) {
+    spaceAfterMarker = true;
+
+    if ((state.bsCount[startLine] + offset) % 4 === 3) {
+      // '  >\t  test '
+      //       ^ -- position start of line here (tab has width===1)
+      pos++;
+      initial++;
+      offset++;
+      adjustTab = false;
+    } else {
+      // ' >\t  test '
+      //    ^ -- position start of line here + shift bsCount slightly
+      //         to make extra space appear
+      adjustTab = true;
+    }
+  } else {
+    spaceAfterMarker = false;
+  }
+
+  oldBMarks = [ state.bMarks[startLine] ];
+  state.bMarks[startLine] = pos;
+
+  while (pos < max) {
+    ch = state.src.charCodeAt(pos);
+
+    if (isSpace$9(ch)) {
+      if (ch === 0x09) {
+        offset += 4 - (offset + state.bsCount[startLine] + (adjustTab ? 1 : 0)) % 4;
+      } else {
+        offset++;
+      }
+    } else {
+      break;
+    }
+
+    pos++;
+  }
+
+  oldBSCount = [ state.bsCount[startLine] ];
+  state.bsCount[startLine] = state.sCount[startLine] + 1 + (spaceAfterMarker ? 1 : 0);
+
+  lastLineEmpty = pos >= max;
+
+  oldSCount = [ state.sCount[startLine] ];
+  state.sCount[startLine] = offset - initial;
+
+  oldTShift = [ state.tShift[startLine] ];
+  state.tShift[startLine] = pos - state.bMarks[startLine];
+
+  terminatorRules = state.md.block.ruler.getRules('blockquote');
+
+  oldParentType = state.parentType;
+  state.parentType = 'blockquote';
+
+  // Search the end of the block
+  //
+  // Block ends with either:
+  //  1. an empty line outside:
+  //     ```
+  //     > test
+  //
+  //     ```
+  //  2. an empty line inside:
+  //     ```
+  //     >
+  //     test
+  //     ```
+  //  3. another tag:
+  //     ```
+  //     > test
+  //      - - -
+  //     ```
+  for (nextLine = startLine + 1; nextLine < endLine; nextLine++) {
+    // check if it's outdented, i.e. it's inside list item and indented
+    // less than said list item:
+    //
+    // ```
+    // 1. anything
+    //    > current blockquote
+    // 2. checking this line
+    // ```
+    isOutdented = state.sCount[nextLine] < state.blkIndent;
+
+    pos = state.bMarks[nextLine] + state.tShift[nextLine];
+    max = state.eMarks[nextLine];
+
+    if (pos >= max) {
+      // Case 1: line is not inside the blockquote, and this line is empty.
+      break;
+    }
+
+    if (state.src.charCodeAt(pos++) === 0x3E/* > */ && !isOutdented) {
+      // This line is inside the blockquote.
+
+      // set offset past spaces and ">"
+      initial = offset = state.sCount[nextLine] + 1;
+
+      // skip one optional space after '>'
+      if (state.src.charCodeAt(pos) === 0x20 /* space */) {
+        // ' >   test '
+        //     ^ -- position start of line here:
+        pos++;
+        initial++;
+        offset++;
+        adjustTab = false;
+        spaceAfterMarker = true;
+      } else if (state.src.charCodeAt(pos) === 0x09 /* tab */) {
+        spaceAfterMarker = true;
+
+        if ((state.bsCount[nextLine] + offset) % 4 === 3) {
+          // '  >\t  test '
+          //       ^ -- position start of line here (tab has width===1)
+          pos++;
+          initial++;
+          offset++;
+          adjustTab = false;
+        } else {
+          // ' >\t  test '
+          //    ^ -- position start of line here + shift bsCount slightly
+          //         to make extra space appear
+          adjustTab = true;
+        }
+      } else {
+        spaceAfterMarker = false;
+      }
+
+      oldBMarks.push(state.bMarks[nextLine]);
+      state.bMarks[nextLine] = pos;
+
+      while (pos < max) {
+        ch = state.src.charCodeAt(pos);
+
+        if (isSpace$9(ch)) {
+          if (ch === 0x09) {
+            offset += 4 - (offset + state.bsCount[nextLine] + (adjustTab ? 1 : 0)) % 4;
+          } else {
+            offset++;
+          }
+        } else {
+          break;
+        }
+
+        pos++;
+      }
+
+      lastLineEmpty = pos >= max;
+
+      oldBSCount.push(state.bsCount[nextLine]);
+      state.bsCount[nextLine] = state.sCount[nextLine] + 1 + (spaceAfterMarker ? 1 : 0);
+
+      oldSCount.push(state.sCount[nextLine]);
+      state.sCount[nextLine] = offset - initial;
+
+      oldTShift.push(state.tShift[nextLine]);
+      state.tShift[nextLine] = pos - state.bMarks[nextLine];
+      continue;
+    }
+
+    // Case 2: line is not inside the blockquote, and the last line was empty.
+    if (lastLineEmpty) { break; }
+
+    // Case 3: another tag found.
+    terminate = false;
+    for (i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+
+    if (terminate) {
+      // Quirk to enforce "hard termination mode" for paragraphs;
+      // normally if you call `tokenize(state, startLine, nextLine)`,
+      // paragraphs will look below nextLine for paragraph continuation,
+      // but if blockquote is terminated by another tag, they shouldn't
+      state.lineMax = nextLine;
+
+      if (state.blkIndent !== 0) {
+        // state.blkIndent was non-zero, we now set it to zero,
+        // so we need to re-calculate all offsets to appear as
+        // if indent wasn't changed
+        oldBMarks.push(state.bMarks[nextLine]);
+        oldBSCount.push(state.bsCount[nextLine]);
+        oldTShift.push(state.tShift[nextLine]);
+        oldSCount.push(state.sCount[nextLine]);
+        state.sCount[nextLine] -= state.blkIndent;
+      }
+
+      break;
+    }
+
+    oldBMarks.push(state.bMarks[nextLine]);
+    oldBSCount.push(state.bsCount[nextLine]);
+    oldTShift.push(state.tShift[nextLine]);
+    oldSCount.push(state.sCount[nextLine]);
+
+    // A negative indentation means that this is a paragraph continuation
+    //
+    state.sCount[nextLine] = -1;
+  }
+
+  oldIndent = state.blkIndent;
+  state.blkIndent = 0;
+
+  token        = state.push('blockquote_open', 'blockquote', 1);
+  token.markup = '>';
+  token.map    = lines = [ startLine, 0 ];
+
+  state.md.block.tokenize(state, startLine, nextLine);
+
+  token        = state.push('blockquote_close', 'blockquote', -1);
+  token.markup = '>';
+
+  state.lineMax = oldLineMax;
+  state.parentType = oldParentType;
+  lines[1] = state.line;
+
+  // Restore original tShift; this might not be necessary since the parser
+  // has already been here, but just to make sure we can do that.
+  for (i = 0; i < oldTShift.length; i++) {
+    state.bMarks[i + startLine] = oldBMarks[i];
+    state.tShift[i + startLine] = oldTShift[i];
+    state.sCount[i + startLine] = oldSCount[i];
+    state.bsCount[i + startLine] = oldBSCount[i];
+  }
+  state.blkIndent = oldIndent;
+
+  return true;
+};
+
+var isSpace$8 = utils$1.isSpace;
+
+
+var hr = function hr(state, startLine, endLine, silent) {
+  var marker, cnt, ch, token,
+      pos = state.bMarks[startLine] + state.tShift[startLine],
+      max = state.eMarks[startLine];
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  marker = state.src.charCodeAt(pos++);
+
+  // Check hr marker
+  if (marker !== 0x2A/* * */ &&
+      marker !== 0x2D/* - */ &&
+      marker !== 0x5F/* _ */) {
+    return false;
+  }
+
+  // markers can be mixed with spaces, but there should be at least 3 of them
+
+  cnt = 1;
+  while (pos < max) {
+    ch = state.src.charCodeAt(pos++);
+    if (ch !== marker && !isSpace$8(ch)) { return false; }
+    if (ch === marker) { cnt++; }
+  }
+
+  if (cnt < 3) { return false; }
+
+  if (silent) { return true; }
+
+  state.line = startLine + 1;
+
+  token        = state.push('hr', 'hr', 0);
+  token.map    = [ startLine, state.line ];
+  token.markup = Array(cnt + 1).join(String.fromCharCode(marker));
+
+  return true;
+};
+
+var isSpace$7 = utils$1.isSpace;
+
+
+// Search `[-+*][\n ]`, returns next pos after marker on success
+// or -1 on fail.
+function skipBulletListMarker(state, startLine) {
+  var marker, pos, max, ch;
+
+  pos = state.bMarks[startLine] + state.tShift[startLine];
+  max = state.eMarks[startLine];
+
+  marker = state.src.charCodeAt(pos++);
+  // Check bullet
+  if (marker !== 0x2A/* * */ &&
+      marker !== 0x2D/* - */ &&
+      marker !== 0x2B/* + */) {
+    return -1;
+  }
+
+  if (pos < max) {
+    ch = state.src.charCodeAt(pos);
+
+    if (!isSpace$7(ch)) {
+      // " -test " - is not a list item
+      return -1;
+    }
+  }
+
+  return pos;
+}
+
+// Search `\d+[.)][\n ]`, returns next pos after marker on success
+// or -1 on fail.
+function skipOrderedListMarker(state, startLine) {
+  var ch,
+      start = state.bMarks[startLine] + state.tShift[startLine],
+      pos = start,
+      max = state.eMarks[startLine];
+
+  // List marker should have at least 2 chars (digit + dot)
+  if (pos + 1 >= max) { return -1; }
+
+  ch = state.src.charCodeAt(pos++);
+
+  if (ch < 0x30/* 0 */ || ch > 0x39/* 9 */) { return -1; }
+
+  for (;;) {
+    // EOL -> fail
+    if (pos >= max) { return -1; }
+
+    ch = state.src.charCodeAt(pos++);
+
+    if (ch >= 0x30/* 0 */ && ch <= 0x39/* 9 */) {
+
+      // List marker should have no more than 9 digits
+      // (prevents integer overflow in browsers)
+      if (pos - start >= 10) { return -1; }
+
+      continue;
+    }
+
+    // found valid marker
+    if (ch === 0x29/* ) */ || ch === 0x2e/* . */) {
+      break;
+    }
+
+    return -1;
+  }
+
+
+  if (pos < max) {
+    ch = state.src.charCodeAt(pos);
+
+    if (!isSpace$7(ch)) {
+      // " 1.test " - is not a list item
+      return -1;
+    }
+  }
+  return pos;
+}
+
+function markTightParagraphs(state, idx) {
+  var i, l,
+      level = state.level + 2;
+
+  for (i = idx + 2, l = state.tokens.length - 2; i < l; i++) {
+    if (state.tokens[i].level === level && state.tokens[i].type === 'paragraph_open') {
+      state.tokens[i + 2].hidden = true;
+      state.tokens[i].hidden = true;
+      i += 2;
+    }
+  }
+}
+
+
+var list = function list(state, startLine, endLine, silent) {
+  var ch,
+      contentStart,
+      i,
+      indent,
+      indentAfterMarker,
+      initial,
+      isOrdered,
+      itemLines,
+      l,
+      listLines,
+      listTokIdx,
+      markerCharCode,
+      markerValue,
+      max,
+      nextLine,
+      offset,
+      oldListIndent,
+      oldParentType,
+      oldSCount,
+      oldTShift,
+      oldTight,
+      pos,
+      posAfterMarker,
+      prevEmptyEnd,
+      start,
+      terminate,
+      terminatorRules,
+      token,
+      isTerminatingParagraph = false,
+      tight = true;
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  // Special case:
+  //  - item 1
+  //   - item 2
+  //    - item 3
+  //     - item 4
+  //      - this one is a paragraph continuation
+  if (state.listIndent >= 0 &&
+      state.sCount[startLine] - state.listIndent >= 4 &&
+      state.sCount[startLine] < state.blkIndent) {
+    return false;
+  }
+
+  // limit conditions when list can interrupt
+  // a paragraph (validation mode only)
+  if (silent && state.parentType === 'paragraph') {
+    // Next list item should still terminate previous list item;
+    //
+    // This code can fail if plugins use blkIndent as well as lists,
+    // but I hope the spec gets fixed long before that happens.
+    //
+    if (state.sCount[startLine] >= state.blkIndent) {
+      isTerminatingParagraph = true;
+    }
+  }
+
+  // Detect list type and position after marker
+  if ((posAfterMarker = skipOrderedListMarker(state, startLine)) >= 0) {
+    isOrdered = true;
+    start = state.bMarks[startLine] + state.tShift[startLine];
+    markerValue = Number(state.src.slice(start, posAfterMarker - 1));
+
+    // If we're starting a new ordered list right after
+    // a paragraph, it should start with 1.
+    if (isTerminatingParagraph && markerValue !== 1) return false;
+
+  } else if ((posAfterMarker = skipBulletListMarker(state, startLine)) >= 0) {
+    isOrdered = false;
+
+  } else {
+    return false;
+  }
+
+  // If we're starting a new unordered list right after
+  // a paragraph, first line should not be empty.
+  if (isTerminatingParagraph) {
+    if (state.skipSpaces(posAfterMarker) >= state.eMarks[startLine]) return false;
+  }
+
+  // We should terminate list on style change. Remember first one to compare.
+  markerCharCode = state.src.charCodeAt(posAfterMarker - 1);
+
+  // For validation mode we can terminate immediately
+  if (silent) { return true; }
+
+  // Start list
+  listTokIdx = state.tokens.length;
+
+  if (isOrdered) {
+    token       = state.push('ordered_list_open', 'ol', 1);
+    if (markerValue !== 1) {
+      token.attrs = [ [ 'start', markerValue ] ];
+    }
+
+  } else {
+    token       = state.push('bullet_list_open', 'ul', 1);
+  }
+
+  token.map    = listLines = [ startLine, 0 ];
+  token.markup = String.fromCharCode(markerCharCode);
+
+  //
+  // Iterate list items
+  //
+
+  nextLine = startLine;
+  prevEmptyEnd = false;
+  terminatorRules = state.md.block.ruler.getRules('list');
+
+  oldParentType = state.parentType;
+  state.parentType = 'list';
+
+  while (nextLine < endLine) {
+    pos = posAfterMarker;
+    max = state.eMarks[nextLine];
+
+    initial = offset = state.sCount[nextLine] + posAfterMarker - (state.bMarks[startLine] + state.tShift[startLine]);
+
+    while (pos < max) {
+      ch = state.src.charCodeAt(pos);
+
+      if (ch === 0x09) {
+        offset += 4 - (offset + state.bsCount[nextLine]) % 4;
+      } else if (ch === 0x20) {
+        offset++;
+      } else {
+        break;
+      }
+
+      pos++;
+    }
+
+    contentStart = pos;
+
+    if (contentStart >= max) {
+      // trimming space in "-    \n  3" case, indent is 1 here
+      indentAfterMarker = 1;
+    } else {
+      indentAfterMarker = offset - initial;
+    }
+
+    // If we have more than 4 spaces, the indent is 1
+    // (the rest is just indented code block)
+    if (indentAfterMarker > 4) { indentAfterMarker = 1; }
+
+    // "  -  test"
+    //  ^^^^^ - calculating total length of this thing
+    indent = initial + indentAfterMarker;
+
+    // Run subparser & write tokens
+    token        = state.push('list_item_open', 'li', 1);
+    token.markup = String.fromCharCode(markerCharCode);
+    token.map    = itemLines = [ startLine, 0 ];
+    if (isOrdered) {
+      token.info = state.src.slice(start, posAfterMarker - 1);
+    }
+
+    // change current state, then restore it after parser subcall
+    oldTight = state.tight;
+    oldTShift = state.tShift[startLine];
+    oldSCount = state.sCount[startLine];
+
+    //  - example list
+    // ^ listIndent position will be here
+    //   ^ blkIndent position will be here
+    //
+    oldListIndent = state.listIndent;
+    state.listIndent = state.blkIndent;
+    state.blkIndent = indent;
+
+    state.tight = true;
+    state.tShift[startLine] = contentStart - state.bMarks[startLine];
+    state.sCount[startLine] = offset;
+
+    if (contentStart >= max && state.isEmpty(startLine + 1)) {
+      // workaround for this case
+      // (list item is empty, list terminates before "foo"):
+      // ~~~~~~~~
+      //   -
+      //
+      //     foo
+      // ~~~~~~~~
+      state.line = Math.min(state.line + 2, endLine);
+    } else {
+      state.md.block.tokenize(state, startLine, endLine, true);
+    }
+
+    // If any of list item is tight, mark list as tight
+    if (!state.tight || prevEmptyEnd) {
+      tight = false;
+    }
+    // Item become loose if finish with empty line,
+    // but we should filter last element, because it means list finish
+    prevEmptyEnd = (state.line - startLine) > 1 && state.isEmpty(state.line - 1);
+
+    state.blkIndent = state.listIndent;
+    state.listIndent = oldListIndent;
+    state.tShift[startLine] = oldTShift;
+    state.sCount[startLine] = oldSCount;
+    state.tight = oldTight;
+
+    token        = state.push('list_item_close', 'li', -1);
+    token.markup = String.fromCharCode(markerCharCode);
+
+    nextLine = startLine = state.line;
+    itemLines[1] = nextLine;
+    contentStart = state.bMarks[startLine];
+
+    if (nextLine >= endLine) { break; }
+
+    //
+    // Try to check if list is terminated or continued.
+    //
+    if (state.sCount[nextLine] < state.blkIndent) { break; }
+
+    // if it's indented more than 3 spaces, it should be a code block
+    if (state.sCount[startLine] - state.blkIndent >= 4) { break; }
+
+    // fail if terminating block found
+    terminate = false;
+    for (i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+    if (terminate) { break; }
+
+    // fail if list has another type
+    if (isOrdered) {
+      posAfterMarker = skipOrderedListMarker(state, nextLine);
+      if (posAfterMarker < 0) { break; }
+      start = state.bMarks[nextLine] + state.tShift[nextLine];
+    } else {
+      posAfterMarker = skipBulletListMarker(state, nextLine);
+      if (posAfterMarker < 0) { break; }
+    }
+
+    if (markerCharCode !== state.src.charCodeAt(posAfterMarker - 1)) { break; }
+  }
+
+  // Finalize list
+  if (isOrdered) {
+    token = state.push('ordered_list_close', 'ol', -1);
+  } else {
+    token = state.push('bullet_list_close', 'ul', -1);
+  }
+  token.markup = String.fromCharCode(markerCharCode);
+
+  listLines[1] = nextLine;
+  state.line = nextLine;
+
+  state.parentType = oldParentType;
+
+  // mark paragraphs tight if needed
+  if (tight) {
+    markTightParagraphs(state, listTokIdx);
+  }
+
+  return true;
+};
+
+var normalizeReference$2   = utils$1.normalizeReference;
+var isSpace$6              = utils$1.isSpace;
+
+
+var reference = function reference(state, startLine, _endLine, silent) {
+  var ch,
+      destEndPos,
+      destEndLineNo,
+      endLine,
+      href,
+      i,
+      l,
+      label,
+      labelEnd,
+      oldParentType,
+      res,
+      start,
+      str,
+      terminate,
+      terminatorRules,
+      title,
+      lines = 0,
+      pos = state.bMarks[startLine] + state.tShift[startLine],
+      max = state.eMarks[startLine],
+      nextLine = startLine + 1;
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  if (state.src.charCodeAt(pos) !== 0x5B/* [ */) { return false; }
+
+  // Simple check to quickly interrupt scan on [link](url) at the start of line.
+  // Can be useful on practice: https://github.com/markdown-it/markdown-it/issues/54
+  while (++pos < max) {
+    if (state.src.charCodeAt(pos) === 0x5D /* ] */ &&
+        state.src.charCodeAt(pos - 1) !== 0x5C/* \ */) {
+      if (pos + 1 === max) { return false; }
+      if (state.src.charCodeAt(pos + 1) !== 0x3A/* : */) { return false; }
+      break;
+    }
+  }
+
+  endLine = state.lineMax;
+
+  // jump line-by-line until empty one or EOF
+  terminatorRules = state.md.block.ruler.getRules('reference');
+
+  oldParentType = state.parentType;
+  state.parentType = 'reference';
+
+  for (; nextLine < endLine && !state.isEmpty(nextLine); nextLine++) {
+    // this would be a code block normally, but after paragraph
+    // it's considered a lazy continuation regardless of what's there
+    if (state.sCount[nextLine] - state.blkIndent > 3) { continue; }
+
+    // quirk for blockquotes, this line should already be checked by that rule
+    if (state.sCount[nextLine] < 0) { continue; }
+
+    // Some tags can terminate paragraph without empty line.
+    terminate = false;
+    for (i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+    if (terminate) { break; }
+  }
+
+  str = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
+  max = str.length;
+
+  for (pos = 1; pos < max; pos++) {
+    ch = str.charCodeAt(pos);
+    if (ch === 0x5B /* [ */) {
+      return false;
+    } else if (ch === 0x5D /* ] */) {
+      labelEnd = pos;
+      break;
+    } else if (ch === 0x0A /* \n */) {
+      lines++;
+    } else if (ch === 0x5C /* \ */) {
+      pos++;
+      if (pos < max && str.charCodeAt(pos) === 0x0A) {
+        lines++;
+      }
+    }
+  }
+
+  if (labelEnd < 0 || str.charCodeAt(labelEnd + 1) !== 0x3A/* : */) { return false; }
+
+  // [label]:   destination   'title'
+  //         ^^^ skip optional whitespace here
+  for (pos = labelEnd + 2; pos < max; pos++) {
+    ch = str.charCodeAt(pos);
+    if (ch === 0x0A) {
+      lines++;
+    } else if (isSpace$6(ch)) ; else {
+      break;
+    }
+  }
+
+  // [label]:   destination   'title'
+  //            ^^^^^^^^^^^ parse this
+  res = state.md.helpers.parseLinkDestination(str, pos, max);
+  if (!res.ok) { return false; }
+
+  href = state.md.normalizeLink(res.str);
+  if (!state.md.validateLink(href)) { return false; }
+
+  pos = res.pos;
+  lines += res.lines;
+
+  // save cursor state, we could require to rollback later
+  destEndPos = pos;
+  destEndLineNo = lines;
+
+  // [label]:   destination   'title'
+  //                       ^^^ skipping those spaces
+  start = pos;
+  for (; pos < max; pos++) {
+    ch = str.charCodeAt(pos);
+    if (ch === 0x0A) {
+      lines++;
+    } else if (isSpace$6(ch)) ; else {
+      break;
+    }
+  }
+
+  // [label]:   destination   'title'
+  //                          ^^^^^^^ parse this
+  res = state.md.helpers.parseLinkTitle(str, pos, max);
+  if (pos < max && start !== pos && res.ok) {
+    title = res.str;
+    pos = res.pos;
+    lines += res.lines;
+  } else {
+    title = '';
+    pos = destEndPos;
+    lines = destEndLineNo;
+  }
+
+  // skip trailing spaces until the rest of the line
+  while (pos < max) {
+    ch = str.charCodeAt(pos);
+    if (!isSpace$6(ch)) { break; }
+    pos++;
+  }
+
+  if (pos < max && str.charCodeAt(pos) !== 0x0A) {
+    if (title) {
+      // garbage at the end of the line after title,
+      // but it could still be a valid reference if we roll back
+      title = '';
+      pos = destEndPos;
+      lines = destEndLineNo;
+      while (pos < max) {
+        ch = str.charCodeAt(pos);
+        if (!isSpace$6(ch)) { break; }
+        pos++;
+      }
+    }
+  }
+
+  if (pos < max && str.charCodeAt(pos) !== 0x0A) {
+    // garbage at the end of the line
+    return false;
+  }
+
+  label = normalizeReference$2(str.slice(1, labelEnd));
+  if (!label) {
+    // CommonMark 0.20 disallows empty labels
+    return false;
+  }
+
+  // Reference can not terminate anything. This check is for safety only.
+  /*istanbul ignore if*/
+  if (silent) { return true; }
+
+  if (typeof state.env.references === 'undefined') {
+    state.env.references = {};
+  }
+  if (typeof state.env.references[label] === 'undefined') {
+    state.env.references[label] = { title: title, href: href };
+  }
+
+  state.parentType = oldParentType;
+
+  state.line = startLine + lines + 1;
+  return true;
+};
+
+var html_blocks = [
+  'address',
+  'article',
+  'aside',
+  'base',
+  'basefont',
+  'blockquote',
+  'body',
+  'caption',
+  'center',
+  'col',
+  'colgroup',
+  'dd',
+  'details',
+  'dialog',
+  'dir',
+  'div',
+  'dl',
+  'dt',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'frame',
+  'frameset',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'head',
+  'header',
+  'hr',
+  'html',
+  'iframe',
+  'legend',
+  'li',
+  'link',
+  'main',
+  'menu',
+  'menuitem',
+  'nav',
+  'noframes',
+  'ol',
+  'optgroup',
+  'option',
+  'p',
+  'param',
+  'section',
+  'source',
+  'summary',
+  'table',
+  'tbody',
+  'td',
+  'tfoot',
+  'th',
+  'thead',
+  'title',
+  'tr',
+  'track',
+  'ul'
+];
+
+var html_re = {};
+
+var attr_name     = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
+
+var unquoted      = '[^"\'=<>`\\x00-\\x20]+';
+var single_quoted = "'[^']*'";
+var double_quoted = '"[^"]*"';
+
+var attr_value  = '(?:' + unquoted + '|' + single_quoted + '|' + double_quoted + ')';
+
+var attribute   = '(?:\\s+' + attr_name + '(?:\\s*=\\s*' + attr_value + ')?)';
+
+var open_tag    = '<[A-Za-z][A-Za-z0-9\\-]*' + attribute + '*\\s*\\/?>';
+
+var close_tag   = '<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>';
+var comment     = '<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->';
+var processing  = '<[?][\\s\\S]*?[?]>';
+var declaration = '<![A-Z]+\\s+[^>]*>';
+var cdata       = '<!\\[CDATA\\[[\\s\\S]*?\\]\\]>';
+
+var HTML_TAG_RE$1 = new RegExp('^(?:' + open_tag + '|' + close_tag + '|' + comment +
+                        '|' + processing + '|' + declaration + '|' + cdata + ')');
+var HTML_OPEN_CLOSE_TAG_RE$1 = new RegExp('^(?:' + open_tag + '|' + close_tag + ')');
+
+html_re.HTML_TAG_RE = HTML_TAG_RE$1;
+html_re.HTML_OPEN_CLOSE_TAG_RE = HTML_OPEN_CLOSE_TAG_RE$1;
+
+var block_names = html_blocks;
+var HTML_OPEN_CLOSE_TAG_RE = html_re.HTML_OPEN_CLOSE_TAG_RE;
+
+// An array of opening and corresponding closing sequences for html tags,
+// last argument defines whether it can terminate a paragraph or not
+//
+var HTML_SEQUENCES = [
+  [ /^<(script|pre|style|textarea)(?=(\s|>|$))/i, /<\/(script|pre|style|textarea)>/i, true ],
+  [ /^<!--/,        /-->/,   true ],
+  [ /^<\?/,         /\?>/,   true ],
+  [ /^<![A-Z]/,     />/,     true ],
+  [ /^<!\[CDATA\[/, /\]\]>/, true ],
+  [ new RegExp('^</?(' + block_names.join('|') + ')(?=(\\s|/?>|$))', 'i'), /^$/, true ],
+  [ new RegExp(HTML_OPEN_CLOSE_TAG_RE.source + '\\s*$'),  /^$/, false ]
+];
+
+
+var html_block = function html_block(state, startLine, endLine, silent) {
+  var i, nextLine, token, lineText,
+      pos = state.bMarks[startLine] + state.tShift[startLine],
+      max = state.eMarks[startLine];
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  if (!state.md.options.html) { return false; }
+
+  if (state.src.charCodeAt(pos) !== 0x3C/* < */) { return false; }
+
+  lineText = state.src.slice(pos, max);
+
+  for (i = 0; i < HTML_SEQUENCES.length; i++) {
+    if (HTML_SEQUENCES[i][0].test(lineText)) { break; }
+  }
+
+  if (i === HTML_SEQUENCES.length) { return false; }
+
+  if (silent) {
+    // true if this sequence can be a terminator, false otherwise
+    return HTML_SEQUENCES[i][2];
+  }
+
+  nextLine = startLine + 1;
+
+  // If we are here - we detected HTML block.
+  // Let's roll down till block end.
+  if (!HTML_SEQUENCES[i][1].test(lineText)) {
+    for (; nextLine < endLine; nextLine++) {
+      if (state.sCount[nextLine] < state.blkIndent) { break; }
+
+      pos = state.bMarks[nextLine] + state.tShift[nextLine];
+      max = state.eMarks[nextLine];
+      lineText = state.src.slice(pos, max);
+
+      if (HTML_SEQUENCES[i][1].test(lineText)) {
+        if (lineText.length !== 0) { nextLine++; }
+        break;
+      }
+    }
+  }
+
+  state.line = nextLine;
+
+  token         = state.push('html_block', '', 0);
+  token.map     = [ startLine, nextLine ];
+  token.content = state.getLines(startLine, nextLine, state.blkIndent, true);
+
+  return true;
+};
+
+var isSpace$5 = utils$1.isSpace;
+
+
+var heading = function heading(state, startLine, endLine, silent) {
+  var ch, level, tmp, token,
+      pos = state.bMarks[startLine] + state.tShift[startLine],
+      max = state.eMarks[startLine];
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  ch  = state.src.charCodeAt(pos);
+
+  if (ch !== 0x23/* # */ || pos >= max) { return false; }
+
+  // count heading level
+  level = 1;
+  ch = state.src.charCodeAt(++pos);
+  while (ch === 0x23/* # */ && pos < max && level <= 6) {
+    level++;
+    ch = state.src.charCodeAt(++pos);
+  }
+
+  if (level > 6 || (pos < max && !isSpace$5(ch))) { return false; }
+
+  if (silent) { return true; }
+
+  // Let's cut tails like '    ###  ' from the end of string
+
+  max = state.skipSpacesBack(max, pos);
+  tmp = state.skipCharsBack(max, 0x23, pos); // #
+  if (tmp > pos && isSpace$5(state.src.charCodeAt(tmp - 1))) {
+    max = tmp;
+  }
+
+  state.line = startLine + 1;
+
+  token        = state.push('heading_open', 'h' + String(level), 1);
+  token.markup = '########'.slice(0, level);
+  token.map    = [ startLine, state.line ];
+
+  token          = state.push('inline', '', 0);
+  token.content  = state.src.slice(pos, max).trim();
+  token.map      = [ startLine, state.line ];
+  token.children = [];
+
+  token        = state.push('heading_close', 'h' + String(level), -1);
+  token.markup = '########'.slice(0, level);
+
+  return true;
+};
+
+var lheading = function lheading(state, startLine, endLine/*, silent*/) {
+  var content, terminate, i, l, token, pos, max, level, marker,
+      nextLine = startLine + 1, oldParentType,
+      terminatorRules = state.md.block.ruler.getRules('paragraph');
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+
+  oldParentType = state.parentType;
+  state.parentType = 'paragraph'; // use paragraph to match terminatorRules
+
+  // jump line-by-line until empty one or EOF
+  for (; nextLine < endLine && !state.isEmpty(nextLine); nextLine++) {
+    // this would be a code block normally, but after paragraph
+    // it's considered a lazy continuation regardless of what's there
+    if (state.sCount[nextLine] - state.blkIndent > 3) { continue; }
+
+    //
+    // Check for underline in setext header
+    //
+    if (state.sCount[nextLine] >= state.blkIndent) {
+      pos = state.bMarks[nextLine] + state.tShift[nextLine];
+      max = state.eMarks[nextLine];
+
+      if (pos < max) {
+        marker = state.src.charCodeAt(pos);
+
+        if (marker === 0x2D/* - */ || marker === 0x3D/* = */) {
+          pos = state.skipChars(pos, marker);
+          pos = state.skipSpaces(pos);
+
+          if (pos >= max) {
+            level = (marker === 0x3D/* = */ ? 1 : 2);
+            break;
+          }
+        }
+      }
+    }
+
+    // quirk for blockquotes, this line should already be checked by that rule
+    if (state.sCount[nextLine] < 0) { continue; }
+
+    // Some tags can terminate paragraph without empty line.
+    terminate = false;
+    for (i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+    if (terminate) { break; }
+  }
+
+  if (!level) {
+    // Didn't find valid underline
+    return false;
+  }
+
+  content = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
+
+  state.line = nextLine + 1;
+
+  token          = state.push('heading_open', 'h' + String(level), 1);
+  token.markup   = String.fromCharCode(marker);
+  token.map      = [ startLine, state.line ];
+
+  token          = state.push('inline', '', 0);
+  token.content  = content;
+  token.map      = [ startLine, state.line - 1 ];
+  token.children = [];
+
+  token          = state.push('heading_close', 'h' + String(level), -1);
+  token.markup   = String.fromCharCode(marker);
+
+  state.parentType = oldParentType;
+
+  return true;
+};
+
+var paragraph = function paragraph(state, startLine/*, endLine*/) {
+  var content, terminate, i, l, token, oldParentType,
+      nextLine = startLine + 1,
+      terminatorRules = state.md.block.ruler.getRules('paragraph'),
+      endLine = state.lineMax;
+
+  oldParentType = state.parentType;
+  state.parentType = 'paragraph';
+
+  // jump line-by-line until empty one or EOF
+  for (; nextLine < endLine && !state.isEmpty(nextLine); nextLine++) {
+    // this would be a code block normally, but after paragraph
+    // it's considered a lazy continuation regardless of what's there
+    if (state.sCount[nextLine] - state.blkIndent > 3) { continue; }
+
+    // quirk for blockquotes, this line should already be checked by that rule
+    if (state.sCount[nextLine] < 0) { continue; }
+
+    // Some tags can terminate paragraph without empty line.
+    terminate = false;
+    for (i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+    if (terminate) { break; }
+  }
+
+  content = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
+
+  state.line = nextLine;
+
+  token          = state.push('paragraph_open', 'p', 1);
+  token.map      = [ startLine, state.line ];
+
+  token          = state.push('inline', '', 0);
+  token.content  = content;
+  token.map      = [ startLine, state.line ];
+  token.children = [];
+
+  token          = state.push('paragraph_close', 'p', -1);
+
+  state.parentType = oldParentType;
+
+  return true;
+};
+
+var Token$1 = token;
+var isSpace$4 = utils$1.isSpace;
+
+
+function StateBlock(src, md, env, tokens) {
+  var ch, s, start, pos, len, indent, offset, indent_found;
+
+  this.src = src;
+
+  // link to parser instance
+  this.md     = md;
+
+  this.env = env;
+
+  //
+  // Internal state vartiables
+  //
+
+  this.tokens = tokens;
+
+  this.bMarks = [];  // line begin offsets for fast jumps
+  this.eMarks = [];  // line end offsets for fast jumps
+  this.tShift = [];  // offsets of the first non-space characters (tabs not expanded)
+  this.sCount = [];  // indents for each line (tabs expanded)
+
+  // An amount of virtual spaces (tabs expanded) between beginning
+  // of each line (bMarks) and real beginning of that line.
+  //
+  // It exists only as a hack because blockquotes override bMarks
+  // losing information in the process.
+  //
+  // It's used only when expanding tabs, you can think about it as
+  // an initial tab length, e.g. bsCount=21 applied to string `\t123`
+  // means first tab should be expanded to 4-21%4 === 3 spaces.
+  //
+  this.bsCount = [];
+
+  // block parser variables
+  this.blkIndent  = 0; // required block content indent (for example, if we are
+                       // inside a list, it would be positioned after list marker)
+  this.line       = 0; // line index in src
+  this.lineMax    = 0; // lines count
+  this.tight      = false;  // loose/tight mode for lists
+  this.ddIndent   = -1; // indent of the current dd block (-1 if there isn't any)
+  this.listIndent = -1; // indent of the current list block (-1 if there isn't any)
+
+  // can be 'blockquote', 'list', 'root', 'paragraph' or 'reference'
+  // used in lists to determine if they interrupt a paragraph
+  this.parentType = 'root';
+
+  this.level = 0;
+
+  // renderer
+  this.result = '';
+
+  // Create caches
+  // Generate markers.
+  s = this.src;
+  indent_found = false;
+
+  for (start = pos = indent = offset = 0, len = s.length; pos < len; pos++) {
+    ch = s.charCodeAt(pos);
+
+    if (!indent_found) {
+      if (isSpace$4(ch)) {
+        indent++;
+
+        if (ch === 0x09) {
+          offset += 4 - offset % 4;
+        } else {
+          offset++;
+        }
+        continue;
+      } else {
+        indent_found = true;
+      }
+    }
+
+    if (ch === 0x0A || pos === len - 1) {
+      if (ch !== 0x0A) { pos++; }
+      this.bMarks.push(start);
+      this.eMarks.push(pos);
+      this.tShift.push(indent);
+      this.sCount.push(offset);
+      this.bsCount.push(0);
+
+      indent_found = false;
+      indent = 0;
+      offset = 0;
+      start = pos + 1;
+    }
+  }
+
+  // Push fake entry to simplify cache bounds checks
+  this.bMarks.push(s.length);
+  this.eMarks.push(s.length);
+  this.tShift.push(0);
+  this.sCount.push(0);
+  this.bsCount.push(0);
+
+  this.lineMax = this.bMarks.length - 1; // don't count last fake line
+}
+
+// Push new token to "stream".
+//
+StateBlock.prototype.push = function (type, tag, nesting) {
+  var token = new Token$1(type, tag, nesting);
+  token.block = true;
+
+  if (nesting < 0) this.level--; // closing tag
+  token.level = this.level;
+  if (nesting > 0) this.level++; // opening tag
+
+  this.tokens.push(token);
+  return token;
+};
+
+StateBlock.prototype.isEmpty = function isEmpty(line) {
+  return this.bMarks[line] + this.tShift[line] >= this.eMarks[line];
+};
+
+StateBlock.prototype.skipEmptyLines = function skipEmptyLines(from) {
+  for (var max = this.lineMax; from < max; from++) {
+    if (this.bMarks[from] + this.tShift[from] < this.eMarks[from]) {
+      break;
+    }
+  }
+  return from;
+};
+
+// Skip spaces from given position.
+StateBlock.prototype.skipSpaces = function skipSpaces(pos) {
+  var ch;
+
+  for (var max = this.src.length; pos < max; pos++) {
+    ch = this.src.charCodeAt(pos);
+    if (!isSpace$4(ch)) { break; }
+  }
+  return pos;
+};
+
+// Skip spaces from given position in reverse.
+StateBlock.prototype.skipSpacesBack = function skipSpacesBack(pos, min) {
+  if (pos <= min) { return pos; }
+
+  while (pos > min) {
+    if (!isSpace$4(this.src.charCodeAt(--pos))) { return pos + 1; }
+  }
+  return pos;
+};
+
+// Skip char codes from given position
+StateBlock.prototype.skipChars = function skipChars(pos, code) {
+  for (var max = this.src.length; pos < max; pos++) {
+    if (this.src.charCodeAt(pos) !== code) { break; }
+  }
+  return pos;
+};
+
+// Skip char codes reverse from given position - 1
+StateBlock.prototype.skipCharsBack = function skipCharsBack(pos, code, min) {
+  if (pos <= min) { return pos; }
+
+  while (pos > min) {
+    if (code !== this.src.charCodeAt(--pos)) { return pos + 1; }
+  }
+  return pos;
+};
+
+// cut lines range from source.
+StateBlock.prototype.getLines = function getLines(begin, end, indent, keepLastLF) {
+  var i, lineIndent, ch, first, last, queue, lineStart,
+      line = begin;
+
+  if (begin >= end) {
+    return '';
+  }
+
+  queue = new Array(end - begin);
+
+  for (i = 0; line < end; line++, i++) {
+    lineIndent = 0;
+    lineStart = first = this.bMarks[line];
+
+    if (line + 1 < end || keepLastLF) {
+      // No need for bounds check because we have fake entry on tail.
+      last = this.eMarks[line] + 1;
+    } else {
+      last = this.eMarks[line];
+    }
+
+    while (first < last && lineIndent < indent) {
+      ch = this.src.charCodeAt(first);
+
+      if (isSpace$4(ch)) {
+        if (ch === 0x09) {
+          lineIndent += 4 - (lineIndent + this.bsCount[line]) % 4;
+        } else {
+          lineIndent++;
+        }
+      } else if (first - lineStart < this.tShift[line]) {
+        // patched tShift masked characters to look like spaces (blockquotes, list markers)
+        lineIndent++;
+      } else {
+        break;
+      }
+
+      first++;
+    }
+
+    if (lineIndent > indent) {
+      // partially expanding tabs in code blocks, e.g '\t\tfoobar'
+      // with indent=2 becomes '  \tfoobar'
+      queue[i] = new Array(lineIndent - indent + 1).join(' ') + this.src.slice(first, last);
+    } else {
+      queue[i] = this.src.slice(first, last);
+    }
+  }
+
+  return queue.join('');
+};
+
+// re-export Token class to use in block rules
+StateBlock.prototype.Token = Token$1;
+
+
+var state_block = StateBlock;
+
+/** internal
+ * class ParserBlock
+ *
+ * Block-level tokenizer.
+ **/
+
+
+var Ruler$1           = ruler;
+
+
+var _rules$1 = [
+  // First 2 params - rule name & source. Secondary array - list of rules,
+  // which can be terminated by this one.
+  [ 'table',      table,      [ 'paragraph', 'reference' ] ],
+  [ 'code',       code ],
+  [ 'fence',      fence,      [ 'paragraph', 'reference', 'blockquote', 'list' ] ],
+  [ 'blockquote', blockquote, [ 'paragraph', 'reference', 'blockquote', 'list' ] ],
+  [ 'hr',         hr,         [ 'paragraph', 'reference', 'blockquote', 'list' ] ],
+  [ 'list',       list,       [ 'paragraph', 'reference', 'blockquote' ] ],
+  [ 'reference',  reference ],
+  [ 'html_block', html_block, [ 'paragraph', 'reference', 'blockquote' ] ],
+  [ 'heading',    heading,    [ 'paragraph', 'reference', 'blockquote' ] ],
+  [ 'lheading',   lheading ],
+  [ 'paragraph',  paragraph ]
+];
+
+
+/**
+ * new ParserBlock()
+ **/
+function ParserBlock$1() {
+  /**
+   * ParserBlock#ruler -> Ruler
+   *
+   * [[Ruler]] instance. Keep configuration of block rules.
+   **/
+  this.ruler = new Ruler$1();
+
+  for (var i = 0; i < _rules$1.length; i++) {
+    this.ruler.push(_rules$1[i][0], _rules$1[i][1], { alt: (_rules$1[i][2] || []).slice() });
+  }
+}
+
+
+// Generate tokens for input range
+//
+ParserBlock$1.prototype.tokenize = function (state, startLine, endLine) {
+  var ok, i,
+      rules = this.ruler.getRules(''),
+      len = rules.length,
+      line = startLine,
+      hasEmptyLines = false,
+      maxNesting = state.md.options.maxNesting;
+
+  while (line < endLine) {
+    state.line = line = state.skipEmptyLines(line);
+    if (line >= endLine) { break; }
+
+    // Termination condition for nested calls.
+    // Nested calls currently used for blockquotes & lists
+    if (state.sCount[line] < state.blkIndent) { break; }
+
+    // If nesting level exceeded - skip tail to the end. That's not ordinary
+    // situation and we should not care about content.
+    if (state.level >= maxNesting) {
+      state.line = endLine;
+      break;
+    }
+
+    // Try all possible rules.
+    // On success, rule should:
+    //
+    // - update `state.line`
+    // - update `state.tokens`
+    // - return true
+
+    for (i = 0; i < len; i++) {
+      ok = rules[i](state, line, endLine, false);
+      if (ok) { break; }
+    }
+
+    // set state.tight if we had an empty line before current tag
+    // i.e. latest empty line should not count
+    state.tight = !hasEmptyLines;
+
+    // paragraph might "eat" one newline after it in nested lists
+    if (state.isEmpty(state.line - 1)) {
+      hasEmptyLines = true;
+    }
+
+    line = state.line;
+
+    if (line < endLine && state.isEmpty(line)) {
+      hasEmptyLines = true;
+      line++;
+      state.line = line;
+    }
+  }
+};
+
+
+/**
+ * ParserBlock.parse(str, md, env, outTokens)
+ *
+ * Process input string and push block tokens into `outTokens`
+ **/
+ParserBlock$1.prototype.parse = function (src, md, env, outTokens) {
+  var state;
+
+  if (!src) { return; }
+
+  state = new this.State(src, md, env, outTokens);
+
+  this.tokenize(state, state.line, state.lineMax);
+};
+
+
+ParserBlock$1.prototype.State = state_block;
+
+
+var parser_block = ParserBlock$1;
+
+// Rule to skip pure text
+// '{}$%@~+=:' reserved for extentions
+
+// !, ", #, $, %, &, ', (, ), *, +, ,, -, ., /, :, ;, <, =, >, ?, @, [, \, ], ^, _, `, {, |, }, or ~
+
+// !!!! Don't confuse with "Markdown ASCII Punctuation" chars
+// http://spec.commonmark.org/0.15/#ascii-punctuation-character
+function isTerminatorChar(ch) {
+  switch (ch) {
+    case 0x0A/* \n */:
+    case 0x21/* ! */:
+    case 0x23/* # */:
+    case 0x24/* $ */:
+    case 0x25/* % */:
+    case 0x26/* & */:
+    case 0x2A/* * */:
+    case 0x2B/* + */:
+    case 0x2D/* - */:
+    case 0x3A/* : */:
+    case 0x3C/* < */:
+    case 0x3D/* = */:
+    case 0x3E/* > */:
+    case 0x40/* @ */:
+    case 0x5B/* [ */:
+    case 0x5C/* \ */:
+    case 0x5D/* ] */:
+    case 0x5E/* ^ */:
+    case 0x5F/* _ */:
+    case 0x60/* ` */:
+    case 0x7B/* { */:
+    case 0x7D/* } */:
+    case 0x7E/* ~ */:
+      return true;
+    default:
+      return false;
+  }
+}
+
+var text = function text(state, silent) {
+  var pos = state.pos;
+
+  while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos))) {
+    pos++;
+  }
+
+  if (pos === state.pos) { return false; }
+
+  if (!silent) { state.pending += state.src.slice(state.pos, pos); }
+
+  state.pos = pos;
+
+  return true;
+};
+
+var isSpace$3 = utils$1.isSpace;
+
+
+var newline = function newline(state, silent) {
+  var pmax, max, ws, pos = state.pos;
+
+  if (state.src.charCodeAt(pos) !== 0x0A/* \n */) { return false; }
+
+  pmax = state.pending.length - 1;
+  max = state.posMax;
+
+  // '  \n' -> hardbreak
+  // Lookup in pending chars is bad practice! Don't copy to other rules!
+  // Pending string is stored in concat mode, indexed lookups will cause
+  // convertion to flat mode.
+  if (!silent) {
+    if (pmax >= 0 && state.pending.charCodeAt(pmax) === 0x20) {
+      if (pmax >= 1 && state.pending.charCodeAt(pmax - 1) === 0x20) {
+        // Find whitespaces tail of pending chars.
+        ws = pmax - 1;
+        while (ws >= 1 && state.pending.charCodeAt(ws - 1) === 0x20) ws--;
+
+        state.pending = state.pending.slice(0, ws);
+        state.push('hardbreak', 'br', 0);
+      } else {
+        state.pending = state.pending.slice(0, -1);
+        state.push('softbreak', 'br', 0);
+      }
+
+    } else {
+      state.push('softbreak', 'br', 0);
+    }
+  }
+
+  pos++;
+
+  // skip heading spaces for next line
+  while (pos < max && isSpace$3(state.src.charCodeAt(pos))) { pos++; }
+
+  state.pos = pos;
+  return true;
+};
+
+var isSpace$2 = utils$1.isSpace;
+
+var ESCAPED = [];
+
+for (var i = 0; i < 256; i++) { ESCAPED.push(0); }
+
+'\\!"#$%&\'()*+,./:;<=>?@[]^_`{|}~-'
+  .split('').forEach(function (ch) { ESCAPED[ch.charCodeAt(0)] = 1; });
+
+
+var _escape = function escape(state, silent) {
+  var ch, pos = state.pos, max = state.posMax;
+
+  if (state.src.charCodeAt(pos) !== 0x5C/* \ */) { return false; }
+
+  pos++;
+
+  if (pos < max) {
+    ch = state.src.charCodeAt(pos);
+
+    if (ch < 256 && ESCAPED[ch] !== 0) {
+      if (!silent) { state.pending += state.src[pos]; }
+      state.pos += 2;
+      return true;
+    }
+
+    if (ch === 0x0A) {
+      if (!silent) {
+        state.push('hardbreak', 'br', 0);
+      }
+
+      pos++;
+      // skip leading whitespaces from next line
+      while (pos < max) {
+        ch = state.src.charCodeAt(pos);
+        if (!isSpace$2(ch)) { break; }
+        pos++;
+      }
+
+      state.pos = pos;
+      return true;
+    }
+  }
+
+  if (!silent) { state.pending += '\\'; }
+  state.pos++;
+  return true;
+};
+
+var backticks = function backtick(state, silent) {
+  var start, max, marker, token, matchStart, matchEnd, openerLength, closerLength,
+      pos = state.pos,
+      ch = state.src.charCodeAt(pos);
+
+  if (ch !== 0x60/* ` */) { return false; }
+
+  start = pos;
+  pos++;
+  max = state.posMax;
+
+  // scan marker length
+  while (pos < max && state.src.charCodeAt(pos) === 0x60/* ` */) { pos++; }
+
+  marker = state.src.slice(start, pos);
+  openerLength = marker.length;
+
+  if (state.backticksScanned && (state.backticks[openerLength] || 0) <= start) {
+    if (!silent) state.pending += marker;
+    state.pos += openerLength;
+    return true;
+  }
+
+  matchStart = matchEnd = pos;
+
+  // Nothing found in the cache, scan until the end of the line (or until marker is found)
+  while ((matchStart = state.src.indexOf('`', matchEnd)) !== -1) {
+    matchEnd = matchStart + 1;
+
+    // scan marker length
+    while (matchEnd < max && state.src.charCodeAt(matchEnd) === 0x60/* ` */) { matchEnd++; }
+
+    closerLength = matchEnd - matchStart;
+
+    if (closerLength === openerLength) {
+      // Found matching closer length.
+      if (!silent) {
+        token     = state.push('code_inline', 'code', 0);
+        token.markup  = marker;
+        token.content = state.src.slice(pos, matchStart)
+          .replace(/\n/g, ' ')
+          .replace(/^ (.+) $/, '$1');
+      }
+      state.pos = matchEnd;
+      return true;
+    }
+
+    // Some different length found, put it in cache as upper limit of where closer can be found
+    state.backticks[closerLength] = matchStart;
+  }
+
+  // Scanned through the end, didn't find anything
+  state.backticksScanned = true;
+
+  if (!silent) state.pending += marker;
+  state.pos += openerLength;
+  return true;
+};
+
+var strikethrough = {};
+
+// Insert each marker as a separate text token, and add it to delimiter list
+//
+strikethrough.tokenize = function strikethrough(state, silent) {
+  var i, scanned, token, len, ch,
+      start = state.pos,
+      marker = state.src.charCodeAt(start);
+
+  if (silent) { return false; }
+
+  if (marker !== 0x7E/* ~ */) { return false; }
+
+  scanned = state.scanDelims(state.pos, true);
+  len = scanned.length;
+  ch = String.fromCharCode(marker);
+
+  if (len < 2) { return false; }
+
+  if (len % 2) {
+    token         = state.push('text', '', 0);
+    token.content = ch;
+    len--;
+  }
+
+  for (i = 0; i < len; i += 2) {
+    token         = state.push('text', '', 0);
+    token.content = ch + ch;
+
+    state.delimiters.push({
+      marker: marker,
+      length: 0,     // disable "rule of 3" length checks meant for emphasis
+      token:  state.tokens.length - 1,
+      end:    -1,
+      open:   scanned.can_open,
+      close:  scanned.can_close
+    });
+  }
+
+  state.pos += scanned.length;
+
+  return true;
+};
+
+
+function postProcess$1(state, delimiters) {
+  var i, j,
+      startDelim,
+      endDelim,
+      token,
+      loneMarkers = [],
+      max = delimiters.length;
+
+  for (i = 0; i < max; i++) {
+    startDelim = delimiters[i];
+
+    if (startDelim.marker !== 0x7E/* ~ */) {
+      continue;
+    }
+
+    if (startDelim.end === -1) {
+      continue;
+    }
+
+    endDelim = delimiters[startDelim.end];
+
+    token         = state.tokens[startDelim.token];
+    token.type    = 's_open';
+    token.tag     = 's';
+    token.nesting = 1;
+    token.markup  = '~~';
+    token.content = '';
+
+    token         = state.tokens[endDelim.token];
+    token.type    = 's_close';
+    token.tag     = 's';
+    token.nesting = -1;
+    token.markup  = '~~';
+    token.content = '';
+
+    if (state.tokens[endDelim.token - 1].type === 'text' &&
+        state.tokens[endDelim.token - 1].content === '~') {
+
+      loneMarkers.push(endDelim.token - 1);
+    }
+  }
+
+  // If a marker sequence has an odd number of characters, it's splitted
+  // like this: `~~~~~` -> `~` + `~~` + `~~`, leaving one marker at the
+  // start of the sequence.
+  //
+  // So, we have to move all those markers after subsequent s_close tags.
+  //
+  while (loneMarkers.length) {
+    i = loneMarkers.pop();
+    j = i + 1;
+
+    while (j < state.tokens.length && state.tokens[j].type === 's_close') {
+      j++;
+    }
+
+    j--;
+
+    if (i !== j) {
+      token = state.tokens[j];
+      state.tokens[j] = state.tokens[i];
+      state.tokens[i] = token;
+    }
+  }
+}
+
+
+// Walk through delimiter list and replace text tokens with tags
+//
+strikethrough.postProcess = function strikethrough(state) {
+  var curr,
+      tokens_meta = state.tokens_meta,
+      max = state.tokens_meta.length;
+
+  postProcess$1(state, state.delimiters);
+
+  for (curr = 0; curr < max; curr++) {
+    if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
+      postProcess$1(state, tokens_meta[curr].delimiters);
+    }
+  }
+};
+
+var emphasis = {};
+
+// Insert each marker as a separate text token, and add it to delimiter list
+//
+emphasis.tokenize = function emphasis(state, silent) {
+  var i, scanned, token,
+      start = state.pos,
+      marker = state.src.charCodeAt(start);
+
+  if (silent) { return false; }
+
+  if (marker !== 0x5F /* _ */ && marker !== 0x2A /* * */) { return false; }
+
+  scanned = state.scanDelims(state.pos, marker === 0x2A);
+
+  for (i = 0; i < scanned.length; i++) {
+    token         = state.push('text', '', 0);
+    token.content = String.fromCharCode(marker);
+
+    state.delimiters.push({
+      // Char code of the starting marker (number).
+      //
+      marker: marker,
+
+      // Total length of these series of delimiters.
+      //
+      length: scanned.length,
+
+      // A position of the token this delimiter corresponds to.
+      //
+      token:  state.tokens.length - 1,
+
+      // If this delimiter is matched as a valid opener, `end` will be
+      // equal to its position, otherwise it's `-1`.
+      //
+      end:    -1,
+
+      // Boolean flags that determine if this delimiter could open or close
+      // an emphasis.
+      //
+      open:   scanned.can_open,
+      close:  scanned.can_close
+    });
+  }
+
+  state.pos += scanned.length;
+
+  return true;
+};
+
+
+function postProcess(state, delimiters) {
+  var i,
+      startDelim,
+      endDelim,
+      token,
+      ch,
+      isStrong,
+      max = delimiters.length;
+
+  for (i = max - 1; i >= 0; i--) {
+    startDelim = delimiters[i];
+
+    if (startDelim.marker !== 0x5F/* _ */ && startDelim.marker !== 0x2A/* * */) {
+      continue;
+    }
+
+    // Process only opening markers
+    if (startDelim.end === -1) {
+      continue;
+    }
+
+    endDelim = delimiters[startDelim.end];
+
+    // If the previous delimiter has the same marker and is adjacent to this one,
+    // merge those into one strong delimiter.
+    //
+    // `<em><em>whatever</em></em>` -> `<strong>whatever</strong>`
+    //
+    isStrong = i > 0 &&
+               delimiters[i - 1].end === startDelim.end + 1 &&
+               // check that first two markers match and adjacent
+               delimiters[i - 1].marker === startDelim.marker &&
+               delimiters[i - 1].token === startDelim.token - 1 &&
+               // check that last two markers are adjacent (we can safely assume they match)
+               delimiters[startDelim.end + 1].token === endDelim.token + 1;
+
+    ch = String.fromCharCode(startDelim.marker);
+
+    token         = state.tokens[startDelim.token];
+    token.type    = isStrong ? 'strong_open' : 'em_open';
+    token.tag     = isStrong ? 'strong' : 'em';
+    token.nesting = 1;
+    token.markup  = isStrong ? ch + ch : ch;
+    token.content = '';
+
+    token         = state.tokens[endDelim.token];
+    token.type    = isStrong ? 'strong_close' : 'em_close';
+    token.tag     = isStrong ? 'strong' : 'em';
+    token.nesting = -1;
+    token.markup  = isStrong ? ch + ch : ch;
+    token.content = '';
+
+    if (isStrong) {
+      state.tokens[delimiters[i - 1].token].content = '';
+      state.tokens[delimiters[startDelim.end + 1].token].content = '';
+      i--;
+    }
+  }
+}
+
+
+// Walk through delimiter list and replace text tokens with tags
+//
+emphasis.postProcess = function emphasis(state) {
+  var curr,
+      tokens_meta = state.tokens_meta,
+      max = state.tokens_meta.length;
+
+  postProcess(state, state.delimiters);
+
+  for (curr = 0; curr < max; curr++) {
+    if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
+      postProcess(state, tokens_meta[curr].delimiters);
+    }
+  }
+};
+
+var normalizeReference$1   = utils$1.normalizeReference;
+var isSpace$1              = utils$1.isSpace;
+
+
+var link = function link(state, silent) {
+  var attrs,
+      code,
+      label,
+      labelEnd,
+      labelStart,
+      pos,
+      res,
+      ref,
+      token,
+      href = '',
+      title = '',
+      oldPos = state.pos,
+      max = state.posMax,
+      start = state.pos,
+      parseReference = true;
+
+  if (state.src.charCodeAt(state.pos) !== 0x5B/* [ */) { return false; }
+
+  labelStart = state.pos + 1;
+  labelEnd = state.md.helpers.parseLinkLabel(state, state.pos, true);
+
+  // parser failed to find ']', so it's not a valid link
+  if (labelEnd < 0) { return false; }
+
+  pos = labelEnd + 1;
+  if (pos < max && state.src.charCodeAt(pos) === 0x28/* ( */) {
+    //
+    // Inline link
+    //
+
+    // might have found a valid shortcut link, disable reference parsing
+    parseReference = false;
+
+    // [link](  <href>  "title"  )
+    //        ^^ skipping these spaces
+    pos++;
+    for (; pos < max; pos++) {
+      code = state.src.charCodeAt(pos);
+      if (!isSpace$1(code) && code !== 0x0A) { break; }
+    }
+    if (pos >= max) { return false; }
+
+    // [link](  <href>  "title"  )
+    //          ^^^^^^ parsing link destination
+    start = pos;
+    res = state.md.helpers.parseLinkDestination(state.src, pos, state.posMax);
+    if (res.ok) {
+      href = state.md.normalizeLink(res.str);
+      if (state.md.validateLink(href)) {
+        pos = res.pos;
+      } else {
+        href = '';
+      }
+
+      // [link](  <href>  "title"  )
+      //                ^^ skipping these spaces
+      start = pos;
+      for (; pos < max; pos++) {
+        code = state.src.charCodeAt(pos);
+        if (!isSpace$1(code) && code !== 0x0A) { break; }
+      }
+
+      // [link](  <href>  "title"  )
+      //                  ^^^^^^^ parsing link title
+      res = state.md.helpers.parseLinkTitle(state.src, pos, state.posMax);
+      if (pos < max && start !== pos && res.ok) {
+        title = res.str;
+        pos = res.pos;
+
+        // [link](  <href>  "title"  )
+        //                         ^^ skipping these spaces
+        for (; pos < max; pos++) {
+          code = state.src.charCodeAt(pos);
+          if (!isSpace$1(code) && code !== 0x0A) { break; }
+        }
+      }
+    }
+
+    if (pos >= max || state.src.charCodeAt(pos) !== 0x29/* ) */) {
+      // parsing a valid shortcut link failed, fallback to reference
+      parseReference = true;
+    }
+    pos++;
+  }
+
+  if (parseReference) {
+    //
+    // Link reference
+    //
+    if (typeof state.env.references === 'undefined') { return false; }
+
+    if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
+      start = pos + 1;
+      pos = state.md.helpers.parseLinkLabel(state, pos);
+      if (pos >= 0) {
+        label = state.src.slice(start, pos++);
+      } else {
+        pos = labelEnd + 1;
+      }
+    } else {
+      pos = labelEnd + 1;
+    }
+
+    // covers label === '' and label === undefined
+    // (collapsed reference link and shortcut reference link respectively)
+    if (!label) { label = state.src.slice(labelStart, labelEnd); }
+
+    ref = state.env.references[normalizeReference$1(label)];
+    if (!ref) {
+      state.pos = oldPos;
+      return false;
+    }
+    href = ref.href;
+    title = ref.title;
+  }
+
+  //
+  // We found the end of the link, and know for a fact it's a valid link;
+  // so all that's left to do is to call tokenizer.
+  //
+  if (!silent) {
+    state.pos = labelStart;
+    state.posMax = labelEnd;
+
+    token        = state.push('link_open', 'a', 1);
+    token.attrs  = attrs = [ [ 'href', href ] ];
+    if (title) {
+      attrs.push([ 'title', title ]);
+    }
+
+    state.md.inline.tokenize(state);
+
+    token        = state.push('link_close', 'a', -1);
+  }
+
+  state.pos = pos;
+  state.posMax = max;
+  return true;
+};
+
+var normalizeReference   = utils$1.normalizeReference;
+var isSpace              = utils$1.isSpace;
+
+
+var image = function image(state, silent) {
+  var attrs,
+      code,
+      content,
+      label,
+      labelEnd,
+      labelStart,
+      pos,
+      ref,
+      res,
+      title,
+      token,
+      tokens,
+      start,
+      href = '',
+      oldPos = state.pos,
+      max = state.posMax;
+
+  if (state.src.charCodeAt(state.pos) !== 0x21/* ! */) { return false; }
+  if (state.src.charCodeAt(state.pos + 1) !== 0x5B/* [ */) { return false; }
+
+  labelStart = state.pos + 2;
+  labelEnd = state.md.helpers.parseLinkLabel(state, state.pos + 1, false);
+
+  // parser failed to find ']', so it's not a valid link
+  if (labelEnd < 0) { return false; }
+
+  pos = labelEnd + 1;
+  if (pos < max && state.src.charCodeAt(pos) === 0x28/* ( */) {
+    //
+    // Inline link
+    //
+
+    // [link](  <href>  "title"  )
+    //        ^^ skipping these spaces
+    pos++;
+    for (; pos < max; pos++) {
+      code = state.src.charCodeAt(pos);
+      if (!isSpace(code) && code !== 0x0A) { break; }
+    }
+    if (pos >= max) { return false; }
+
+    // [link](  <href>  "title"  )
+    //          ^^^^^^ parsing link destination
+    start = pos;
+    res = state.md.helpers.parseLinkDestination(state.src, pos, state.posMax);
+    if (res.ok) {
+      href = state.md.normalizeLink(res.str);
+      if (state.md.validateLink(href)) {
+        pos = res.pos;
+      } else {
+        href = '';
+      }
+    }
+
+    // [link](  <href>  "title"  )
+    //                ^^ skipping these spaces
+    start = pos;
+    for (; pos < max; pos++) {
+      code = state.src.charCodeAt(pos);
+      if (!isSpace(code) && code !== 0x0A) { break; }
+    }
+
+    // [link](  <href>  "title"  )
+    //                  ^^^^^^^ parsing link title
+    res = state.md.helpers.parseLinkTitle(state.src, pos, state.posMax);
+    if (pos < max && start !== pos && res.ok) {
+      title = res.str;
+      pos = res.pos;
+
+      // [link](  <href>  "title"  )
+      //                         ^^ skipping these spaces
+      for (; pos < max; pos++) {
+        code = state.src.charCodeAt(pos);
+        if (!isSpace(code) && code !== 0x0A) { break; }
+      }
+    } else {
+      title = '';
+    }
+
+    if (pos >= max || state.src.charCodeAt(pos) !== 0x29/* ) */) {
+      state.pos = oldPos;
+      return false;
+    }
+    pos++;
+  } else {
+    //
+    // Link reference
+    //
+    if (typeof state.env.references === 'undefined') { return false; }
+
+    if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
+      start = pos + 1;
+      pos = state.md.helpers.parseLinkLabel(state, pos);
+      if (pos >= 0) {
+        label = state.src.slice(start, pos++);
+      } else {
+        pos = labelEnd + 1;
+      }
+    } else {
+      pos = labelEnd + 1;
+    }
+
+    // covers label === '' and label === undefined
+    // (collapsed reference link and shortcut reference link respectively)
+    if (!label) { label = state.src.slice(labelStart, labelEnd); }
+
+    ref = state.env.references[normalizeReference(label)];
+    if (!ref) {
+      state.pos = oldPos;
+      return false;
+    }
+    href = ref.href;
+    title = ref.title;
+  }
+
+  //
+  // We found the end of the link, and know for a fact it's a valid link;
+  // so all that's left to do is to call tokenizer.
+  //
+  if (!silent) {
+    content = state.src.slice(labelStart, labelEnd);
+
+    state.md.inline.parse(
+      content,
+      state.md,
+      state.env,
+      tokens = []
+    );
+
+    token          = state.push('image', 'img', 0);
+    token.attrs    = attrs = [ [ 'src', href ], [ 'alt', '' ] ];
+    token.children = tokens;
+    token.content  = content;
+
+    if (title) {
+      attrs.push([ 'title', title ]);
+    }
+  }
+
+  state.pos = pos;
+  state.posMax = max;
+  return true;
+};
+
+/*eslint max-len:0*/
+var EMAIL_RE    = /^([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)$/;
+var AUTOLINK_RE = /^([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)$/;
+
+
+var autolink = function autolink(state, silent) {
+  var url, fullUrl, token, ch, start, max,
+      pos = state.pos;
+
+  if (state.src.charCodeAt(pos) !== 0x3C/* < */) { return false; }
+
+  start = state.pos;
+  max = state.posMax;
+
+  for (;;) {
+    if (++pos >= max) return false;
+
+    ch = state.src.charCodeAt(pos);
+
+    if (ch === 0x3C /* < */) return false;
+    if (ch === 0x3E /* > */) break;
+  }
+
+  url = state.src.slice(start + 1, pos);
+
+  if (AUTOLINK_RE.test(url)) {
+    fullUrl = state.md.normalizeLink(url);
+    if (!state.md.validateLink(fullUrl)) { return false; }
+
+    if (!silent) {
+      token         = state.push('link_open', 'a', 1);
+      token.attrs   = [ [ 'href', fullUrl ] ];
+      token.markup  = 'autolink';
+      token.info    = 'auto';
+
+      token         = state.push('text', '', 0);
+      token.content = state.md.normalizeLinkText(url);
+
+      token         = state.push('link_close', 'a', -1);
+      token.markup  = 'autolink';
+      token.info    = 'auto';
+    }
+
+    state.pos += url.length + 2;
+    return true;
+  }
+
+  if (EMAIL_RE.test(url)) {
+    fullUrl = state.md.normalizeLink('mailto:' + url);
+    if (!state.md.validateLink(fullUrl)) { return false; }
+
+    if (!silent) {
+      token         = state.push('link_open', 'a', 1);
+      token.attrs   = [ [ 'href', fullUrl ] ];
+      token.markup  = 'autolink';
+      token.info    = 'auto';
+
+      token         = state.push('text', '', 0);
+      token.content = state.md.normalizeLinkText(url);
+
+      token         = state.push('link_close', 'a', -1);
+      token.markup  = 'autolink';
+      token.info    = 'auto';
+    }
+
+    state.pos += url.length + 2;
+    return true;
+  }
+
+  return false;
+};
+
+var HTML_TAG_RE = html_re.HTML_TAG_RE;
+
+
+function isLetter(ch) {
+  /*eslint no-bitwise:0*/
+  var lc = ch | 0x20; // to lower case
+  return (lc >= 0x61/* a */) && (lc <= 0x7a/* z */);
+}
+
+
+var html_inline = function html_inline(state, silent) {
+  var ch, match, max, token,
+      pos = state.pos;
+
+  if (!state.md.options.html) { return false; }
+
+  // Check start
+  max = state.posMax;
+  if (state.src.charCodeAt(pos) !== 0x3C/* < */ ||
+      pos + 2 >= max) {
+    return false;
+  }
+
+  // Quick fail on second char
+  ch = state.src.charCodeAt(pos + 1);
+  if (ch !== 0x21/* ! */ &&
+      ch !== 0x3F/* ? */ &&
+      ch !== 0x2F/* / */ &&
+      !isLetter(ch)) {
+    return false;
+  }
+
+  match = state.src.slice(pos).match(HTML_TAG_RE);
+  if (!match) { return false; }
+
+  if (!silent) {
+    token         = state.push('html_inline', '', 0);
+    token.content = state.src.slice(pos, pos + match[0].length);
+  }
+  state.pos += match[0].length;
+  return true;
+};
+
+var entities          = entities$1.exports;
+var has               = utils$1.has;
+var isValidEntityCode = utils$1.isValidEntityCode;
+var fromCodePoint     = utils$1.fromCodePoint;
+
+
+var DIGITAL_RE = /^&#((?:x[a-f0-9]{1,6}|[0-9]{1,7}));/i;
+var NAMED_RE   = /^&([a-z][a-z0-9]{1,31});/i;
+
+
+var entity = function entity(state, silent) {
+  var ch, code, match, pos = state.pos, max = state.posMax;
+
+  if (state.src.charCodeAt(pos) !== 0x26/* & */) { return false; }
+
+  if (pos + 1 < max) {
+    ch = state.src.charCodeAt(pos + 1);
+
+    if (ch === 0x23 /* # */) {
+      match = state.src.slice(pos).match(DIGITAL_RE);
+      if (match) {
+        if (!silent) {
+          code = match[1][0].toLowerCase() === 'x' ? parseInt(match[1].slice(1), 16) : parseInt(match[1], 10);
+          state.pending += isValidEntityCode(code) ? fromCodePoint(code) : fromCodePoint(0xFFFD);
+        }
+        state.pos += match[0].length;
+        return true;
+      }
+    } else {
+      match = state.src.slice(pos).match(NAMED_RE);
+      if (match) {
+        if (has(entities, match[1])) {
+          if (!silent) { state.pending += entities[match[1]]; }
+          state.pos += match[0].length;
+          return true;
+        }
+      }
+    }
+  }
+
+  if (!silent) { state.pending += '&'; }
+  state.pos++;
+  return true;
+};
+
+function processDelimiters(state, delimiters) {
+  var closerIdx, openerIdx, closer, opener, minOpenerIdx, newMinOpenerIdx,
+      isOddMatch, lastJump,
+      openersBottom = {},
+      max = delimiters.length;
+
+  if (!max) return;
+
+  // headerIdx is the first delimiter of the current (where closer is) delimiter run
+  var headerIdx = 0;
+  var lastTokenIdx = -2; // needs any value lower than -1
+  var jumps = [];
+
+  for (closerIdx = 0; closerIdx < max; closerIdx++) {
+    closer = delimiters[closerIdx];
+
+    jumps.push(0);
+
+    // markers belong to same delimiter run if:
+    //  - they have adjacent tokens
+    //  - AND markers are the same
+    //
+    if (delimiters[headerIdx].marker !== closer.marker || lastTokenIdx !== closer.token - 1) {
+      headerIdx = closerIdx;
+    }
+
+    lastTokenIdx = closer.token;
+
+    // Length is only used for emphasis-specific "rule of 3",
+    // if it's not defined (in strikethrough or 3rd party plugins),
+    // we can default it to 0 to disable those checks.
+    //
+    closer.length = closer.length || 0;
+
+    if (!closer.close) continue;
+
+    // Previously calculated lower bounds (previous fails)
+    // for each marker, each delimiter length modulo 3,
+    // and for whether this closer can be an opener;
+    // https://github.com/commonmark/cmark/commit/34250e12ccebdc6372b8b49c44fab57c72443460
+    if (!openersBottom.hasOwnProperty(closer.marker)) {
+      openersBottom[closer.marker] = [ -1, -1, -1, -1, -1, -1 ];
+    }
+
+    minOpenerIdx = openersBottom[closer.marker][(closer.open ? 3 : 0) + (closer.length % 3)];
+
+    openerIdx = headerIdx - jumps[headerIdx] - 1;
+
+    newMinOpenerIdx = openerIdx;
+
+    for (; openerIdx > minOpenerIdx; openerIdx -= jumps[openerIdx] + 1) {
+      opener = delimiters[openerIdx];
+
+      if (opener.marker !== closer.marker) continue;
+
+      if (opener.open && opener.end < 0) {
+
+        isOddMatch = false;
+
+        // from spec:
+        //
+        // If one of the delimiters can both open and close emphasis, then the
+        // sum of the lengths of the delimiter runs containing the opening and
+        // closing delimiters must not be a multiple of 3 unless both lengths
+        // are multiples of 3.
+        //
+        if (opener.close || closer.open) {
+          if ((opener.length + closer.length) % 3 === 0) {
+            if (opener.length % 3 !== 0 || closer.length % 3 !== 0) {
+              isOddMatch = true;
+            }
+          }
+        }
+
+        if (!isOddMatch) {
+          // If previous delimiter cannot be an opener, we can safely skip
+          // the entire sequence in future checks. This is required to make
+          // sure algorithm has linear complexity (see *_*_*_*_*_... case).
+          //
+          lastJump = openerIdx > 0 && !delimiters[openerIdx - 1].open ?
+            jumps[openerIdx - 1] + 1 :
+            0;
+
+          jumps[closerIdx] = closerIdx - openerIdx + lastJump;
+          jumps[openerIdx] = lastJump;
+
+          closer.open  = false;
+          opener.end   = closerIdx;
+          opener.close = false;
+          newMinOpenerIdx = -1;
+          // treat next token as start of run,
+          // it optimizes skips in **<...>**a**<...>** pathological case
+          lastTokenIdx = -2;
+          break;
+        }
+      }
+    }
+
+    if (newMinOpenerIdx !== -1) {
+      // If match for this delimiter run failed, we want to set lower bound for
+      // future lookups. This is required to make sure algorithm has linear
+      // complexity.
+      //
+      // See details here:
+      // https://github.com/commonmark/cmark/issues/178#issuecomment-270417442
+      //
+      openersBottom[closer.marker][(closer.open ? 3 : 0) + ((closer.length || 0) % 3)] = newMinOpenerIdx;
+    }
+  }
+}
+
+
+var balance_pairs = function link_pairs(state) {
+  var curr,
+      tokens_meta = state.tokens_meta,
+      max = state.tokens_meta.length;
+
+  processDelimiters(state, state.delimiters);
+
+  for (curr = 0; curr < max; curr++) {
+    if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
+      processDelimiters(state, tokens_meta[curr].delimiters);
+    }
+  }
+};
+
+var text_collapse = function text_collapse(state) {
+  var curr, last,
+      level = 0,
+      tokens = state.tokens,
+      max = state.tokens.length;
+
+  for (curr = last = 0; curr < max; curr++) {
+    // re-calculate levels after emphasis/strikethrough turns some text nodes
+    // into opening/closing tags
+    if (tokens[curr].nesting < 0) level--; // closing tag
+    tokens[curr].level = level;
+    if (tokens[curr].nesting > 0) level++; // opening tag
+
+    if (tokens[curr].type === 'text' &&
+        curr + 1 < max &&
+        tokens[curr + 1].type === 'text') {
+
+      // collapse two adjacent text nodes
+      tokens[curr + 1].content = tokens[curr].content + tokens[curr + 1].content;
+    } else {
+      if (curr !== last) { tokens[last] = tokens[curr]; }
+
+      last++;
+    }
+  }
+
+  if (curr !== last) {
+    tokens.length = last;
+  }
+};
+
+var Token          = token;
+var isWhiteSpace   = utils$1.isWhiteSpace;
+var isPunctChar    = utils$1.isPunctChar;
+var isMdAsciiPunct = utils$1.isMdAsciiPunct;
+
+
+function StateInline(src, md, env, outTokens) {
+  this.src = src;
+  this.env = env;
+  this.md = md;
+  this.tokens = outTokens;
+  this.tokens_meta = Array(outTokens.length);
+
+  this.pos = 0;
+  this.posMax = this.src.length;
+  this.level = 0;
+  this.pending = '';
+  this.pendingLevel = 0;
+
+  // Stores { start: end } pairs. Useful for backtrack
+  // optimization of pairs parse (emphasis, strikes).
+  this.cache = {};
+
+  // List of emphasis-like delimiters for current tag
+  this.delimiters = [];
+
+  // Stack of delimiter lists for upper level tags
+  this._prev_delimiters = [];
+
+  // backtick length => last seen position
+  this.backticks = {};
+  this.backticksScanned = false;
+}
+
+
+// Flush pending text
+//
+StateInline.prototype.pushPending = function () {
+  var token = new Token('text', '', 0);
+  token.content = this.pending;
+  token.level = this.pendingLevel;
+  this.tokens.push(token);
+  this.pending = '';
+  return token;
+};
+
+
+// Push new token to "stream".
+// If pending text exists - flush it as text token
+//
+StateInline.prototype.push = function (type, tag, nesting) {
+  if (this.pending) {
+    this.pushPending();
+  }
+
+  var token = new Token(type, tag, nesting);
+  var token_meta = null;
+
+  if (nesting < 0) {
+    // closing tag
+    this.level--;
+    this.delimiters = this._prev_delimiters.pop();
+  }
+
+  token.level = this.level;
+
+  if (nesting > 0) {
+    // opening tag
+    this.level++;
+    this._prev_delimiters.push(this.delimiters);
+    this.delimiters = [];
+    token_meta = { delimiters: this.delimiters };
+  }
+
+  this.pendingLevel = this.level;
+  this.tokens.push(token);
+  this.tokens_meta.push(token_meta);
+  return token;
+};
+
+
+// Scan a sequence of emphasis-like markers, and determine whether
+// it can start an emphasis sequence or end an emphasis sequence.
+//
+//  - start - position to scan from (it should point at a valid marker);
+//  - canSplitWord - determine if these markers can be found inside a word
+//
+StateInline.prototype.scanDelims = function (start, canSplitWord) {
+  var pos = start, lastChar, nextChar, count, can_open, can_close,
+      isLastWhiteSpace, isLastPunctChar,
+      isNextWhiteSpace, isNextPunctChar,
+      left_flanking = true,
+      right_flanking = true,
+      max = this.posMax,
+      marker = this.src.charCodeAt(start);
+
+  // treat beginning of the line as a whitespace
+  lastChar = start > 0 ? this.src.charCodeAt(start - 1) : 0x20;
+
+  while (pos < max && this.src.charCodeAt(pos) === marker) { pos++; }
+
+  count = pos - start;
+
+  // treat end of the line as a whitespace
+  nextChar = pos < max ? this.src.charCodeAt(pos) : 0x20;
+
+  isLastPunctChar = isMdAsciiPunct(lastChar) || isPunctChar(String.fromCharCode(lastChar));
+  isNextPunctChar = isMdAsciiPunct(nextChar) || isPunctChar(String.fromCharCode(nextChar));
+
+  isLastWhiteSpace = isWhiteSpace(lastChar);
+  isNextWhiteSpace = isWhiteSpace(nextChar);
+
+  if (isNextWhiteSpace) {
+    left_flanking = false;
+  } else if (isNextPunctChar) {
+    if (!(isLastWhiteSpace || isLastPunctChar)) {
+      left_flanking = false;
+    }
+  }
+
+  if (isLastWhiteSpace) {
+    right_flanking = false;
+  } else if (isLastPunctChar) {
+    if (!(isNextWhiteSpace || isNextPunctChar)) {
+      right_flanking = false;
+    }
+  }
+
+  if (!canSplitWord) {
+    can_open  = left_flanking  && (!right_flanking || isLastPunctChar);
+    can_close = right_flanking && (!left_flanking  || isNextPunctChar);
+  } else {
+    can_open  = left_flanking;
+    can_close = right_flanking;
+  }
+
+  return {
+    can_open:  can_open,
+    can_close: can_close,
+    length:    count
+  };
+};
+
+
+// re-export Token class to use in block rules
+StateInline.prototype.Token = Token;
+
+
+var state_inline = StateInline;
+
+/** internal
+ * class ParserInline
+ *
+ * Tokenizes paragraph content.
+ **/
+
+
+var Ruler           = ruler;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Parser rules
+
+var _rules = [
+  [ 'text',            text ],
+  [ 'newline',         newline ],
+  [ 'escape',          _escape ],
+  [ 'backticks',       backticks ],
+  [ 'strikethrough',   strikethrough.tokenize ],
+  [ 'emphasis',        emphasis.tokenize ],
+  [ 'link',            link ],
+  [ 'image',           image ],
+  [ 'autolink',        autolink ],
+  [ 'html_inline',     html_inline ],
+  [ 'entity',          entity ]
+];
+
+var _rules2 = [
+  [ 'balance_pairs',   balance_pairs ],
+  [ 'strikethrough',   strikethrough.postProcess ],
+  [ 'emphasis',        emphasis.postProcess ],
+  [ 'text_collapse',   text_collapse ]
+];
+
+
+/**
+ * new ParserInline()
+ **/
+function ParserInline$1() {
+  var i;
+
+  /**
+   * ParserInline#ruler -> Ruler
+   *
+   * [[Ruler]] instance. Keep configuration of inline rules.
+   **/
+  this.ruler = new Ruler();
+
+  for (i = 0; i < _rules.length; i++) {
+    this.ruler.push(_rules[i][0], _rules[i][1]);
+  }
+
+  /**
+   * ParserInline#ruler2 -> Ruler
+   *
+   * [[Ruler]] instance. Second ruler used for post-processing
+   * (e.g. in emphasis-like rules).
+   **/
+  this.ruler2 = new Ruler();
+
+  for (i = 0; i < _rules2.length; i++) {
+    this.ruler2.push(_rules2[i][0], _rules2[i][1]);
+  }
+}
+
+
+// Skip single token by running all rules in validation mode;
+// returns `true` if any rule reported success
+//
+ParserInline$1.prototype.skipToken = function (state) {
+  var ok, i, pos = state.pos,
+      rules = this.ruler.getRules(''),
+      len = rules.length,
+      maxNesting = state.md.options.maxNesting,
+      cache = state.cache;
+
+
+  if (typeof cache[pos] !== 'undefined') {
+    state.pos = cache[pos];
+    return;
+  }
+
+  if (state.level < maxNesting) {
+    for (i = 0; i < len; i++) {
+      // Increment state.level and decrement it later to limit recursion.
+      // It's harmless to do here, because no tokens are created. But ideally,
+      // we'd need a separate private state variable for this purpose.
+      //
+      state.level++;
+      ok = rules[i](state, true);
+      state.level--;
+
+      if (ok) { break; }
+    }
+  } else {
+    // Too much nesting, just skip until the end of the paragraph.
+    //
+    // NOTE: this will cause links to behave incorrectly in the following case,
+    //       when an amount of `[` is exactly equal to `maxNesting + 1`:
+    //
+    //       [[[[[[[[[[[[[[[[[[[[[foo]()
+    //
+    // TODO: remove this workaround when CM standard will allow nested links
+    //       (we can replace it by preventing links from being parsed in
+    //       validation mode)
+    //
+    state.pos = state.posMax;
+  }
+
+  if (!ok) { state.pos++; }
+  cache[pos] = state.pos;
+};
+
+
+// Generate tokens for input range
+//
+ParserInline$1.prototype.tokenize = function (state) {
+  var ok, i,
+      rules = this.ruler.getRules(''),
+      len = rules.length,
+      end = state.posMax,
+      maxNesting = state.md.options.maxNesting;
+
+  while (state.pos < end) {
+    // Try all possible rules.
+    // On success, rule should:
+    //
+    // - update `state.pos`
+    // - update `state.tokens`
+    // - return true
+
+    if (state.level < maxNesting) {
+      for (i = 0; i < len; i++) {
+        ok = rules[i](state, false);
+        if (ok) { break; }
+      }
+    }
+
+    if (ok) {
+      if (state.pos >= end) { break; }
+      continue;
+    }
+
+    state.pending += state.src[state.pos++];
+  }
+
+  if (state.pending) {
+    state.pushPending();
+  }
+};
+
+
+/**
+ * ParserInline.parse(str, md, env, outTokens)
+ *
+ * Process input string and push inline tokens into `outTokens`
+ **/
+ParserInline$1.prototype.parse = function (str, md, env, outTokens) {
+  var i, rules, len;
+  var state = new this.State(str, md, env, outTokens);
+
+  this.tokenize(state);
+
+  rules = this.ruler2.getRules('');
+  len = rules.length;
+
+  for (i = 0; i < len; i++) {
+    rules[i](state);
+  }
+};
+
+
+ParserInline$1.prototype.State = state_inline;
+
+
+var parser_inline = ParserInline$1;
+
+var re;
+var hasRequiredRe;
+
+function requireRe () {
+	if (hasRequiredRe) return re;
+	hasRequiredRe = 1;
+
+
+	re = function (opts) {
+	  var re = {};
+
+	  // Use direct extract instead of `regenerate` to reduse browserified size
+	  re.src_Any = requireRegex$3().source;
+	  re.src_Cc  = requireRegex$2().source;
+	  re.src_Z   = requireRegex().source;
+	  re.src_P   = regex$4.source;
+
+	  // \p{\Z\P\Cc\CF} (white spaces + control + format + punctuation)
+	  re.src_ZPCc = [ re.src_Z, re.src_P, re.src_Cc ].join('|');
+
+	  // \p{\Z\Cc} (white spaces + control)
+	  re.src_ZCc = [ re.src_Z, re.src_Cc ].join('|');
+
+	  // Experimental. List of chars, completely prohibited in links
+	  // because can separate it from other part of text
+	  var text_separators = '[><\uff5c]';
+
+	  // All possible word characters (everything without punctuation, spaces & controls)
+	  // Defined via punctuation & spaces to save space
+	  // Should be something like \p{\L\N\S\M} (\w but without `_`)
+	  re.src_pseudo_letter       = '(?:(?!' + text_separators + '|' + re.src_ZPCc + ')' + re.src_Any + ')';
+	  // The same as abothe but without [0-9]
+	  // var src_pseudo_letter_non_d = '(?:(?![0-9]|' + src_ZPCc + ')' + src_Any + ')';
+
+	  ////////////////////////////////////////////////////////////////////////////////
+
+	  re.src_ip4 =
+
+	    '(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+
+	  // Prohibit any of "@/[]()" in user/pass to avoid wrong domain fetch.
+	  re.src_auth    = '(?:(?:(?!' + re.src_ZCc + '|[@/\\[\\]()]).)+@)?';
+
+	  re.src_port =
+
+	    '(?::(?:6(?:[0-4]\\d{3}|5(?:[0-4]\\d{2}|5(?:[0-2]\\d|3[0-5])))|[1-5]?\\d{1,4}))?';
+
+	  re.src_host_terminator =
+
+	    '(?=$|' + text_separators + '|' + re.src_ZPCc + ')(?!-|_|:\\d|\\.-|\\.(?!$|' + re.src_ZPCc + '))';
+
+	  re.src_path =
+
+	    '(?:' +
+	      '[/?#]' +
+	        '(?:' +
+	          '(?!' + re.src_ZCc + '|' + text_separators + '|[()[\\]{}.,"\'?!\\-;]).|' +
+	          '\\[(?:(?!' + re.src_ZCc + '|\\]).)*\\]|' +
+	          '\\((?:(?!' + re.src_ZCc + '|[)]).)*\\)|' +
+	          '\\{(?:(?!' + re.src_ZCc + '|[}]).)*\\}|' +
+	          '\\"(?:(?!' + re.src_ZCc + '|["]).)+\\"|' +
+	          "\\'(?:(?!" + re.src_ZCc + "|[']).)+\\'|" +
+	          "\\'(?=" + re.src_pseudo_letter + '|[-]).|' +  // allow `I'm_king` if no pair found
+	          '\\.{2,}[a-zA-Z0-9%/&]|' + // google has many dots in "google search" links (#66, #81).
+	                                     // github has ... in commit range links,
+	                                     // Restrict to
+	                                     // - english
+	                                     // - percent-encoded
+	                                     // - parts of file path
+	                                     // - params separator
+	                                     // until more examples found.
+	          '\\.(?!' + re.src_ZCc + '|[.]).|' +
+	          (opts && opts['---'] ?
+	            '\\-(?!--(?:[^-]|$))(?:-*)|' // `---` => long dash, terminate
+	            :
+	            '\\-+|'
+	          ) +
+	          ',(?!' + re.src_ZCc + ').|' +       // allow `,,,` in paths
+	          ';(?!' + re.src_ZCc + ').|' +       // allow `;` if not followed by space-like char
+	          '\\!+(?!' + re.src_ZCc + '|[!]).|' +  // allow `!!!` in paths, but not at the end
+	          '\\?(?!' + re.src_ZCc + '|[?]).' +
+	        ')+' +
+	      '|\\/' +
+	    ')?';
+
+	  // Allow anything in markdown spec, forbid quote (") at the first position
+	  // because emails enclosed in quotes are far more common
+	  re.src_email_name =
+
+	    '[\\-;:&=\\+\\$,\\.a-zA-Z0-9_][\\-;:&=\\+\\$,\\"\\.a-zA-Z0-9_]*';
+
+	  re.src_xn =
+
+	    'xn--[a-z0-9\\-]{1,59}';
+
+	  // More to read about domain names
+	  // http://serverfault.com/questions/638260/
+
+	  re.src_domain_root =
+
+	    // Allow letters & digits (http://test1)
+	    '(?:' +
+	      re.src_xn +
+	      '|' +
+	      re.src_pseudo_letter + '{1,63}' +
+	    ')';
+
+	  re.src_domain =
+
+	    '(?:' +
+	      re.src_xn +
+	      '|' +
+	      '(?:' + re.src_pseudo_letter + ')' +
+	      '|' +
+	      '(?:' + re.src_pseudo_letter + '(?:-|' + re.src_pseudo_letter + '){0,61}' + re.src_pseudo_letter + ')' +
+	    ')';
+
+	  re.src_host =
+
+	    '(?:' +
+	    // Don't need IP check, because digits are already allowed in normal domain names
+	    //   src_ip4 +
+	    // '|' +
+	      '(?:(?:(?:' + re.src_domain + ')\\.)*' + re.src_domain/*_root*/ + ')' +
+	    ')';
+
+	  re.tpl_host_fuzzy =
+
+	    '(?:' +
+	      re.src_ip4 +
+	    '|' +
+	      '(?:(?:(?:' + re.src_domain + ')\\.)+(?:%TLDS%))' +
+	    ')';
+
+	  re.tpl_host_no_ip_fuzzy =
+
+	    '(?:(?:(?:' + re.src_domain + ')\\.)+(?:%TLDS%))';
+
+	  re.src_host_strict =
+
+	    re.src_host + re.src_host_terminator;
+
+	  re.tpl_host_fuzzy_strict =
+
+	    re.tpl_host_fuzzy + re.src_host_terminator;
+
+	  re.src_host_port_strict =
+
+	    re.src_host + re.src_port + re.src_host_terminator;
+
+	  re.tpl_host_port_fuzzy_strict =
+
+	    re.tpl_host_fuzzy + re.src_port + re.src_host_terminator;
+
+	  re.tpl_host_port_no_ip_fuzzy_strict =
+
+	    re.tpl_host_no_ip_fuzzy + re.src_port + re.src_host_terminator;
+
+
+	  ////////////////////////////////////////////////////////////////////////////////
+	  // Main rules
+
+	  // Rude test fuzzy links by host, for quick deny
+	  re.tpl_host_fuzzy_test =
+
+	    'localhost|www\\.|\\.\\d{1,3}\\.|(?:\\.(?:%TLDS%)(?:' + re.src_ZPCc + '|>|$))';
+
+	  re.tpl_email_fuzzy =
+
+	      '(^|' + text_separators + '|"|\\(|' + re.src_ZCc + ')' +
+	      '(' + re.src_email_name + '@' + re.tpl_host_fuzzy_strict + ')';
+
+	  re.tpl_link_fuzzy =
+	      // Fuzzy link can't be prepended with .:/\- and non punctuation.
+	      // but can start with > (markdown blockquote)
+	      '(^|(?![.:/\\-_@])(?:[$+<=>^`|\uff5c]|' + re.src_ZPCc + '))' +
+	      '((?![$+<=>^`|\uff5c])' + re.tpl_host_port_fuzzy_strict + re.src_path + ')';
+
+	  re.tpl_link_no_ip_fuzzy =
+	      // Fuzzy link can't be prepended with .:/\- and non punctuation.
+	      // but can start with > (markdown blockquote)
+	      '(^|(?![.:/\\-_@])(?:[$+<=>^`|\uff5c]|' + re.src_ZPCc + '))' +
+	      '((?![$+<=>^`|\uff5c])' + re.tpl_host_port_no_ip_fuzzy_strict + re.src_path + ')';
+
+	  return re;
+	};
+	return re;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Helpers
+
+// Merge objects
+//
+function assign(obj /*from1, from2, from3, ...*/) {
+  var sources = Array.prototype.slice.call(arguments, 1);
+
+  sources.forEach(function (source) {
+    if (!source) { return; }
+
+    Object.keys(source).forEach(function (key) {
+      obj[key] = source[key];
+    });
+  });
+
+  return obj;
+}
+
+function _class(obj) { return Object.prototype.toString.call(obj); }
+function isString(obj) { return _class(obj) === '[object String]'; }
+function isObject(obj) { return _class(obj) === '[object Object]'; }
+function isRegExp(obj) { return _class(obj) === '[object RegExp]'; }
+function isFunction(obj) { return _class(obj) === '[object Function]'; }
+
+
+function escapeRE(str) { return str.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&'); }
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+var defaultOptions = {
+  fuzzyLink: true,
+  fuzzyEmail: true,
+  fuzzyIP: false
+};
+
+
+function isOptionsObj(obj) {
+  return Object.keys(obj || {}).reduce(function (acc, k) {
+    return acc || defaultOptions.hasOwnProperty(k);
+  }, false);
+}
+
+
+var defaultSchemas = {
+  'http:': {
+    validate: function (text, pos, self) {
+      var tail = text.slice(pos);
+
+      if (!self.re.http) {
+        // compile lazily, because "host"-containing variables can change on tlds update.
+        self.re.http =  new RegExp(
+          '^\\/\\/' + self.re.src_auth + self.re.src_host_port_strict + self.re.src_path, 'i'
+        );
+      }
+      if (self.re.http.test(tail)) {
+        return tail.match(self.re.http)[0].length;
+      }
+      return 0;
+    }
+  },
+  'https:':  'http:',
+  'ftp:':    'http:',
+  '//':      {
+    validate: function (text, pos, self) {
+      var tail = text.slice(pos);
+
+      if (!self.re.no_http) {
+      // compile lazily, because "host"-containing variables can change on tlds update.
+        self.re.no_http =  new RegExp(
+          '^' +
+          self.re.src_auth +
+          // Don't allow single-level domains, because of false positives like '//test'
+          // with code comments
+          '(?:localhost|(?:(?:' + self.re.src_domain + ')\\.)+' + self.re.src_domain_root + ')' +
+          self.re.src_port +
+          self.re.src_host_terminator +
+          self.re.src_path,
+
+          'i'
+        );
+      }
+
+      if (self.re.no_http.test(tail)) {
+        // should not be `://` & `///`, that protects from errors in protocol name
+        if (pos >= 3 && text[pos - 3] === ':') { return 0; }
+        if (pos >= 3 && text[pos - 3] === '/') { return 0; }
+        return tail.match(self.re.no_http)[0].length;
+      }
+      return 0;
+    }
+  },
+  'mailto:': {
+    validate: function (text, pos, self) {
+      var tail = text.slice(pos);
+
+      if (!self.re.mailto) {
+        self.re.mailto =  new RegExp(
+          '^' + self.re.src_email_name + '@' + self.re.src_host_strict, 'i'
+        );
+      }
+      if (self.re.mailto.test(tail)) {
+        return tail.match(self.re.mailto)[0].length;
+      }
+      return 0;
+    }
+  }
+};
+
+/*eslint-disable max-len*/
+
+// RE pattern for 2-character tlds (autogenerated by ./support/tlds_2char_gen.js)
+var tlds_2ch_src_re = 'a[cdefgilmnoqrstuwxz]|b[abdefghijmnorstvwyz]|c[acdfghiklmnoruvwxyz]|d[ejkmoz]|e[cegrstu]|f[ijkmor]|g[abdefghilmnpqrstuwy]|h[kmnrtu]|i[delmnoqrst]|j[emop]|k[eghimnprwyz]|l[abcikrstuvy]|m[acdeghklmnopqrstuvwxyz]|n[acefgilopruz]|om|p[aefghklmnrstwy]|qa|r[eosuw]|s[abcdeghijklmnortuvxyz]|t[cdfghjklmnortvwz]|u[agksyz]|v[aceginu]|w[fs]|y[et]|z[amw]';
+
+// DON'T try to make PRs with changes. Extend TLDs with LinkifyIt.tlds() instead
+var tlds_default = 'biz|com|edu|gov|net|org|pro|web|xxx|aero|asia|coop|info|museum|name|shop|рф'.split('|');
+
+/*eslint-enable max-len*/
+
+////////////////////////////////////////////////////////////////////////////////
+
+function resetScanCache(self) {
+  self.__index__ = -1;
+  self.__text_cache__   = '';
+}
+
+function createValidator(re) {
+  return function (text, pos) {
+    var tail = text.slice(pos);
+
+    if (re.test(tail)) {
+      return tail.match(re)[0].length;
+    }
+    return 0;
+  };
+}
+
+function createNormalizer() {
+  return function (match, self) {
+    self.normalize(match);
+  };
+}
+
+// Schemas compiler. Build regexps.
+//
+function compile(self) {
+
+  // Load & clone RE patterns.
+  var re = self.re = requireRe()(self.__opts__);
+
+  // Define dynamic patterns
+  var tlds = self.__tlds__.slice();
+
+  self.onCompile();
+
+  if (!self.__tlds_replaced__) {
+    tlds.push(tlds_2ch_src_re);
+  }
+  tlds.push(re.src_xn);
+
+  re.src_tlds = tlds.join('|');
+
+  function untpl(tpl) { return tpl.replace('%TLDS%', re.src_tlds); }
+
+  re.email_fuzzy      = RegExp(untpl(re.tpl_email_fuzzy), 'i');
+  re.link_fuzzy       = RegExp(untpl(re.tpl_link_fuzzy), 'i');
+  re.link_no_ip_fuzzy = RegExp(untpl(re.tpl_link_no_ip_fuzzy), 'i');
+  re.host_fuzzy_test  = RegExp(untpl(re.tpl_host_fuzzy_test), 'i');
+
+  //
+  // Compile each schema
+  //
+
+  var aliases = [];
+
+  self.__compiled__ = {}; // Reset compiled data
+
+  function schemaError(name, val) {
+    throw new Error('(LinkifyIt) Invalid schema "' + name + '": ' + val);
+  }
+
+  Object.keys(self.__schemas__).forEach(function (name) {
+    var val = self.__schemas__[name];
+
+    // skip disabled methods
+    if (val === null) { return; }
+
+    var compiled = { validate: null, link: null };
+
+    self.__compiled__[name] = compiled;
+
+    if (isObject(val)) {
+      if (isRegExp(val.validate)) {
+        compiled.validate = createValidator(val.validate);
+      } else if (isFunction(val.validate)) {
+        compiled.validate = val.validate;
+      } else {
+        schemaError(name, val);
+      }
+
+      if (isFunction(val.normalize)) {
+        compiled.normalize = val.normalize;
+      } else if (!val.normalize) {
+        compiled.normalize = createNormalizer();
+      } else {
+        schemaError(name, val);
+      }
+
+      return;
+    }
+
+    if (isString(val)) {
+      aliases.push(name);
+      return;
+    }
+
+    schemaError(name, val);
+  });
+
+  //
+  // Compile postponed aliases
+  //
+
+  aliases.forEach(function (alias) {
+    if (!self.__compiled__[self.__schemas__[alias]]) {
+      // Silently fail on missed schemas to avoid errons on disable.
+      // schemaError(alias, self.__schemas__[alias]);
+      return;
+    }
+
+    self.__compiled__[alias].validate =
+      self.__compiled__[self.__schemas__[alias]].validate;
+    self.__compiled__[alias].normalize =
+      self.__compiled__[self.__schemas__[alias]].normalize;
+  });
+
+  //
+  // Fake record for guessed links
+  //
+  self.__compiled__[''] = { validate: null, normalize: createNormalizer() };
+
+  //
+  // Build schema condition
+  //
+  var slist = Object.keys(self.__compiled__)
+                      .filter(function (name) {
+                        // Filter disabled & fake schemas
+                        return name.length > 0 && self.__compiled__[name];
+                      })
+                      .map(escapeRE)
+                      .join('|');
+  // (?!_) cause 1.5x slowdown
+  self.re.schema_test   = RegExp('(^|(?!_)(?:[><\uff5c]|' + re.src_ZPCc + '))(' + slist + ')', 'i');
+  self.re.schema_search = RegExp('(^|(?!_)(?:[><\uff5c]|' + re.src_ZPCc + '))(' + slist + ')', 'ig');
+
+  self.re.pretest = RegExp(
+    '(' + self.re.schema_test.source + ')|(' + self.re.host_fuzzy_test.source + ')|@',
+    'i'
+  );
+
+  //
+  // Cleanup
+  //
+
+  resetScanCache(self);
+}
+
+/**
+ * class Match
+ *
+ * Match result. Single element of array, returned by [[LinkifyIt#match]]
+ **/
+function Match(self, shift) {
+  var start = self.__index__,
+      end   = self.__last_index__,
+      text  = self.__text_cache__.slice(start, end);
+
+  /**
+   * Match#schema -> String
+   *
+   * Prefix (protocol) for matched string.
+   **/
+  this.schema    = self.__schema__.toLowerCase();
+  /**
+   * Match#index -> Number
+   *
+   * First position of matched string.
+   **/
+  this.index     = start + shift;
+  /**
+   * Match#lastIndex -> Number
+   *
+   * Next position after matched string.
+   **/
+  this.lastIndex = end + shift;
+  /**
+   * Match#raw -> String
+   *
+   * Matched string.
+   **/
+  this.raw       = text;
+  /**
+   * Match#text -> String
+   *
+   * Notmalized text of matched string.
+   **/
+  this.text      = text;
+  /**
+   * Match#url -> String
+   *
+   * Normalized url of matched string.
+   **/
+  this.url       = text;
+}
+
+function createMatch(self, shift) {
+  var match = new Match(self, shift);
+
+  self.__compiled__[match.schema].normalize(match, self);
+
+  return match;
+}
+
+
+/**
+ * class LinkifyIt
+ **/
+
+/**
+ * new LinkifyIt(schemas, options)
+ * - schemas (Object): Optional. Additional schemas to validate (prefix/validator)
+ * - options (Object): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
+ *
+ * Creates new linkifier instance with optional additional schemas.
+ * Can be called without `new` keyword for convenience.
+ *
+ * By default understands:
+ *
+ * - `http(s)://...` , `ftp://...`, `mailto:...` & `//...` links
+ * - "fuzzy" links and emails (example.com, foo@bar.com).
+ *
+ * `schemas` is an object, where each key/value describes protocol/rule:
+ *
+ * - __key__ - link prefix (usually, protocol name with `:` at the end, `skype:`
+ *   for example). `linkify-it` makes shure that prefix is not preceeded with
+ *   alphanumeric char and symbols. Only whitespaces and punctuation allowed.
+ * - __value__ - rule to check tail after link prefix
+ *   - _String_ - just alias to existing rule
+ *   - _Object_
+ *     - _validate_ - validator function (should return matched length on success),
+ *       or `RegExp`.
+ *     - _normalize_ - optional function to normalize text & url of matched result
+ *       (for example, for @twitter mentions).
+ *
+ * `options`:
+ *
+ * - __fuzzyLink__ - recognige URL-s without `http(s):` prefix. Default `true`.
+ * - __fuzzyIP__ - allow IPs in fuzzy links above. Can conflict with some texts
+ *   like version numbers. Default `false`.
+ * - __fuzzyEmail__ - recognize emails without `mailto:` prefix.
+ *
+ **/
+function LinkifyIt$1(schemas, options) {
+  if (!(this instanceof LinkifyIt$1)) {
+    return new LinkifyIt$1(schemas, options);
+  }
+
+  if (!options) {
+    if (isOptionsObj(schemas)) {
+      options = schemas;
+      schemas = {};
+    }
+  }
+
+  this.__opts__           = assign({}, defaultOptions, options);
+
+  // Cache last tested result. Used to skip repeating steps on next `match` call.
+  this.__index__          = -1;
+  this.__last_index__     = -1; // Next scan position
+  this.__schema__         = '';
+  this.__text_cache__     = '';
+
+  this.__schemas__        = assign({}, defaultSchemas, schemas);
+  this.__compiled__       = {};
+
+  this.__tlds__           = tlds_default;
+  this.__tlds_replaced__  = false;
+
+  this.re = {};
+
+  compile(this);
+}
+
+
+/** chainable
+ * LinkifyIt#add(schema, definition)
+ * - schema (String): rule name (fixed pattern prefix)
+ * - definition (String|RegExp|Object): schema definition
+ *
+ * Add new rule definition. See constructor description for details.
+ **/
+LinkifyIt$1.prototype.add = function add(schema, definition) {
+  this.__schemas__[schema] = definition;
+  compile(this);
+  return this;
+};
+
+
+/** chainable
+ * LinkifyIt#set(options)
+ * - options (Object): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
+ *
+ * Set recognition options for links without schema.
+ **/
+LinkifyIt$1.prototype.set = function set(options) {
+  this.__opts__ = assign(this.__opts__, options);
+  return this;
+};
+
+
+/**
+ * LinkifyIt#test(text) -> Boolean
+ *
+ * Searches linkifiable pattern and returns `true` on success or `false` on fail.
+ **/
+LinkifyIt$1.prototype.test = function test(text) {
+  // Reset scan cache
+  this.__text_cache__ = text;
+  this.__index__      = -1;
+
+  if (!text.length) { return false; }
+
+  var m, ml, me, len, shift, next, re, tld_pos, at_pos;
+
+  // try to scan for link with schema - that's the most simple rule
+  if (this.re.schema_test.test(text)) {
+    re = this.re.schema_search;
+    re.lastIndex = 0;
+    while ((m = re.exec(text)) !== null) {
+      len = this.testSchemaAt(text, m[2], re.lastIndex);
+      if (len) {
+        this.__schema__     = m[2];
+        this.__index__      = m.index + m[1].length;
+        this.__last_index__ = m.index + m[0].length + len;
+        break;
+      }
+    }
+  }
+
+  if (this.__opts__.fuzzyLink && this.__compiled__['http:']) {
+    // guess schemaless links
+    tld_pos = text.search(this.re.host_fuzzy_test);
+    if (tld_pos >= 0) {
+      // if tld is located after found link - no need to check fuzzy pattern
+      if (this.__index__ < 0 || tld_pos < this.__index__) {
+        if ((ml = text.match(this.__opts__.fuzzyIP ? this.re.link_fuzzy : this.re.link_no_ip_fuzzy)) !== null) {
+
+          shift = ml.index + ml[1].length;
+
+          if (this.__index__ < 0 || shift < this.__index__) {
+            this.__schema__     = '';
+            this.__index__      = shift;
+            this.__last_index__ = ml.index + ml[0].length;
+          }
+        }
+      }
+    }
+  }
+
+  if (this.__opts__.fuzzyEmail && this.__compiled__['mailto:']) {
+    // guess schemaless emails
+    at_pos = text.indexOf('@');
+    if (at_pos >= 0) {
+      // We can't skip this check, because this cases are possible:
+      // 192.168.1.1@gmail.com, my.in@example.com
+      if ((me = text.match(this.re.email_fuzzy)) !== null) {
+
+        shift = me.index + me[1].length;
+        next  = me.index + me[0].length;
+
+        if (this.__index__ < 0 || shift < this.__index__ ||
+            (shift === this.__index__ && next > this.__last_index__)) {
+          this.__schema__     = 'mailto:';
+          this.__index__      = shift;
+          this.__last_index__ = next;
+        }
+      }
+    }
+  }
+
+  return this.__index__ >= 0;
+};
+
+
+/**
+ * LinkifyIt#pretest(text) -> Boolean
+ *
+ * Very quick check, that can give false positives. Returns true if link MAY BE
+ * can exists. Can be used for speed optimization, when you need to check that
+ * link NOT exists.
+ **/
+LinkifyIt$1.prototype.pretest = function pretest(text) {
+  return this.re.pretest.test(text);
+};
+
+
+/**
+ * LinkifyIt#testSchemaAt(text, name, position) -> Number
+ * - text (String): text to scan
+ * - name (String): rule (schema) name
+ * - position (Number): text offset to check from
+ *
+ * Similar to [[LinkifyIt#test]] but checks only specific protocol tail exactly
+ * at given position. Returns length of found pattern (0 on fail).
+ **/
+LinkifyIt$1.prototype.testSchemaAt = function testSchemaAt(text, schema, pos) {
+  // If not supported schema check requested - terminate
+  if (!this.__compiled__[schema.toLowerCase()]) {
+    return 0;
+  }
+  return this.__compiled__[schema.toLowerCase()].validate(text, pos, this);
+};
+
+
+/**
+ * LinkifyIt#match(text) -> Array|null
+ *
+ * Returns array of found link descriptions or `null` on fail. We strongly
+ * recommend to use [[LinkifyIt#test]] first, for best speed.
+ *
+ * ##### Result match description
+ *
+ * - __schema__ - link schema, can be empty for fuzzy links, or `//` for
+ *   protocol-neutral  links.
+ * - __index__ - offset of matched text
+ * - __lastIndex__ - index of next char after mathch end
+ * - __raw__ - matched text
+ * - __text__ - normalized text
+ * - __url__ - link, generated from matched text
+ **/
+LinkifyIt$1.prototype.match = function match(text) {
+  var shift = 0, result = [];
+
+  // Try to take previous element from cache, if .test() called before
+  if (this.__index__ >= 0 && this.__text_cache__ === text) {
+    result.push(createMatch(this, shift));
+    shift = this.__last_index__;
+  }
+
+  // Cut head if cache was used
+  var tail = shift ? text.slice(shift) : text;
+
+  // Scan string until end reached
+  while (this.test(tail)) {
+    result.push(createMatch(this, shift));
+
+    tail = tail.slice(this.__last_index__);
+    shift += this.__last_index__;
+  }
+
+  if (result.length) {
+    return result;
+  }
+
+  return null;
+};
+
+
+/** chainable
+ * LinkifyIt#tlds(list [, keepOld]) -> this
+ * - list (Array): list of tlds
+ * - keepOld (Boolean): merge with current list if `true` (`false` by default)
+ *
+ * Load (or merge) new tlds list. Those are user for fuzzy links (without prefix)
+ * to avoid false positives. By default this algorythm used:
+ *
+ * - hostname with any 2-letter root zones are ok.
+ * - biz|com|edu|gov|net|org|pro|web|xxx|aero|asia|coop|info|museum|name|shop|рф
+ *   are ok.
+ * - encoded (`xn--...`) root zones are ok.
+ *
+ * If list is replaced, then exact match for 2-chars root zones will be checked.
+ **/
+LinkifyIt$1.prototype.tlds = function tlds(list, keepOld) {
+  list = Array.isArray(list) ? list : [ list ];
+
+  if (!keepOld) {
+    this.__tlds__ = list.slice();
+    this.__tlds_replaced__ = true;
+    compile(this);
+    return this;
+  }
+
+  this.__tlds__ = this.__tlds__.concat(list)
+                                  .sort()
+                                  .filter(function (el, idx, arr) {
+                                    return el !== arr[idx - 1];
+                                  })
+                                  .reverse();
+
+  compile(this);
+  return this;
+};
+
+/**
+ * LinkifyIt#normalize(match)
+ *
+ * Default normalizer (if schema does not define it's own).
+ **/
+LinkifyIt$1.prototype.normalize = function normalize(match) {
+
+  // Do minimal possible changes by default. Need to collect feedback prior
+  // to move forward https://github.com/markdown-it/linkify-it/issues/1
+
+  if (!match.schema) { match.url = 'http://' + match.url; }
+
+  if (match.schema === 'mailto:' && !/^mailto:/i.test(match.url)) {
+    match.url = 'mailto:' + match.url;
+  }
+};
+
+
+/**
+ * LinkifyIt#onCompile()
+ *
+ * Override to modify basic RegExp-s.
+ **/
+LinkifyIt$1.prototype.onCompile = function onCompile() {
+};
+
+
+var linkifyIt = LinkifyIt$1;
+
+var _default = {
+  options: {
+    html:         false,        // Enable HTML tags in source
+    xhtmlOut:     false,        // Use '/' to close single tags (<br />)
+    breaks:       false,        // Convert '\n' in paragraphs into <br>
+    langPrefix:   'language-',  // CSS language prefix for fenced blocks
+    linkify:      false,        // autoconvert URL-like texts to links
+
+    // Enable some language-neutral replacements + quotes beautification
+    typographer:  false,
+
+    // Double + single quotes replacement pairs, when typographer enabled,
+    // and smartquotes on. Could be either a String or an Array.
+    //
+    // For example, you can use '«»„“' for Russian, '„“‚‘' for German,
+    // and ['«\xA0', '\xA0»', '‹\xA0', '\xA0›'] for French (including nbsp).
+    quotes: '\u201c\u201d\u2018\u2019', /* “”‘’ */
+
+    // Highlighter function. Should return escaped HTML,
+    // or '' if the source string is not changed and should be escaped externaly.
+    // If result starts with <pre... internal wrapper is skipped.
+    //
+    // function (/*str, lang*/) { return ''; }
+    //
+    highlight: null,
+
+    maxNesting:   100            // Internal protection, recursion limit
+  },
+
+  components: {
+
+    core: {},
+    block: {},
+    inline: {}
+  }
+};
+
+var zero = {
+  options: {
+    html:         false,        // Enable HTML tags in source
+    xhtmlOut:     false,        // Use '/' to close single tags (<br />)
+    breaks:       false,        // Convert '\n' in paragraphs into <br>
+    langPrefix:   'language-',  // CSS language prefix for fenced blocks
+    linkify:      false,        // autoconvert URL-like texts to links
+
+    // Enable some language-neutral replacements + quotes beautification
+    typographer:  false,
+
+    // Double + single quotes replacement pairs, when typographer enabled,
+    // and smartquotes on. Could be either a String or an Array.
+    //
+    // For example, you can use '«»„“' for Russian, '„“‚‘' for German,
+    // and ['«\xA0', '\xA0»', '‹\xA0', '\xA0›'] for French (including nbsp).
+    quotes: '\u201c\u201d\u2018\u2019', /* “”‘’ */
+
+    // Highlighter function. Should return escaped HTML,
+    // or '' if the source string is not changed and should be escaped externaly.
+    // If result starts with <pre... internal wrapper is skipped.
+    //
+    // function (/*str, lang*/) { return ''; }
+    //
+    highlight: null,
+
+    maxNesting:   20            // Internal protection, recursion limit
+  },
+
+  components: {
+
+    core: {
+      rules: [
+        'normalize',
+        'block',
+        'inline'
+      ]
+    },
+
+    block: {
+      rules: [
+        'paragraph'
+      ]
+    },
+
+    inline: {
+      rules: [
+        'text'
+      ],
+      rules2: [
+        'balance_pairs',
+        'text_collapse'
+      ]
+    }
+  }
+};
+
+var commonmark = {
+  options: {
+    html:         true,         // Enable HTML tags in source
+    xhtmlOut:     true,         // Use '/' to close single tags (<br />)
+    breaks:       false,        // Convert '\n' in paragraphs into <br>
+    langPrefix:   'language-',  // CSS language prefix for fenced blocks
+    linkify:      false,        // autoconvert URL-like texts to links
+
+    // Enable some language-neutral replacements + quotes beautification
+    typographer:  false,
+
+    // Double + single quotes replacement pairs, when typographer enabled,
+    // and smartquotes on. Could be either a String or an Array.
+    //
+    // For example, you can use '«»„“' for Russian, '„“‚‘' for German,
+    // and ['«\xA0', '\xA0»', '‹\xA0', '\xA0›'] for French (including nbsp).
+    quotes: '\u201c\u201d\u2018\u2019', /* “”‘’ */
+
+    // Highlighter function. Should return escaped HTML,
+    // or '' if the source string is not changed and should be escaped externaly.
+    // If result starts with <pre... internal wrapper is skipped.
+    //
+    // function (/*str, lang*/) { return ''; }
+    //
+    highlight: null,
+
+    maxNesting:   20            // Internal protection, recursion limit
+  },
+
+  components: {
+
+    core: {
+      rules: [
+        'normalize',
+        'block',
+        'inline'
+      ]
+    },
+
+    block: {
+      rules: [
+        'blockquote',
+        'code',
+        'fence',
+        'heading',
+        'hr',
+        'html_block',
+        'lheading',
+        'list',
+        'reference',
+        'paragraph'
+      ]
+    },
+
+    inline: {
+      rules: [
+        'autolink',
+        'backticks',
+        'emphasis',
+        'entity',
+        'escape',
+        'html_inline',
+        'image',
+        'link',
+        'newline',
+        'text'
+      ],
+      rules2: [
+        'balance_pairs',
+        'emphasis',
+        'text_collapse'
+      ]
+    }
+  }
+};
+
+var utils        = utils$1;
+var helpers      = helpers$1;
+var Renderer     = renderer$1;
+var ParserCore   = parser_core;
+var ParserBlock  = parser_block;
+var ParserInline = parser_inline;
+var LinkifyIt    = linkifyIt;
+var mdurl        = mdurl$1;
+var punycode     = require$$0__default$3["default"];
+
+
+var config = {
+  default: _default,
+  zero: zero,
+  commonmark: commonmark
+};
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// This validator can prohibit more than really needed to prevent XSS. It's a
+// tradeoff to keep code simple and to be secure by default.
+//
+// If you need different setup - override validator method as you wish. Or
+// replace it with dummy function and use external sanitizer.
+//
+
+var BAD_PROTO_RE = /^(vbscript|javascript|file|data):/;
+var GOOD_DATA_RE = /^data:image\/(gif|png|jpeg|webp);/;
+
+function validateLink(url) {
+  // url should be normalized at this point, and existing entities are decoded
+  var str = url.trim().toLowerCase();
+
+  return BAD_PROTO_RE.test(str) ? (GOOD_DATA_RE.test(str) ? true : false) : true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+var RECODE_HOSTNAME_FOR = [ 'http:', 'https:', 'mailto:' ];
+
+function normalizeLink(url) {
+  var parsed = mdurl.parse(url, true);
+
+  if (parsed.hostname) {
+    // Encode hostnames in urls like:
+    // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
+    //
+    // We don't encode unknown schemas, because it's likely that we encode
+    // something we shouldn't (e.g. `skype:name` treated as `skype:host`)
+    //
+    if (!parsed.protocol || RECODE_HOSTNAME_FOR.indexOf(parsed.protocol) >= 0) {
+      try {
+        parsed.hostname = punycode.toASCII(parsed.hostname);
+      } catch (er) { /**/ }
+    }
+  }
+
+  return mdurl.encode(mdurl.format(parsed));
+}
+
+function normalizeLinkText(url) {
+  var parsed = mdurl.parse(url, true);
+
+  if (parsed.hostname) {
+    // Encode hostnames in urls like:
+    // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
+    //
+    // We don't encode unknown schemas, because it's likely that we encode
+    // something we shouldn't (e.g. `skype:name` treated as `skype:host`)
+    //
+    if (!parsed.protocol || RECODE_HOSTNAME_FOR.indexOf(parsed.protocol) >= 0) {
+      try {
+        parsed.hostname = punycode.toUnicode(parsed.hostname);
+      } catch (er) { /**/ }
+    }
+  }
+
+  // add '%' to exclude list because of https://github.com/markdown-it/markdown-it/issues/720
+  return mdurl.decode(mdurl.format(parsed), mdurl.decode.defaultChars + '%');
+}
+
+
+/**
+ * class MarkdownIt
+ *
+ * Main parser/renderer class.
+ *
+ * ##### Usage
+ *
+ * ```javascript
+ * // node.js, "classic" way:
+ * var MarkdownIt = require('markdown-it'),
+ *     md = new MarkdownIt();
+ * var result = md.render('# markdown-it rulezz!');
+ *
+ * // node.js, the same, but with sugar:
+ * var md = require('markdown-it')();
+ * var result = md.render('# markdown-it rulezz!');
+ *
+ * // browser without AMD, added to "window" on script load
+ * // Note, there are no dash.
+ * var md = window.markdownit();
+ * var result = md.render('# markdown-it rulezz!');
+ * ```
+ *
+ * Single line rendering, without paragraph wrap:
+ *
+ * ```javascript
+ * var md = require('markdown-it')();
+ * var result = md.renderInline('__markdown-it__ rulezz!');
+ * ```
+ **/
+
+/**
+ * new MarkdownIt([presetName, options])
+ * - presetName (String): optional, `commonmark` / `zero`
+ * - options (Object)
+ *
+ * Creates parser instanse with given config. Can be called without `new`.
+ *
+ * ##### presetName
+ *
+ * MarkdownIt provides named presets as a convenience to quickly
+ * enable/disable active syntax rules and options for common use cases.
+ *
+ * - ["commonmark"](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/commonmark.js) -
+ *   configures parser to strict [CommonMark](http://commonmark.org/) mode.
+ * - [default](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/default.js) -
+ *   similar to GFM, used when no preset name given. Enables all available rules,
+ *   but still without html, typographer & autolinker.
+ * - ["zero"](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/zero.js) -
+ *   all rules disabled. Useful to quickly setup your config via `.enable()`.
+ *   For example, when you need only `bold` and `italic` markup and nothing else.
+ *
+ * ##### options:
+ *
+ * - __html__ - `false`. Set `true` to enable HTML tags in source. Be careful!
+ *   That's not safe! You may need external sanitizer to protect output from XSS.
+ *   It's better to extend features via plugins, instead of enabling HTML.
+ * - __xhtmlOut__ - `false`. Set `true` to add '/' when closing single tags
+ *   (`<br />`). This is needed only for full CommonMark compatibility. In real
+ *   world you will need HTML output.
+ * - __breaks__ - `false`. Set `true` to convert `\n` in paragraphs into `<br>`.
+ * - __langPrefix__ - `language-`. CSS language class prefix for fenced blocks.
+ *   Can be useful for external highlighters.
+ * - __linkify__ - `false`. Set `true` to autoconvert URL-like text to links.
+ * - __typographer__  - `false`. Set `true` to enable [some language-neutral
+ *   replacement](https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/replacements.js) +
+ *   quotes beautification (smartquotes).
+ * - __quotes__ - `“”‘’`, String or Array. Double + single quotes replacement
+ *   pairs, when typographer enabled and smartquotes on. For example, you can
+ *   use `'«»„“'` for Russian, `'„“‚‘'` for German, and
+ *   `['«\xA0', '\xA0»', '‹\xA0', '\xA0›']` for French (including nbsp).
+ * - __highlight__ - `null`. Highlighter function for fenced code blocks.
+ *   Highlighter `function (str, lang)` should return escaped HTML. It can also
+ *   return empty string if the source was not changed and should be escaped
+ *   externaly. If result starts with <pre... internal wrapper is skipped.
+ *
+ * ##### Example
+ *
+ * ```javascript
+ * // commonmark mode
+ * var md = require('markdown-it')('commonmark');
+ *
+ * // default mode
+ * var md = require('markdown-it')();
+ *
+ * // enable everything
+ * var md = require('markdown-it')({
+ *   html: true,
+ *   linkify: true,
+ *   typographer: true
+ * });
+ * ```
+ *
+ * ##### Syntax highlighting
+ *
+ * ```js
+ * var hljs = require('highlight.js') // https://highlightjs.org/
+ *
+ * var md = require('markdown-it')({
+ *   highlight: function (str, lang) {
+ *     if (lang && hljs.getLanguage(lang)) {
+ *       try {
+ *         return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+ *       } catch (__) {}
+ *     }
+ *
+ *     return ''; // use external default escaping
+ *   }
+ * });
+ * ```
+ *
+ * Or with full wrapper override (if you need assign class to `<pre>`):
+ *
+ * ```javascript
+ * var hljs = require('highlight.js') // https://highlightjs.org/
+ *
+ * // Actual default values
+ * var md = require('markdown-it')({
+ *   highlight: function (str, lang) {
+ *     if (lang && hljs.getLanguage(lang)) {
+ *       try {
+ *         return '<pre class="hljs"><code>' +
+ *                hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+ *                '</code></pre>';
+ *       } catch (__) {}
+ *     }
+ *
+ *     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+ *   }
+ * });
+ * ```
+ *
+ **/
+function MarkdownIt(presetName, options) {
+  if (!(this instanceof MarkdownIt)) {
+    return new MarkdownIt(presetName, options);
+  }
+
+  if (!options) {
+    if (!utils.isString(presetName)) {
+      options = presetName || {};
+      presetName = 'default';
+    }
+  }
+
+  /**
+   * MarkdownIt#inline -> ParserInline
+   *
+   * Instance of [[ParserInline]]. You may need it to add new rules when
+   * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
+   * [[MarkdownIt.enable]].
+   **/
+  this.inline = new ParserInline();
+
+  /**
+   * MarkdownIt#block -> ParserBlock
+   *
+   * Instance of [[ParserBlock]]. You may need it to add new rules when
+   * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
+   * [[MarkdownIt.enable]].
+   **/
+  this.block = new ParserBlock();
+
+  /**
+   * MarkdownIt#core -> Core
+   *
+   * Instance of [[Core]] chain executor. You may need it to add new rules when
+   * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
+   * [[MarkdownIt.enable]].
+   **/
+  this.core = new ParserCore();
+
+  /**
+   * MarkdownIt#renderer -> Renderer
+   *
+   * Instance of [[Renderer]]. Use it to modify output look. Or to add rendering
+   * rules for new token types, generated by plugins.
+   *
+   * ##### Example
+   *
+   * ```javascript
+   * var md = require('markdown-it')();
+   *
+   * function myToken(tokens, idx, options, env, self) {
+   *   //...
+   *   return result;
+   * };
+   *
+   * md.renderer.rules['my_token'] = myToken
+   * ```
+   *
+   * See [[Renderer]] docs and [source code](https://github.com/markdown-it/markdown-it/blob/master/lib/renderer.js).
+   **/
+  this.renderer = new Renderer();
+
+  /**
+   * MarkdownIt#linkify -> LinkifyIt
+   *
+   * [linkify-it](https://github.com/markdown-it/linkify-it) instance.
+   * Used by [linkify](https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/linkify.js)
+   * rule.
+   **/
+  this.linkify = new LinkifyIt();
+
+  /**
+   * MarkdownIt#validateLink(url) -> Boolean
+   *
+   * Link validation function. CommonMark allows too much in links. By default
+   * we disable `javascript:`, `vbscript:`, `file:` schemas, and almost all `data:...` schemas
+   * except some embedded image types.
+   *
+   * You can change this behaviour:
+   *
+   * ```javascript
+   * var md = require('markdown-it')();
+   * // enable everything
+   * md.validateLink = function () { return true; }
+   * ```
+   **/
+  this.validateLink = validateLink;
+
+  /**
+   * MarkdownIt#normalizeLink(url) -> String
+   *
+   * Function used to encode link url to a machine-readable format,
+   * which includes url-encoding, punycode, etc.
+   **/
+  this.normalizeLink = normalizeLink;
+
+  /**
+   * MarkdownIt#normalizeLinkText(url) -> String
+   *
+   * Function used to decode link url to a human-readable format`
+   **/
+  this.normalizeLinkText = normalizeLinkText;
+
+
+  // Expose utils & helpers for easy acces from plugins
+
+  /**
+   * MarkdownIt#utils -> utils
+   *
+   * Assorted utility functions, useful to write plugins. See details
+   * [here](https://github.com/markdown-it/markdown-it/blob/master/lib/common/utils.js).
+   **/
+  this.utils = utils;
+
+  /**
+   * MarkdownIt#helpers -> helpers
+   *
+   * Link components parser functions, useful to write plugins. See details
+   * [here](https://github.com/markdown-it/markdown-it/blob/master/lib/helpers).
+   **/
+  this.helpers = utils.assign({}, helpers);
+
+
+  this.options = {};
+  this.configure(presetName);
+
+  if (options) { this.set(options); }
+}
+
+
+/** chainable
+ * MarkdownIt.set(options)
+ *
+ * Set parser options (in the same format as in constructor). Probably, you
+ * will never need it, but you can change options after constructor call.
+ *
+ * ##### Example
+ *
+ * ```javascript
+ * var md = require('markdown-it')()
+ *             .set({ html: true, breaks: true })
+ *             .set({ typographer, true });
+ * ```
+ *
+ * __Note:__ To achieve the best possible performance, don't modify a
+ * `markdown-it` instance options on the fly. If you need multiple configurations
+ * it's best to create multiple instances and initialize each with separate
+ * config.
+ **/
+MarkdownIt.prototype.set = function (options) {
+  utils.assign(this.options, options);
+  return this;
+};
+
+
+/** chainable, internal
+ * MarkdownIt.configure(presets)
+ *
+ * Batch load of all options and compenent settings. This is internal method,
+ * and you probably will not need it. But if you will - see available presets
+ * and data structure [here](https://github.com/markdown-it/markdown-it/tree/master/lib/presets)
+ *
+ * We strongly recommend to use presets instead of direct config loads. That
+ * will give better compatibility with next versions.
+ **/
+MarkdownIt.prototype.configure = function (presets) {
+  var self = this, presetName;
+
+  if (utils.isString(presets)) {
+    presetName = presets;
+    presets = config[presetName];
+    if (!presets) { throw new Error('Wrong `markdown-it` preset "' + presetName + '", check name'); }
+  }
+
+  if (!presets) { throw new Error('Wrong `markdown-it` preset, can\'t be empty'); }
+
+  if (presets.options) { self.set(presets.options); }
+
+  if (presets.components) {
+    Object.keys(presets.components).forEach(function (name) {
+      if (presets.components[name].rules) {
+        self[name].ruler.enableOnly(presets.components[name].rules);
+      }
+      if (presets.components[name].rules2) {
+        self[name].ruler2.enableOnly(presets.components[name].rules2);
+      }
+    });
+  }
+  return this;
+};
+
+
+/** chainable
+ * MarkdownIt.enable(list, ignoreInvalid)
+ * - list (String|Array): rule name or list of rule names to enable
+ * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+ *
+ * Enable list or rules. It will automatically find appropriate components,
+ * containing rules with given names. If rule not found, and `ignoreInvalid`
+ * not set - throws exception.
+ *
+ * ##### Example
+ *
+ * ```javascript
+ * var md = require('markdown-it')()
+ *             .enable(['sub', 'sup'])
+ *             .disable('smartquotes');
+ * ```
+ **/
+MarkdownIt.prototype.enable = function (list, ignoreInvalid) {
+  var result = [];
+
+  if (!Array.isArray(list)) { list = [ list ]; }
+
+  [ 'core', 'block', 'inline' ].forEach(function (chain) {
+    result = result.concat(this[chain].ruler.enable(list, true));
+  }, this);
+
+  result = result.concat(this.inline.ruler2.enable(list, true));
+
+  var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
+
+  if (missed.length && !ignoreInvalid) {
+    throw new Error('MarkdownIt. Failed to enable unknown rule(s): ' + missed);
+  }
+
+  return this;
+};
+
+
+/** chainable
+ * MarkdownIt.disable(list, ignoreInvalid)
+ * - list (String|Array): rule name or list of rule names to disable.
+ * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+ *
+ * The same as [[MarkdownIt.enable]], but turn specified rules off.
+ **/
+MarkdownIt.prototype.disable = function (list, ignoreInvalid) {
+  var result = [];
+
+  if (!Array.isArray(list)) { list = [ list ]; }
+
+  [ 'core', 'block', 'inline' ].forEach(function (chain) {
+    result = result.concat(this[chain].ruler.disable(list, true));
+  }, this);
+
+  result = result.concat(this.inline.ruler2.disable(list, true));
+
+  var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
+
+  if (missed.length && !ignoreInvalid) {
+    throw new Error('MarkdownIt. Failed to disable unknown rule(s): ' + missed);
+  }
+  return this;
+};
+
+
+/** chainable
+ * MarkdownIt.use(plugin, params)
+ *
+ * Load specified plugin with given params into current parser instance.
+ * It's just a sugar to call `plugin(md, params)` with curring.
+ *
+ * ##### Example
+ *
+ * ```javascript
+ * var iterator = require('markdown-it-for-inline');
+ * var md = require('markdown-it')()
+ *             .use(iterator, 'foo_replace', 'text', function (tokens, idx) {
+ *               tokens[idx].content = tokens[idx].content.replace(/foo/g, 'bar');
+ *             });
+ * ```
+ **/
+MarkdownIt.prototype.use = function (plugin /*, params, ... */) {
+  var args = [ this ].concat(Array.prototype.slice.call(arguments, 1));
+  plugin.apply(plugin, args);
+  return this;
+};
+
+
+/** internal
+ * MarkdownIt.parse(src, env) -> Array
+ * - src (String): source string
+ * - env (Object): environment sandbox
+ *
+ * Parse input string and return list of block tokens (special token type
+ * "inline" will contain list of inline tokens). You should not call this
+ * method directly, until you write custom renderer (for example, to produce
+ * AST).
+ *
+ * `env` is used to pass data between "distributed" rules and return additional
+ * metadata like reference info, needed for the renderer. It also can be used to
+ * inject data in specific cases. Usually, you will be ok to pass `{}`,
+ * and then pass updated object to renderer.
+ **/
+MarkdownIt.prototype.parse = function (src, env) {
+  if (typeof src !== 'string') {
+    throw new Error('Input data should be a String');
+  }
+
+  var state = new this.core.State(src, this, env);
+
+  this.core.process(state);
+
+  return state.tokens;
+};
+
+
+/**
+ * MarkdownIt.render(src [, env]) -> String
+ * - src (String): source string
+ * - env (Object): environment sandbox
+ *
+ * Render markdown string into html. It does all magic for you :).
+ *
+ * `env` can be used to inject additional metadata (`{}` by default).
+ * But you will not need it with high probability. See also comment
+ * in [[MarkdownIt.parse]].
+ **/
+MarkdownIt.prototype.render = function (src, env) {
+  env = env || {};
+
+  return this.renderer.render(this.parse(src, env), this.options, env);
+};
+
+
+/** internal
+ * MarkdownIt.parseInline(src, env) -> Array
+ * - src (String): source string
+ * - env (Object): environment sandbox
+ *
+ * The same as [[MarkdownIt.parse]] but skip all block rules. It returns the
+ * block tokens list with the single `inline` element, containing parsed inline
+ * tokens in `children` property. Also updates `env` object.
+ **/
+MarkdownIt.prototype.parseInline = function (src, env) {
+  var state = new this.core.State(src, this, env);
+
+  state.inlineMode = true;
+  this.core.process(state);
+
+  return state.tokens;
+};
+
+
+/**
+ * MarkdownIt.renderInline(src [, env]) -> String
+ * - src (String): source string
+ * - env (Object): environment sandbox
+ *
+ * Similar to [[MarkdownIt.render]] but for single paragraph content. Result
+ * will NOT be wrapped into `<p>` tags.
+ **/
+MarkdownIt.prototype.renderInline = function (src, env) {
+  env = env || {};
+
+  return this.renderer.render(this.parseInline(src, env), this.options, env);
+};
+
+
+var lib = MarkdownIt;
+
+(function (module) {
+
+
+	module.exports = lib;
+} (markdownIt));
+
+var markdownit = /*@__PURE__*/getDefaultExportFromCjs(markdownIt.exports);
+
+const markdown = new markdownit({
+    html: true,
+});
+const renderer = (source, options) => {
+    let rendered = nunjucks.renderString(source, options.context);
+    if (options.renderAsHTML)
+        rendered = markdown.render(rendered);
+    return rendered;
+};
+
+var template = "<!--START_SECTION:{{ tag }}-->\n\n{%- macro keyState(name) %}\n  {{- state.kbd[name] -}}\n{% endmacro -%}\n\n{%- macro block(row, col) %}\n  {%- if state.wrd[row][col] -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ state.wrd[row][col] }}{{ state.fbk[row][col] }}.png\" />\n  {%- elif row == state.row and col == state.col -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/cursor.png\" />\n  {%- else -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/blank.png\" />\n  {%- endif -%}\n{% endmacro -%}\n\n{%- set row1 = ['q','w','e','r','t','y','u','i','o','p'] -%}\n{%- set row2 = ['a','s','d','f','g','h','j','k','l'] -%}\n{%- set row3 = ['bksp','z','x','c','v','b','n','m','enter'] -%}\n\n<!--VAR:{{ tag }}_state={{ id }}-->\n\n<p align=\"center\">\n<table>\n<tr><th><p align=\"center\">\n\nWORDLE\n\n</p></th></tr>\n<tr><td><p align=\"center\">\n\n<br/>\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n|      |      |      |      |      |\n| ---- | ---- | ---- | ---- | ---- |\n{% for row in range(0, 6) -%}\n  |\n  {%- for col in range(0, 5) -%}\n    {{- block(row, col) -}}\n    |\n  {%- endfor %}\n{% endfor %}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{{- message -}}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n<br/>\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row1 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row2 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row3 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n</table>\n</p>\n\n{% if isDev -%}\n\n```json\n{{ state | dump(2) | safe }}\n```\n\n{%- endif -%}\n\n<!--END_SECTION:{{ tag }}-->\n";
+
 (() => __awaiter$1(void 0, void 0, void 0, function* () {
     try {
         const readmeFile = coreExports.getInput('readme');
         const readmeTag = coreExports.getInput('tag');
-        const payload = github.context.payload;
+        const payload = github.context.payload.client_payload;
         const eventName = github.context.eventName;
         const repo = github.context.repo;
         console.log({ readmeFile, readmeTag, payload, eventName, repo });
-        // const oldReadme = (await readFile(readmeFile)).toString()
-        // const newState = wordle.play(wordle.deserialize(payload.state), payload.move)
-        // const newReadme = renderer(template, {
-        //   renderAsHTML: false,
-        //   context: {
-        //     baseUrl: `/dispatch/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}/`,
-        //     id: wordle.serialize(newState),
-        //     imgBaseUrl: '/images/',
-        //     isDev: false,
-        //     message: wordle.getMessageString(newState.msg),
-        //     state: newState,
-        //     tag: readmeTag,
-        //   },
-        // })
+        const oldReadme = (yield promises.readFile(readmeFile)).toString();
+        const newState = play(deserialize(payload.state), payload.move);
+        const newReadme = renderer(template, {
+            renderAsHTML: false,
+            context: {
+                baseUrl: `/dispatch/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}/`,
+                id: serialize(newState),
+                imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
+                isDev: false,
+                message: getMessageString(newState.msg),
+                state: newState,
+                tag: readmeTag,
+            },
+        });
+        const pattern = new RegExp(`<!--START_SECTION:${readmeTag}-->.*<!--END_SECTION:${readmeTag}-->`, 's');
+        const finalReadme = oldReadme.replace(pattern, newReadme);
+        yield promises.writeFile(readmeFile, finalReadme);
     }
     catch (error) {
         // @ts-ignore
