@@ -3,24 +3,31 @@ import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import { string } from "rollup-plugin-string";
 import typescript from '@rollup/plugin-typescript'
+import dts from "rollup-plugin-dts"
 
 /** @type {import('rollup').RollupOptions} */
 export default [
   {
     input: 'src/index.ts',
-    output: {
-      file: 'dist/umd/wordle.js',
-      format: 'umd',
-      name: 'Wordle',
-    },
-    plugins: [nodeResolve(), commonjs(), json(), typescript()],
-  },
-  {
-    input: 'src/index.ts',
-    output: {
-      file: 'dist/cjs/wordle.js',
-      format: 'cjs',
-    },
+    output: [
+      {
+        file: 'dist/umd/wordle.js',
+        format: 'umd',
+        name: 'Wordle',
+      },
+      {
+        file: 'dist/cjs/wordle.js',
+        format: 'cjs',
+      },
+      {
+        file: 'dist/esm/wordle.js',
+        format: 'esm',
+      },
+      {
+        file: 'dist/amd/wordle.js',
+        format: 'amd',
+      },
+    ],
     plugins: [nodeResolve(), commonjs(), json(), typescript()],
   },
   {
@@ -46,24 +53,21 @@ export default [
       file: 'dist/cjs/actions.js',
       format: 'cjs',
     },
-    plugins: [nodeResolve(), commonjs(), json(), string({
-      include: "**/*.tmpl"
-    }), typescript()],
+    plugins: [
+      nodeResolve(),
+      commonjs(),
+      json(),
+      string({
+        include: "**/*.tmpl"
+      }),
+      typescript()
+    ],
   },
   {
-    input: 'src/index.ts',
-    output: {
-      file: 'dist/esm/wordle.js',
-      format: 'es',
-    },
-    plugins: [nodeResolve(), commonjs(), json(), typescript()],
-  },
-  {
-    input: 'src/index.ts',
-    output: {
-      file: 'dist/amd/wordle.js',
-      format: 'amd',
-    },
-    plugins: [nodeResolve(), commonjs(), json(), typescript()],
+    input: "./src/index.ts",
+    output: [
+      { file: "dist/index.d.ts", format: "esm" },
+    ],
+    plugins: [dts()],
   },
 ]

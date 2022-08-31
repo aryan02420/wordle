@@ -5,7 +5,7 @@
     "src/**"
   ],
   "watch": [
-    "dist/cjs/server/**"
+    "dist/cjs/server.js"
   ],
   "verbose": true
 }
