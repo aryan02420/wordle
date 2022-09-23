@@ -9,17 +9,19 @@ import template from '../../views/index.tmpl'
     const readmeFile = core.getInput('readme')
     const readmeTag = core.getInput('tag')
     const serverUrl = core.getInput('serverUrl')
-    const payload = github.context.payload.client_payload
-    const eventName = github.context.eventName
-    const repo = github.context.repo
-    console.log({ readmeFile, readmeTag, payload, eventName, repo })
+    const { event, move } = github.context.payload.client_payload
+    const { owner, repo } = github.context.repo
+
     const oldReadme = (await readFile(readmeFile)).toString()
-    const newState = wordle.play(wordle.deserialize(payload.state), payload.move)
+    const oldStatePattern = new RegExp(`<!--VAR:${readmeTag}\\s+state=(.*)-->`, 's')
+    const oldStateCode = oldReadme.match(oldStatePattern)?.[1]!
+    const newState = wordle.play(wordle.deserialize(oldStateCode), move)
     const newStateCode = wordle.serialize(newState)
+
     const newReadme = renderer(template, {
       renderAsHTML: false,
       context: {
-        baseUrl: `${serverUrl}/${payload.owner}/${payload.repo}/${payload.event}/${newStateCode}`,
+        baseUrl: `${serverUrl}/${owner}/${repo}/${event}`,
         id: newStateCode,
         imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
         isDev: false,
@@ -28,9 +30,11 @@ import template from '../../views/index.tmpl'
         tag: readmeTag,
       },
     })
+
     const pattern = new RegExp(`<!--START_SECTION:${readmeTag}-->.*<!--END_SECTION:${readmeTag}-->`, 's')
     const finalReadme = oldReadme.replace(pattern, newReadme.trim())
     await writeFile(readmeFile, finalReadme)
+    
   } catch (error) {
     // @ts-ignore
     core.setFailed(error.message)

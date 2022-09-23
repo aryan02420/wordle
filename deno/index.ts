@@ -11,8 +11,8 @@ router.get('/', (ctx) => {
   ctx.response.body = 'Hello world!'
 })
 
-router.get('/:owner/:repo/:event/:state/:move', async (ctx) => {
-  const { owner, repo, event, state, move } = ctx.params
+router.get('/:owner/:repo/:event/:move', async (ctx) => {
+  const { owner, repo, event, move } = ctx.params
   try {
     const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/dispatches`, {
       method: 'POST',
@@ -23,10 +23,7 @@ router.get('/:owner/:repo/:event/:state/:move', async (ctx) => {
       body: JSON.stringify({
         event_type: event,
         client_payload: {
-          owner,
-          repo,
           event,
-          state,
           move,
         },
       }),
