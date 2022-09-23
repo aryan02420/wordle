@@ -14,11 +14,12 @@ import template from '../../views/index.tmpl'
     console.log({ readmeFile, readmeTag, payload, eventName, repo })
     const oldReadme = (await readFile(readmeFile)).toString()
     const newState = wordle.play(wordle.deserialize(payload.state), payload.move)
+    const newStateCode = wordle.serialize(newState)
     const newReadme = renderer(template, {
       renderAsHTML: false,
       context: {
-        baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}`,
-        id: wordle.serialize(newState),
+        baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${newStateCode}`,
+        id: newStateCode,
         imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
         isDev: false,
         message: wordle.getMessageString(newState.msg),

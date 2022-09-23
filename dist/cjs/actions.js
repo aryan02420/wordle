@@ -114116,11 +114116,12 @@ var template = "<!--START_SECTION:{{ tag }}-->\n\n{%- macro keyState(name) %}\n 
         console.log({ readmeFile, readmeTag, payload, eventName, repo });
         const oldReadme = (yield promises.readFile(readmeFile)).toString();
         const newState = play(deserialize(payload.state), payload.move);
+        const newStateCode = serialize(newState);
         const newReadme = renderer(template, {
             renderAsHTML: false,
             context: {
-                baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}`,
-                id: serialize(newState),
+                baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${newStateCode}`,
+                id: newStateCode,
                 imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
                 isDev: false,
                 message: getMessageString(newState.msg),
