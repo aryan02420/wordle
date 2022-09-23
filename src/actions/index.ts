@@ -8,6 +8,7 @@ import template from '../../views/index.tmpl'
   try {
     const readmeFile = core.getInput('readme')
     const readmeTag = core.getInput('tag')
+    const serverUrl = core.getInput('serverUrl')
     const payload = github.context.payload.client_payload
     const eventName = github.context.eventName
     const repo = github.context.repo
@@ -18,7 +19,7 @@ import template from '../../views/index.tmpl'
     const newReadme = renderer(template, {
       renderAsHTML: false,
       context: {
-        baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${newStateCode}`,
+        baseUrl: `${serverUrl}/${payload.owner}/${payload.repo}/${payload.event}/${newStateCode}`,
         id: newStateCode,
         imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
         isDev: false,

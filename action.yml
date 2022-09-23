@@ -15,6 +15,10 @@ inputs:
     description: 'tag to identify wordle'
     required: false
     default: 'wreadle'
+  serverUrl:
+    description: 'server for triggering workflows'
+    required: false
+    default: 'https://wreadle.02420.dev'
 runs:
   using: 'node16'
   main: 'dist/cjs/actions.js'
