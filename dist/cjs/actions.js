@@ -114129,7 +114129,7 @@ var template = "<!--START_SECTION:{{ tag }}-->\n\n{%- macro keyState(name) %}\n 
             },
         });
         const pattern = new RegExp(`<!--START_SECTION:${readmeTag}-->.*<!--END_SECTION:${readmeTag}-->`, 's');
-        const finalReadme = oldReadme.replace(pattern, newReadme);
+        const finalReadme = oldReadme.replace(pattern, newReadme.trim());
         yield promises.writeFile(readmeFile, finalReadme);
     }
     catch (error) {

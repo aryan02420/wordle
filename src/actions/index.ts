@@ -27,7 +27,7 @@ import template from '../../views/index.tmpl'
       },
     })
     const pattern = new RegExp(`<!--START_SECTION:${readmeTag}-->.*<!--END_SECTION:${readmeTag}-->`, 's')
-    const finalReadme = oldReadme.replace(pattern, newReadme)
+    const finalReadme = oldReadme.replace(pattern, newReadme.trim())
     await writeFile(readmeFile, finalReadme)
   } catch (error) {
     // @ts-ignore

@@ -26516,7 +26516,7 @@ var arrayToObject = function arrayToObject(source, options) {
     return obj;
 };
 
-var merge$4 = function merge(target, source, options) {
+var merge$3 = function merge(target, source, options) {
     /* eslint no-param-reassign: 0 */
     if (!source) {
         return target;
@@ -26720,7 +26720,7 @@ var utils$8 = {
     isBuffer: isBuffer,
     isRegExp: isRegExp$1,
     maybeMap: maybeMap,
-    merge: merge$4
+    merge: merge$3
 };
 
 var utils$7 = utils$8;
@@ -27738,7 +27738,7 @@ function requireUrlencoded () {
  * @public
  */
 
-var mergeDescriptors = merge$3;
+var mergeDescriptors = merge$2;
 
 /**
  * Module variables.
@@ -27757,7 +27757,7 @@ var hasOwnProperty$1 = Object.prototype.hasOwnProperty;
  * @public
  */
 
-function merge$3(dest, src, redefine) {
+function merge$2(dest, src, redefine) {
   if (!dest) {
     throw new TypeError('argument dest is required')
   }
@@ -28941,7 +28941,7 @@ var debug$7 = src$2.exports('finalhandler');
 var encodeUrl$2 = encodeurl;
 var escapeHtml$3 = escapeHtml_1;
 var onFinished$2 = onFinished$4.exports;
-var parseUrl$3 = parseurl$1.exports;
+var parseUrl$2 = parseurl$1.exports;
 var statuses$2 = statuses$3;
 var unpipe = unpipe_1;
 
@@ -29145,7 +29145,7 @@ function getErrorStatusCode (err) {
 
 function getResourceName (req) {
   try {
-    return parseUrl$3.original(req).pathname
+    return parseUrl$2.original(req).pathname
   } catch (e) {
     return 'resource'
   }
@@ -30808,7 +30808,7 @@ var mixin = utilsMerge.exports;
 var debug$3 = src$1.exports('express:router');
 var deprecate$3 = depd_1('express');
 var flatten = arrayFlatten_1;
-var parseUrl$2 = parseurl$1.exports;
+var parseUrl$1 = parseurl$1.exports;
 var setPrototypeOf$1 = setprototypeof;
 
 /**
@@ -31319,7 +31319,7 @@ function appendMethods(list, addition) {
 // get pathname of request
 function getPathname(req) {
   try {
-    return parseUrl$2(req).pathname;
+    return parseUrl$1(req).pathname;
   } catch (err) {
     return undefined;
   }
@@ -31506,43 +31506,52 @@ init.init = function(app){
  * MIT Licensed
  */
 
-/**
- * Module dependencies.
- */
+var query;
+var hasRequiredQuery;
 
-var merge$2 = utilsMerge.exports;
-var parseUrl$1 = parseurl$1.exports;
-var qs = lib$b;
+function requireQuery () {
+	if (hasRequiredQuery) return query;
+	hasRequiredQuery = 1;
 
-/**
- * @param {Object} options
- * @return {Function}
- * @api public
- */
+	/**
+	 * Module dependencies.
+	 */
 
-var query = function query(options) {
-  var opts = merge$2({}, options);
-  var queryparse = qs.parse;
+	var merge = utilsMerge.exports;
+	var parseUrl = parseurl$1.exports;
+	var qs = lib$b;
 
-  if (typeof options === 'function') {
-    queryparse = options;
-    opts = undefined;
-  }
+	/**
+	 * @param {Object} options
+	 * @return {Function}
+	 * @api public
+	 */
 
-  if (opts !== undefined && opts.allowPrototypes === undefined) {
-    // back-compat for qs module
-    opts.allowPrototypes = true;
-  }
+	query = function query(options) {
+	  var opts = merge({}, options);
+	  var queryparse = qs.parse;
 
-  return function query(req, res, next){
-    if (!req.query) {
-      var val = parseUrl$1(req).query;
-      req.query = queryparse(val, opts);
-    }
+	  if (typeof options === 'function') {
+	    queryparse = options;
+	    opts = undefined;
+	  }
 
-    next();
-  };
-};
+	  if (opts !== undefined && opts.allowPrototypes === undefined) {
+	    // back-compat for qs module
+	    opts.allowPrototypes = true;
+	  }
+
+	  return function query(req, res, next){
+	    if (!req.query) {
+	      var val = parseUrl(req).query;
+	      req.query = queryparse(val, opts);
+	    }
+
+	    next();
+	  };
+	};
+	return query;
+}
 
 function commonjsRequire(path) {
 	throw new Error('Could not dynamically require "' + path + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
@@ -39255,7 +39264,7 @@ function trustSingle (subnet) {
 	var Router = router$2.exports;
 	var methods = methods$2;
 	var middleware = init;
-	var query$1 = query;
+	var query = requireQuery();
 	var debug = src$1.exports('express:application');
 	var View = view;
 	var http = http__default["default"];
@@ -39379,7 +39388,7 @@ function trustSingle (subnet) {
 	      strict: this.enabled('strict routing')
 	    });
 
-	    this._router.use(query$1(this.get('query parser fn')));
+	    this._router.use(query(this.get('query parser fn')));
 	    this._router.use(middleware.init(this));
 	  }
 	};
@@ -43406,7 +43415,7 @@ function requireServeStatic () {
 	 */
 
 	exports.json = bodyParser$1.json;
-	exports.query = query;
+	exports.query = requireQuery();
 	exports.raw = bodyParser$1.raw;
 	exports.static = requireServeStatic();
 	exports.text = bodyParser$1.text;
@@ -152598,7 +152607,6 @@ Octokit.plugins = [];
 
 const router = express.Router();
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-// http://localhost:3000/dispatch/aryan02420/wordle/wordle/00i70h300000000000/c
 router.get('/:owner/:repo/:event/:state/:move', (req, res) => {
     const { owner, repo, event, state, move } = req.params;
     octokit.request(`POST /repos/${owner}/${repo}/dispatches`, {
