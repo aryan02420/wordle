@@ -1,7 +1,9 @@
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts'
 import { config } from 'https://deno.land/x/dotenv/mod.ts'
 
-config({ export: true })
+if (Deno.env.get('APP_ENV') === 'local') {
+  config({ export: true })
+}
 
 const router = new Router()
 
