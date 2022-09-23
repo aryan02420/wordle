@@ -17,7 +17,7 @@ import template from '../../views/index.tmpl'
     const newReadme = renderer(template, {
       renderAsHTML: false,
       context: {
-        baseUrl: `/dispatch/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}/`,
+        baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}`,
         id: wordle.serialize(newState),
         imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
         isDev: false,

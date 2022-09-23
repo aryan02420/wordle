@@ -114119,7 +114119,7 @@ var template = "<!--START_SECTION:{{ tag }}-->\n\n{%- macro keyState(name) %}\n 
         const newReadme = renderer(template, {
             renderAsHTML: false,
             context: {
-                baseUrl: `/dispatch/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}/`,
+                baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${payload.state}`,
                 id: serialize(newState),
                 imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
                 isDev: false,
