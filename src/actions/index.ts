@@ -13,8 +13,8 @@ import template from '../../views/index.tmpl'
     const { owner, repo } = github.context.repo
 
     const oldReadme = (await readFile(readmeFile)).toString()
-    const oldStatePattern = new RegExp(`<!--VAR:${readmeTag}\\s+state=(.*)-->`, 's')
-    const oldStateCode = oldReadme.match(oldStatePattern)?.[1]!
+    const oldStatePattern = new RegExp(`<!--VAR:${readmeTag}\\s+state=(.*?)-->`, 's')
+    const oldStateCode = oldReadme.match(oldStatePattern)?.[1] || wordle.serialize(wordle.play())
     const newState = wordle.play(wordle.deserialize(oldStateCode), move)
     const newStateCode = wordle.serialize(newState)
 
