@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" width="24" height="24">
+  <style>
+    #animated {
+      stroke-dasharray: 32.04424506661589; /* calc(2 * 3.1415926535 * 5.1) */
+      stroke-dashoffset: 32.04424506661589; /* calc(2 * 3.1415926535 * 5.1) */
+      animation: timer 3s linear infinite;
+    }
+    @keyframes timer {
+      from {
+        stroke: #4dc01a;
+      }
+      33% {
+        stroke: #4dc01a;
+      }
+      66% {
+        stroke: #d97d10;
+      }
+      to {
+        stroke-dashoffset: 0;
+        stroke: #bb0945;
+      }
+    }
+  </style>
+  <g fill="white" stroke="none">
+    <circle cx="12" cy="12" r="10"/>
+  </g>
+  <g fill="none" stroke="#bb0945" stroke-width="6.5" stroke-linecap="flat" stroke-linejoin="flat" 
+    transform="rotate(-90) translate(-24 0)">
+    <circle id="animated" cx="12" cy="12" r="5.1"/>
+  </g>
+  <g fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <circle cx="12" cy="12" r="0.2"/>
+    <line x1="2" y1="4" x2="4" y2="2"/>
+    <line x1="22" y1="4" x2="20" y2="2"/>
+  </g>
+</svg>

@@ -27,6 +27,7 @@ import template from '../../views/index.tmpl'
         isDev: false,
         message: wordle.getMessageString(newState.msg),
         state: newState,
+        showTimer: true,
         tag: readmeTag,
       },
     })
