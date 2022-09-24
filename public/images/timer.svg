@@ -3,7 +3,7 @@
     #animated {
       stroke-dasharray: 32.04424506661589; /* calc(2 * 3.1415926535 * 5.1) */
       stroke-dashoffset: 32.04424506661589; /* calc(2 * 3.1415926535 * 5.1) */
-      animation: timer 3s linear infinite;
+      animation: timer 30s linear infinite;
     }
     @keyframes timer {
       from {
