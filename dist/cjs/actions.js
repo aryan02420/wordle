@@ -114104,23 +114104,25 @@ const renderer = (source, options) => {
     return rendered;
 };
 
-var template = "<!--START_SECTION:{{ tag }}-->\n\n{%- macro keyState(name) %}\n  {{- state.kbd[name] -}}\n{% endmacro -%}\n\n{%- macro block(row, col) %}\n  {%- if state.wrd[row][col] -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ state.wrd[row][col] }}{{ state.fbk[row][col] }}.png\" />\n  {%- elif row == state.row and col == state.col -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/cursor.png\" />\n  {%- else -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/blank.png\" />\n  {%- endif -%}\n{% endmacro -%}\n\n{%- set row1 = ['q','w','e','r','t','y','u','i','o','p'] -%}\n{%- set row2 = ['a','s','d','f','g','h','j','k','l'] -%}\n{%- set row3 = ['bksp','z','x','c','v','b','n','m','enter'] -%}\n\n<!--VAR:{{ tag }}_state={{ id }}-->\n\n<p align=\"center\">\n<table>\n<tr><th><p align=\"center\">\n\nWORDLE\n\n</p></th></tr>\n<tr><td><p align=\"center\">\n\n<br/>\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n|      |      |      |      |      |\n| ---- | ---- | ---- | ---- | ---- |\n{% for row in range(0, 6) -%}\n  |\n  {%- for col in range(0, 5) -%}\n    {{- block(row, col) -}}\n    |\n  {%- endfor %}\n{% endfor %}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{{- message -}}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n<br/>\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row1 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row2 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row3 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n</table>\n</p>\n\n{% if isDev -%}\n\n```json\n{{ state | dump(2) | safe }}\n```\n\n{%- endif -%}\n\n<!--END_SECTION:{{ tag }}-->\n";
+var template = "<!--START_SECTION:{{ tag }}-->\n\n{%- macro keyState(name) %}\n  {{- state.kbd[name] -}}\n{% endmacro -%}\n\n{%- macro block(row, col) %}\n  {%- if state.wrd[row][col] -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ state.wrd[row][col] }}{{ state.fbk[row][col] }}.png\" />\n  {%- elif row == state.row and col == state.col -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/cursor.png\" />\n  {%- else -%}\n    <img height=\"40px\" src=\"{{ imgBaseUrl }}/blank.png\" />\n  {%- endif -%}\n{% endmacro -%}\n\n{%- set row1 = ['q','w','e','r','t','y','u','i','o','p'] -%}\n{%- set row2 = ['a','s','d','f','g','h','j','k','l'] -%}\n{%- set row3 = ['bksp','z','x','c','v','b','n','m','enter'] -%}\n\n<!--VAR:{{ tag }} state={{ id }}-->\n\n<p align=\"center\">\n<table>\n<tr><th><p align=\"center\">\n\nWORDLE\n\n</p></th></tr>\n<tr><td><p align=\"center\">\n\n<br/>\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n|      |      |      |      |      |\n| ---- | ---- | ---- | ---- | ---- |\n{% for row in range(0, 6) -%}\n  |\n  {%- for col in range(0, 5) -%}\n    {{- block(row, col) -}}\n    |\n  {%- endfor %}\n{% endfor %}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{{- message -}}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n<br/>\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row1 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row2 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n<tr><td><p align=\"center\">\n\n{%- for k in row3 -%}\n  <a href=\"{{ baseUrl }}/{{ k }}\"><img height=\"40px\" src=\"{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png\" /></a> &nbsp;\n{%- endfor -%}\n\n</p></td></tr>\n</table>\n</p>\n\n{% if isDev -%}\n\n```json\n{{ state | dump(2) | safe }}\n```\n\n{%- endif -%}\n\n<!--END_SECTION:{{ tag }}-->\n";
 
 (() => __awaiter$1(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const readmeFile = coreExports.getInput('readme');
         const readmeTag = coreExports.getInput('tag');
-        const payload = github.context.payload.client_payload;
-        const eventName = github.context.eventName;
-        const repo = github.context.repo;
-        console.log({ readmeFile, readmeTag, payload, eventName, repo });
+        const serverUrl = coreExports.getInput('serverUrl');
+        const { event, move } = github.context.payload.client_payload;
+        const { owner, repo } = github.context.repo;
         const oldReadme = (yield promises.readFile(readmeFile)).toString();
-        const newState = play(deserialize(payload.state), payload.move);
+        const oldStatePattern = new RegExp(`<!--VAR:${readmeTag}\\s+state=(.*)-->`, 's');
+        const oldStateCode = (_a = oldReadme.match(oldStatePattern)) === null || _a === void 0 ? void 0 : _a[1];
+        const newState = play(deserialize(oldStateCode), move);
         const newStateCode = serialize(newState);
         const newReadme = renderer(template, {
             renderAsHTML: false,
             context: {
-                baseUrl: `https://wreadle.02420.dev/${payload.owner}/${payload.repo}/${payload.event}/${newStateCode}`,
+                baseUrl: `${serverUrl}/${owner}/${repo}/${event}`,
                 id: newStateCode,
                 imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
                 isDev: false,
