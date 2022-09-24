@@ -21,9 +21,9 @@ import template from '../../views/index.tmpl'
     const newReadme = renderer(template, {
       renderAsHTML: false,
       context: {
-        baseUrl: `${serverUrl}/${owner}/${repo}/${event}`,
+        baseUrl: `${serverUrl}/${owner}/${repo}/${event}/`,
         id: newStateCode,
-        imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images',
+        imgBaseUrl: 'https://raw.githubusercontent.com/aryan02420/wordle/main/public/images/',
         isDev: false,
         message: wordle.getMessageString(newState.msg),
         state: newState,

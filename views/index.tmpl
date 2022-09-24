@@ -6,11 +6,11 @@
 
 {%- macro block(row, col) %}
   {%- if state.wrd[row][col] -%}
-    <img height="40px" src="{{ imgBaseUrl }}/{{ state.wrd[row][col] }}{{ state.fbk[row][col] }}.png" />
+    <img height="40px" src="{{ imgBaseUrl }}{{ state.wrd[row][col] }}{{ state.fbk[row][col] }}.png" />
   {%- elif row == state.row and col == state.col -%}
-    <img height="40px" src="{{ imgBaseUrl }}/cursor.png" />
+    <img height="40px" src="{{ imgBaseUrl }}cursor.png" />
   {%- else -%}
-    <img height="40px" src="{{ imgBaseUrl }}/blank.png" />
+    <img height="40px" src="{{ imgBaseUrl }}blank.png" />
   {%- endif -%}
 {% endmacro -%}
 
@@ -58,21 +58,21 @@ WORDLE
 <tr><td><p align="center">
 
 {%- for k in row1 -%}
-  <a href="{{ baseUrl }}/{{ k }}"><img height="40px" src="{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
+  <a href="{{ baseUrl }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor -%}
 
 </p></td></tr>
 <tr><td><p align="center">
 
 {%- for k in row2 -%}
-  <a href="{{ baseUrl }}/{{ k }}"><img height="40px" src="{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
+  <a href="{{ baseUrl }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor -%}
 
 </p></td></tr>
 <tr><td><p align="center">
 
 {%- for k in row3 -%}
-  <a href="{{ baseUrl }}/{{ k }}"><img height="40px" src="{{ imgBaseUrl }}/{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
+  <a href="{{ baseUrl }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor -%}
 
 </p></td></tr>
