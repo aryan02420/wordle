@@ -1,0 +1,17 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    permissions:
+      id-token: write # This is required to allow the GitHub Action to authenticate with Deno Deploy.
+      contents: read
+    steps:
+      - name: Deploy to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: aryan02420-wordle # the name of the project on Deno Deploy
+          root: deno
+          entrypoint: index.ts # the entrypoint to deploy relative to the root
