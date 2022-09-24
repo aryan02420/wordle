@@ -69999,6 +69999,7 @@ router$1.get('/:state/', (req, res) => {
             imgBaseUrl: '/images/',
             isDev: process.env.NODE_ENV === 'development',
             message: getMessageString(state.msg),
+            showTimer: false,
             state,
             tag: 'wreadle',
         },
