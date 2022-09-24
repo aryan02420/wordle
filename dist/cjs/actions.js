@@ -114136,6 +114136,7 @@ var template = "<!--START_SECTION:{{ tag }}-->\n\n{%- macro keyState(name) %}\n 
         yield promises.writeFile(readmeFile, finalReadme);
     }
     catch (error) {
+        console.trace();
         // @ts-ignore
         coreExports.setFailed(error.message);
     }

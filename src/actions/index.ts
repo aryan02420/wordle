@@ -36,6 +36,7 @@ import template from '../../views/index.tmpl'
     await writeFile(readmeFile, finalReadme)
     
   } catch (error) {
+    console.trace()
     // @ts-ignore
     core.setFailed(error.message)
   }
