@@ -11,6 +11,7 @@
   "scripts": {
     "build": "rollup --config rollup.config.js && chmod +x dist/cjs/cli.js",
     "dev:build": "NODE_ENV=development rollup --config rollup.config.js --watch",
+    "start": "node dist/cjs/server.js",
     "dev:start": "NODE_ENV=development nodemon -r dotenv/config dist/cjs/server.js",
     "test": "jest"
   },

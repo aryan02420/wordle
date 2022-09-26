@@ -5,7 +5,7 @@ import playRouter from './routes/play'
 import dispatchRouter from './routes/dispatch'
 import type { renderOptions } from '../shared'
 
-const PORT = process.env.port ?? 3000
+const PORT = process.env.port ?? 80
 const MILLISECS_IN_A_DAY = 1000*60*60*24
 
 const app = express()
