@@ -1,12 +1,9 @@
 name: 'Wreadle'
 description: 'Play Wordle in GitHub readme'
+branding:
+  icon: 'grid'
+  color: 'green'
 inputs:
-  # state -> from readme
-  # move -> from event payload
-  # event type -> from ??
-  # baseurl from -> /dispatch/owner/repo/event -> env var and event type
-  # imageurl base -> hardcode
-  # readme file -> input
   readme:
     description: 'path/name of the readme file'
     required: false
