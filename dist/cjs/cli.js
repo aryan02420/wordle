@@ -2227,5 +2227,4 @@ function display() {
     console.log('');
     console.log(getKeyboard());
     console.log(getMessage());
-    console.log(state.sol.join(''));
 }

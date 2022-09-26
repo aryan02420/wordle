@@ -152624,7 +152624,7 @@ router.get('/:owner/:repo/:event/:move', (req, res) => {
 });
 
 var _a;
-const PORT = (_a = process.env.port) !== null && _a !== void 0 ? _a : 3000;
+const PORT = (_a = process.env.port) !== null && _a !== void 0 ? _a : 80;
 const MILLISECS_IN_A_DAY = 1000 * 60 * 60 * 24;
 const app = express();
 app.use(express.static('public', {
