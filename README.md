@@ -85,6 +85,8 @@ npm i @aryan02420/wordle
   <!--END_SECTION:wreadle-->
   ```
 
+- Go to `<serverUrl>/<user>/<repo>/my-event-name/new` to generate a new game
+
 ### Server
 
 #### Hosting locally
