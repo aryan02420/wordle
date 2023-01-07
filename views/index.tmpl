@@ -1,10 +1,11 @@
 <!--START_SECTION:{{ tag }}-->
 
-{%- macro keyState(name) %}
+{%- macro keyState(name) -%}
   {{- state.kbd[name] -}}
-{% endmacro -%}
+{%- endmacro -%}
 
-{%- macro block(row, col) %}
+{%- macro block(row, col) -%}
+  <a>
   {%- if state.wrd[row][col] -%}
     <img height="40px" src="{{ imgBaseUrl }}{{ state.wrd[row][col] }}{{ state.fbk[row][col] }}.png" />
   {%- elif row == state.row and col == state.col -%}
@@ -12,7 +13,8 @@
   {%- else -%}
     <img height="40px" src="{{ imgBaseUrl }}blank.png" />
   {%- endif -%}
-{% endmacro -%}
+  </a>
+{%- endmacro -%}
 
 {%- set row1 = ['q','w','e','r','t','y','u','i','o','p'] -%}
 {%- set row2 = ['a','s','d','f','g','h','j','k','l'] -%}
@@ -20,71 +22,46 @@
 
 <!--VAR:{{ tag }} state={{ id }}-->
 
-<p align="center">
-<table>
-<tr><th>
+<h2 align="center">{% if showTimer %}<img height="32px" src="{{ imgBaseUrl }}timer.svg" alt="timer" /> {% endif %}WORDLE</h2>
 
-# {% if showTimer %}<img height="32px" src="{{ imgBaseUrl }}timer.svg" alt="timer" />{% endif %} WORDLE
-
-</th></tr>
-<tr><td>
-
-<br/>
-
-</td></tr>
-<tr><td><p align="center">
-
-|      |      |      |      |      |
-| ---- | ---- | ---- | ---- | ---- |
 {% for row in range(0, 6) -%}
-  |
+<p align="center">
   {%- for col in range(0, 5) -%}
-    {{- block(row, col) -}}
-    |
-  {%- endfor %}
-{% endfor %}
-
-</p></td></tr>
-<tr><td><p align="center">
-
-{{- message -}}
-
-</p></td></tr>
-<tr><td><p align="center">
+    {{- block(row, col) -}} &nbsp;
+  {%- endfor -%}
+</p>
+{%- endfor %}
 
 <br/>
 
-</p></td></tr>
-<tr><td><p align="center">
+<p align="center">{{ message }}</p>
 
+<p align="center">
 {%- for k in row1 -%}
   <a href="{{ baseUrl }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor -%}
+</p>
 
-</p></td></tr>
-<tr><td><p align="center">
-
+<p align="center">
 {%- for k in row2 -%}
   <a href="{{ baseUrl }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor -%}
+</p>
 
-</p></td></tr>
-<tr><td><p align="center">
-
+<p align="center">
 {%- for k in row3 -%}
   <a href="{{ baseUrl }}{{ k }}"><img height="40px" src="{{ imgBaseUrl }}{{ k }}{{ keyState(k) }}.png" /></a> &nbsp;
 {%- endfor -%}
-
-</p></td></tr>
-</table>
 </p>
 
-{% if isDev -%}
+<!--END_SECTION:{{ tag }}-->
+
+{%- if isDev %}
+
+state
 
 ```json
 {{ state | dump(2) | safe }}
 ```
 
-{%- endif -%}
-
-<!--END_SECTION:{{ tag }}-->
+{% endif %}
