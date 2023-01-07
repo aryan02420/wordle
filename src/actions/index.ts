@@ -19,7 +19,7 @@ import template from '../../views/index.tmpl'
     const newStateCode = wordle.serialize(newState)
 
     const newReadme = renderer(template, {
-      renderAsHTML: false,
+      renderAs: 'markdown',
       context: {
         baseUrl: `${serverUrl}/${owner}/${repo}/${event}/`,
         id: newStateCode,

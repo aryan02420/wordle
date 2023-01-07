@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
 router.get('/:state/', (req, res) => {
   const state = wordle.deserialize(req.params.state)
   const options: renderOptions = {
-    renderAsHTML: true,
+    renderAs: 'html',
     context: {
       baseUrl: `/play/${req.params.state}/`,
       id: req.params.state,
