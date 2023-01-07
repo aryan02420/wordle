@@ -1,5 +1,5 @@
 index.html:	README.md Makefile
-	pandoc README.md -s -o public/index.html
+	pandoc README.md -s --embed-resources -o public/index.html
 
 images: assets/sheet.png Makefile
 	# normal
