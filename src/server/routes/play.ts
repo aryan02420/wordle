@@ -15,6 +15,9 @@ router.get('/:state/', (req, res) => {
     renderAs: 'html',
     context: {
       baseUrl: `/play/${req.params.state}/`,
+      debugInfo: {
+        renderAs: 'html',
+      },
       id: req.params.state,
       imgBaseUrl: '/images/',
       isDev: process.env.NODE_ENV === 'development',
