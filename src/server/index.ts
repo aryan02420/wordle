@@ -23,10 +23,6 @@ app.engine('tmpl', (filePath, options, callback) => {
 app.set('views', './views')
 app.set('view engine', 'tmpl')
 
-app.get('/', (req, res) => {
-  res.send('<a href="https://github.com/aryan02420/wordle">aryan02420/wordle</a>')
-})
-
 app.use('/play/', playRouter)
 
 app.use('/dispatch/', dispatchRouter)
