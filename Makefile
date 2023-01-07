@@ -1,3 +1,9 @@
+.PHONY: all
+
+all:
+	$(MAKE) index.html
+	$(MAKE) images
+
 index.html:	README.md Makefile
 	pandoc README.md -s --embed-resources -o public/index.html
 
