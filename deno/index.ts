@@ -5,6 +5,8 @@ if (Deno.env.get('APP_ENV') === 'local') {
   config({ export: true })
 }
 
+const MILLISECS_IN_A_DAY = 1000 * 60 * 60 * 24
+
 const router = new Router()
 
 router.get('/', (ctx) => {
@@ -38,7 +40,20 @@ router.get('/:owner/:repo/:event/:move', async (ctx) => {
 })
 
 const app = new Application()
+
+app.use(async (context, next) => {
+  try {
+    context.response.headers.set("max-age", MILLISECS_IN_A_DAY);
+    await context.send({
+      root: `${Deno.cwd()}/public`,
+      index: "index.html",
+    })
+  } catch {
+    await next()
+  }
+})
+
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-await app.listen({ port: parseInt(Deno.env.get('PORT') || '80') })
+await app.listen({ port: 8080 })
