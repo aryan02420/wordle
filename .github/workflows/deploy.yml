@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - deno/**
+      - public/**
   workflow_dispatch:
 
 jobs:
@@ -21,5 +22,4 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: aryan02420-wordle # the name of the project on Deno Deploy
-          entrypoint: index.ts # the entrypoint to deploy relative to the root
-          root: deno
+          entrypoint: deno/index.ts # the entrypoint to deploy relative to the root
