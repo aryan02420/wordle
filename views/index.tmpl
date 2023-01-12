@@ -54,6 +54,21 @@
 {%- endfor -%}
 </p>
 
+<p align="center">
+{%- if showHelp -%}
+  <details>
+    <summary>How to play?</summary>
+    <ul>
+      <li><a href="https://en.wikipedia.org/wiki/Wordle">What is wordle?</a></li>
+      <li>Press a key</li>
+      <li>Watch the timer for one complete cycle.</li>
+      <li>Refresh</li>
+      <li>Repeat</li>
+    </ul>
+  </details>
+{%- endif -%}
+</p>
+
 <!--END_SECTION:{{ tag }}-->
 
 {%- if isDev %}

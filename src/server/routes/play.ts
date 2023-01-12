@@ -22,6 +22,7 @@ router.get('/:state/', (req, res) => {
       imgBaseUrl: '/images/',
       isDev: process.env.NODE_ENV === 'development',
       message: wordle.getMessageString(state.msg),
+      showHelp: false,
       showTimer: false,
       state,
       tag: 'wreadle',
